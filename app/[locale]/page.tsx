@@ -1,17 +1,49 @@
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { locales, type Locale } from "@/lib/i18n/config";
-
-export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
-}
+import { sanityClient } from "@/lib/sanity/client";
+import {
+  testimonialsQuery,
+  type TestimonialDoc,
+} from "@/lib/sanity/queries";
 import { Hero } from "@/components/sections/Hero";
 import { WhoWeAre } from "@/components/sections/WhoWeAre";
 import { Assessment } from "@/components/sections/Assessment";
 import { Events } from "@/components/sections/Events";
 import { OnStage } from "@/components/sections/OnStage";
 import { PartnersTicker } from "@/components/sections/PartnersTicker";
-import { Testimonials } from "@/components/sections/Testimonials";
+import {
+  Testimonials,
+  type TestimonialItem,
+} from "@/components/sections/Testimonials";
 import { GlobalCTA } from "@/components/sections/GlobalCTA";
+
+export function generateStaticParams() {
+  return locales.map((locale) => ({ locale }));
+}
+
+/**
+ * Pull testimonials from Sanity at build time. Static export (`output:
+ * "export"`) means this runs exactly once per `next build` per locale —
+ * the visitor never waits on the network. If Sanity is unreachable we
+ * return [] and `<Testimonials>` falls back to the dict items so the
+ * homepage still ships.
+ */
+async function loadTestimonials(locale: Locale): Promise<TestimonialItem[]> {
+  try {
+    const rows = await sanityClient.fetch<TestimonialDoc[]>(testimonialsQuery);
+    return rows
+      .map((row) => ({
+        id: row.id,
+        quote: row.quote?.[locale] ?? row.quote?.en ?? "",
+        author: row.author?.[locale] ?? row.author?.en ?? "",
+        org: row.org?.[locale] ?? row.org?.en,
+      }))
+      .filter((row) => row.quote && row.author);
+  } catch (err) {
+    console.warn("Sanity testimonials fetch failed; using dict fallback.", err);
+    return [];
+  }
+}
 
 export default async function Home({
   params,
@@ -19,7 +51,10 @@ export default async function Home({
   params: Promise<{ locale: Locale }>;
 }) {
   const { locale } = await params;
-  const dict = await getDictionary(locale);
+  const [dict, testimonials] = await Promise.all([
+    getDictionary(locale),
+    loadTestimonials(locale),
+  ]);
   return (
     <main id="main">
       <Hero dict={dict} locale={locale} />
@@ -28,7 +63,7 @@ export default async function Home({
       <Events dict={dict} locale={locale} />
       <OnStage dict={dict} />
       <PartnersTicker dict={dict} />
-      <Testimonials dict={dict} />
+      <Testimonials dict={dict} items={testimonials} />
       <GlobalCTA dict={dict} variant="home" />
     </main>
   );

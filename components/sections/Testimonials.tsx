@@ -9,8 +9,32 @@ import { BackdropMesh } from "@/components/motion/Backdrops";
 
 const AUTO_MS = 6500;
 
-export function Testimonials({ dict }: { dict: Dictionary }) {
-  const items = dict.testimonials.items;
+/**
+ * Carousel item shape after the page component has picked a locale from the
+ * Sanity-localized fields. Matches the legacy `dict.testimonials.items` rows
+ * exactly so the markup below doesn't care where the data came from.
+ */
+export type TestimonialItem = {
+  id: string;
+  quote: string;
+  author: string;
+  org?: string;
+};
+
+type TestimonialsProps = {
+  dict: Dictionary;
+  /**
+   * Sanity-sourced items (already localized for the current page locale).
+   * When the array is empty (Sanity returned nothing, or the env was
+   * misconfigured during build) we fall back to the dict items so the
+   * section never renders blank.
+   */
+  items?: TestimonialItem[];
+};
+
+export function Testimonials({ dict, items: itemsProp }: TestimonialsProps) {
+  const items: readonly TestimonialItem[] =
+    itemsProp && itemsProp.length > 0 ? itemsProp : dict.testimonials.items;
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
