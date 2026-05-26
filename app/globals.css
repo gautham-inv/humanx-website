@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+@theme {
+  /* Palette aligned to the HumanX Insights logo:
+   *   - bg is warm-shifted indigo (slight violet lean) so the dark surface
+   *     reads "considered" instead of "cool tech"
+   *   - accent is the warm orange from the "insights" wordmark
+   *   - violet matches the X gradient start
+   *   - magenta matches the X gradient end
+   * Default = dark. Light theme overrides live in :root[data-theme="light"]. */
+  --color-bg: #0c0a16;
+  --color-bg-elev: #15121f;
+  --color-ink: #f5f1ec;
+  --color-ink-dim: #a39ea8;
+  --color-accent: #e89348;        /* warm orange from the logo */
+  --color-accent-bright: #f5a623; /* brighter for hover states */
+  --color-violet: #5b2db5;        /* X gradient start */
+  --color-magenta: #c2186a;       /* X gradient end */
+  --color-line: rgba(245,241,236,0.09);
+  --color-on-accent: #0c0a16;     /* stable dark text on the orange button */
+
+  --font-sans: var(--font-geologica), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-geologica), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-literata), ui-serif, Georgia, serif;
+  /* Highlight italic used inside H1s to standout the brand-promise word.
+     Different family from --font-serif so it reads as a deliberate accent. */
+  --font-highlight: var(--font-highlight), ui-serif, Georgia, serif;
+
+  --shadow-glow: 0 0 60px -10px var(--color-accent);
+
+  --radius-card: 1.25rem;
+}
+
+/* ---------------------------------------------------------------
+ * Light theme — same token names, flipped values. Toggling the
+ * [data-theme="light"] attribute on <html> swaps the entire palette
+ * without touching any component class names. Accent stays orange
+ * but deepens to a burnt tone so it has AA contrast on cream.
+ * ------------------------------------------------------------- */
+:root[data-theme="light"] {
+  --color-bg: #faf6ed;            /* warm cream */
+  --color-bg-elev: #ffffff;       /* clean white for elevated surfaces */
+  --color-ink: #1a1620;           /* deep warm ink */
+  --color-ink-dim: #5a5562;       /* muted body */
+  --color-accent: #a45620;        /* burnt orange for AA on cream */
+  --color-accent-bright: #c46428;
+  --color-violet: #4a1f9c;        /* deeper violet for cream bg */
+  --color-magenta: #a51258;       /* deeper magenta for cream bg */
+  --color-line: rgba(26, 22, 32, 0.10);
+  --color-on-accent: #faf6ed;     /* cream on burnt orange */
+
+  /* On a cream bg the brand colours are darker than the surface, so a
+   * blurred glow reads as a dim smudge, not a halo. Disable glow effects
+   * in light theme and gate the BackgroundOrbs plume off entirely. */
+  --shadow-glow: none;
+}
+
+:root[data-theme="light"] [data-orbs] {
+  display: none;
+}
+
+/* WebGL hero models: mobile gate handled by `hidden lg:block` utility on the
+ * wrapper div in the page. The light-theme adaptation lives inside the
+ * shaders (uHaloMix=0) so dots stay visible without the bloom smudge. */
+
+/* ---------------------------------------------------------------
+ * .brand-x — gradient treatment for the "X" letter in the HumanX
+ * wordmark. Mirrors the logo's X exactly: orange head → magenta tail.
+ * Used in the nav + footer wordmark so the brand element travels with
+ * the user everywhere.
+ * ------------------------------------------------------------- */
+.brand-x {
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-magenta) 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Hero portrait — swap sources with [data-theme] (no JS; matches theme-init first paint). */
+.hero-portrait-light {
+  opacity: 0;
+}
+.hero-portrait-dark {
+  opacity: 1;
+}
+:root[data-theme="light"] .hero-portrait-light {
+  opacity: 1;
+}
+:root[data-theme="light"] .hero-portrait-dark {
+  opacity: 0;
+}
+
+@layer base {
+  html, body {
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Animate the palette flip so the toggle doesn't feel jarring. */
+  html {
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  body {
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+
+  /* Disable native smooth scroll — Lenis handles it. */
+  html { scroll-behavior: auto; }
+
+  /* Respect reduced motion: animations bypass via class. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}
+
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+

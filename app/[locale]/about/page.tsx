@@ -1,0 +1,281 @@
+import type { Metadata } from "next";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import { locales, type Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { Reveal } from "@/components/motion/Reveal";
+import { CountUp } from "@/components/motion/CountUp";
+import { ContactCTAButton } from "@/components/layout/ContactCTAButton";
+import { GlobalCTA } from "@/components/sections/GlobalCTA";
+import { AboutHeroNetwork } from "@/components/sections/about/AboutHeroNetwork";
+import {
+  MissionTargetIcon,
+  ValuesCompassIcon,
+  ExperienceArcIcon,
+  FounderDotIcon,
+} from "@/components/sections/about/SectionIcons";
+import { BackdropMesh } from "@/components/motion/Backdrops";
+import { HighlightedTitle } from "@/components/motion/HighlightedTitle";
+
+const SLUG = "about";
+
+export function generateStaticParams() {
+  return locales.map((locale) => ({ locale }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return {
+    title: "About · HumanX",
+    alternates: {
+      canonical: `/${locale}/${SLUG}`,
+      languages: {
+        en: `/en/${SLUG}`,
+        es: `/es/${SLUG}`,
+        "x-default": `/en/${SLUG}`,
+      },
+    },
+  };
+}
+
+export default async function AboutPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  if (!locales.includes(locale as Locale)) notFound();
+  const dict = await getDictionary(locale as Locale);
+  const t = dict.about;
+
+  return (
+    <main id="main">
+        {/* 1. HERO */}
+        <section className="relative overflow-hidden px-6 pt-20 pb-16 md:pt-32 md:pb-24">
+          <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.2fr_auto]">
+            <div className="order-2 lg:order-1">
+              <Reveal direction="up">
+                <div className="mb-6 text-xs uppercase tracking-[0.3em] text-ink-dim">
+                  <span className="mr-3 inline-block h-px w-8 bg-accent align-middle" />
+                  {t.pageEyebrow}
+                </div>
+              </Reveal>
+              <Reveal direction="up" delay={0.05}>
+                <HighlightedTitle
+                  as="h1"
+                  className="font-display text-[clamp(2.5rem,6vw,5rem)] leading-[1.05] tracking-tight"
+                >
+                  {t.pageTitle}
+                </HighlightedTitle>
+              </Reveal>
+              <Reveal direction="up" delay={0.1}>
+                <p className="mt-6 max-w-xl font-serif text-lg leading-relaxed text-ink-dim">{t.pageBody}</p>
+              </Reveal>
+              <Reveal direction="up" delay={0.15}>
+                <div className="mt-8">
+                  <ContactCTAButton label={t.primaryCta} />
+                </div>
+              </Reveal>
+            </div>
+            <div className="order-1 hidden lg:order-2 lg:block">
+              <Reveal direction="up" delay={0.1}>
+                <AboutHeroNetwork className="mx-auto aspect-square w-[28rem] max-w-full" />
+              </Reveal>
+            </div>
+          </div>
+        </section>
+
+        {/* 2. MISSION — image-left / text-right */}
+        <section id="mission" className="relative border-t border-line px-6 py-20 md:py-28">
+          <div className="mx-auto grid max-w-6xl items-center gap-12 md:grid-cols-2 md:gap-16">
+            <Reveal direction="up">
+              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl border border-line">
+                <Image
+                  src="/mission.jpeg"
+                  alt={t.missionImageAlt}
+                  fill
+                  sizes="(min-width: 768px) 32rem, 100vw"
+                  className="object-cover object-[center_30%]"
+                />
+              </div>
+            </Reveal>
+            <div>
+              <Reveal direction="up">
+                <div className="mb-6 text-violet">
+                  <MissionTargetIcon width={36} height={36} />
+                </div>
+              </Reveal>
+              <Reveal direction="up" delay={0.05}>
+                <h2 className="font-display text-4xl leading-tight md:text-5xl">
+                  {t.missionTitle}
+                </h2>
+              </Reveal>
+              <Reveal direction="up" delay={0.1}>
+                <p className="mt-6 font-serif text-lg leading-relaxed text-ink-dim">{t.missionBody}</p>
+              </Reveal>
+            </div>
+          </div>
+        </section>
+
+        {/* 3. VALUES — intro left (sticky), single-column editorial list right.
+           Replaces the 2-col numbered card grid; no card chrome, no backdrop
+           blur, no rotating accent colour. Letterforms + a thin rule do the
+           work. */}
+        <section id="values" className="relative overflow-hidden border-t border-line px-6 py-20 md:py-28">
+          <BackdropMesh
+            cell={32}
+            opacity={0.09}
+            strokeWidth={0.5}
+            fade="radial"
+            feather="center"
+          />
+          <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[1fr_1.4fr] lg:gap-20">
+            <div className="lg:sticky lg:top-24 lg:self-start">
+              <Reveal direction="up">
+                <div className="mb-6 text-accent">
+                  <ValuesCompassIcon width={36} height={36} />
+                </div>
+              </Reveal>
+              <Reveal direction="up" delay={0.05}>
+                <h2 className="font-display text-4xl leading-tight md:text-5xl">
+                  {dict.values.title}
+                </h2>
+              </Reveal>
+              <Reveal direction="up" delay={0.1}>
+                <p className="mt-6 font-serif text-lg leading-relaxed text-ink-dim">{dict.values.body}</p>
+              </Reveal>
+            </div>
+            <ol className="divide-y divide-line">
+              {dict.values.items.map((v, i) => (
+                <li key={v.title}>
+                  <Reveal direction="up" delay={i * 0.05}>
+                    <div className="grid grid-cols-[3rem_1fr] gap-6 py-8 md:gap-10 md:py-10">
+                      <span
+                        aria-hidden
+                        className="font-display text-2xl tabular-nums text-accent/50"
+                        style={{ fontVariationSettings: '"SHRP" 80' }}
+                      >
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <div>
+                        <h3 className="font-display text-2xl text-ink md:text-3xl">{v.title}</h3>
+                        <p className="mt-3 font-serif text-base leading-relaxed text-ink-dim md:text-lg">{v.body}</p>
+                      </div>
+                    </div>
+                  </Reveal>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        {/* 4. EXPERIENCE — heading + marginalia stat in the gutter. No card
+           chrome, no backdrop blur, no border. The 30+ numeral floats in the
+           margin like a magazine pull-quote; the body sits in the main column
+           in the editorial serif. */}
+        <section id="experience" className="relative border-t border-line px-6 py-20 md:py-28">
+          <div className="mx-auto grid max-w-6xl gap-x-12 gap-y-10 md:grid-cols-[auto_1fr] md:gap-x-16">
+            <Reveal direction="up" className="md:col-start-2">
+              <div className="mb-6 text-magenta">
+                <ExperienceArcIcon width={36} height={36} />
+              </div>
+            </Reveal>
+            <Reveal direction="up" delay={0.05} className="md:col-start-2">
+              <h2 className="font-display text-4xl leading-tight md:text-5xl">
+                {t.experienceTitle}
+              </h2>
+            </Reveal>
+
+            <Reveal direction="up" delay={0.15} className="md:row-start-3 md:self-start">
+              <div className="flex items-start gap-5 md:flex-col md:gap-3">
+                <CountUp
+                  value={t.experienceStatValue}
+                  className="font-display text-[clamp(4rem,9vw,7rem)] leading-[0.85] tabular-nums tracking-tight text-accent"
+                  style={{ fontVariationSettings: '"SHRP" 100' }}
+                />
+                <div className="max-w-[14rem] pt-2 md:pt-0">
+                  <p className="text-xs uppercase tracking-[0.2em] text-ink-dim">{t.experienceStatLabel}</p>
+                  <p className="mt-2 text-xs leading-relaxed text-ink-dim">{t.experienceStatNote}</p>
+                </div>
+              </div>
+            </Reveal>
+
+            <Reveal direction="up" delay={0.2} className="md:col-start-2 md:row-start-3">
+              <p className="font-serif text-lg leading-relaxed text-ink-dim md:text-xl">{t.experienceBody}</p>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* 5. FOUNDER — ramon2.png + rings/dots */}
+        <section id="founder" className="relative border-t border-line px-6 py-20 md:py-32">
+          <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-16 md:grid-cols-[1fr_1.2fr]">
+            <div className="relative mx-auto aspect-square w-full max-w-xs md:mx-0 md:max-w-md">
+              <svg viewBox="0 0 400 400" className="absolute inset-0 h-full w-full" aria-hidden>
+                <circle cx="200" cy="200" r="180" fill="none" stroke="var(--color-line)" strokeWidth="1" />
+                <circle cx="200" cy="200" r="140" fill="none" stroke="var(--color-line)" strokeWidth="1" />
+                <circle cx="200" cy="200" r="100" fill="none" stroke="var(--color-line)" strokeWidth="1" strokeDasharray="2 6" />
+                <circle cx="320" cy="70" r="6" fill="var(--color-violet)" />
+                <circle cx="90" cy="320" r="4" fill="var(--color-magenta)" />
+                <circle cx="60" cy="120" r="3" fill="var(--color-accent)" />
+                <circle cx="350" cy="280" r="3" fill="var(--color-accent)" />
+                <circle cx="40" cy="220" r="2" fill="var(--color-accent-bright)" />
+                <circle cx="360" cy="180" r="2" fill="var(--color-accent-bright)" />
+              </svg>
+              <div className="absolute inset-0">
+                <Image
+                  src="/ramon2.png"
+                  alt={dict.ramon.title}
+                  fill
+                  sizes="(min-width: 768px) 28rem, 20rem"
+                  className="object-contain object-bottom"
+                />
+              </div>
+            </div>
+            <div className="space-y-8">
+              <Reveal direction="up">
+                <div className="text-violet">
+                  <FounderDotIcon width={36} height={36} />
+                </div>
+              </Reveal>
+              <Reveal direction="up" delay={0.05}>
+                <h2 className="font-display text-4xl leading-tight md:text-5xl">
+                  {dict.ramon.title}
+                </h2>
+              </Reveal>
+              <Reveal direction="up" delay={0.1}>
+                <p className="max-w-lg font-serif text-lg leading-relaxed text-ink-dim">{dict.ramon.body}</p>
+              </Reveal>
+              <Reveal direction="up" delay={0.15}>
+                <dl className="grid grid-cols-3 gap-6 border-t border-line pt-8">
+                  {dict.ramon.stats.map((s, i) => {
+                    // Three stats, three brand colours — orange, violet, magenta.
+                    const valColor =
+                      ["text-accent", "text-violet", "text-magenta"][i % 3];
+                    return (
+                      <div key={s.label}>
+                        <dt>
+                          <CountUp
+                            value={s.value}
+                            className={`font-display text-3xl tabular-nums ${valColor}`}
+                          />
+                        </dt>
+                        <dd className="mt-1 text-xs uppercase tracking-widest text-ink-dim">
+                          {s.label}
+                        </dd>
+                      </div>
+                    );
+                  })}
+                </dl>
+              </Reveal>
+            </div>
+          </div>
+        </section>
+
+        <GlobalCTA dict={dict} variant="centered" />
+      </main>
+  );
+}
