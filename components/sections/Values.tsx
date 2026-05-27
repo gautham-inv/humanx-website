@@ -43,7 +43,7 @@ export function Values({ dict }: { dict: Dictionary }) {
   return (
     <section
       ref={ref}
-      className="relative w-full overflow-hidden border-t border-line bg-bg-elev py-20 md:py-32"
+      className="relative w-full overflow-hidden border-t border-line bg-bg-elev py-12 md:py-20 lg:py-28"
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,var(--color-accent)/8%,transparent_60%)]" />
 

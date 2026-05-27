@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { locales, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { loadAboutPage, loadContactCta } from "@/lib/sanity/loaders";
 import { Reveal } from "@/components/motion/Reveal";
 import { CountUp } from "@/components/motion/CountUp";
 import { ContactCTAButton } from "@/components/layout/ContactCTAButton";
@@ -49,19 +50,54 @@ export default async function AboutPage({
 }) {
   const { locale } = await params;
   if (!locales.includes(locale as Locale)) notFound();
-  const dict = await getDictionary(locale as Locale);
+  const [dict, about, contactCta] = await Promise.all([
+    getDictionary(locale as Locale),
+    loadAboutPage(locale as Locale),
+    loadContactCta(locale as Locale),
+  ]);
   const t = dict.about;
+  // Resolve every editable string once at the top. Each leaf falls back to
+  // the dict value if Sanity hasn't supplied it; the section markup below
+  // stays the same shape it has today.
+  const pageEyebrow = about?.hero.eyebrow ?? t.pageEyebrow;
+  const pageTitleRaw = about?.hero.titleRaw ?? t.pageTitle;
+  const pageBody = about?.hero.body ?? t.pageBody;
+  const primaryCta = about?.hero.primaryCta ?? t.primaryCta;
+  const missionTitle = about?.mission.title ?? t.missionTitle;
+  const missionBody = about?.mission.body ?? t.missionBody;
+  const missionImageAlt = about?.mission.imageAlt ?? t.missionImageAlt;
+  const valuesTitle = about?.values.title ?? dict.values.title;
+  const valuesBody = about?.values.body ?? dict.values.body;
+  const valuesItems =
+    about?.values.items && about.values.items.length > 0
+      ? about.values.items
+      : dict.values.items;
+  const experienceTitle = about?.experience.title ?? t.experienceTitle;
+  const experienceBody = about?.experience.body ?? t.experienceBody;
+  const experienceStatValue =
+    about?.experience.statValue ?? t.experienceStatValue;
+  const experienceStatLabel =
+    about?.experience.statLabel ?? t.experienceStatLabel;
+  const experienceStatNote =
+    about?.experience.statNote ?? t.experienceStatNote;
+  const founderTitle = about?.founder.name ?? dict.ramon.title;
+  const founderBio = about?.founder.bio ?? dict.ramon.body;
+  const founderImageAlt = about?.founder.imageAlt ?? dict.ramon.title;
+  const founderStats =
+    about?.founder.stats && about.founder.stats.length > 0
+      ? about.founder.stats
+      : dict.ramon.stats;
 
   return (
     <main id="main">
         {/* 1. HERO */}
-        <section className="relative overflow-hidden px-6 pt-20 pb-16 md:pt-32 md:pb-24">
-          <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.2fr_auto]">
+        <section className="relative overflow-hidden px-6 pt-14 pb-10 md:pt-24 md:pb-16 lg:pt-32 lg:pb-24">
+          <div className="mx-auto grid max-w-6xl items-start gap-12 lg:grid-cols-[1.2fr_auto]">
             <div className="order-2 lg:order-1">
               <Reveal direction="up">
                 <div className="mb-6 text-xs uppercase tracking-[0.3em] text-ink-dim">
                   <span className="mr-3 inline-block h-px w-8 bg-accent align-middle" />
-                  {t.pageEyebrow}
+                  {pageEyebrow}
                 </div>
               </Reveal>
               <Reveal direction="up" delay={0.05}>
@@ -69,15 +105,15 @@ export default async function AboutPage({
                   as="h1"
                   className="font-display text-[clamp(2.5rem,6vw,5rem)] leading-[1.05] tracking-tight"
                 >
-                  {t.pageTitle}
+                  {pageTitleRaw}
                 </HighlightedTitle>
               </Reveal>
               <Reveal direction="up" delay={0.1}>
-                <p className="mt-6 max-w-xl font-serif text-lg leading-relaxed text-ink-dim">{t.pageBody}</p>
+                <p className="mt-6 max-w-xl font-serif text-lg leading-relaxed text-ink-dim">{pageBody}</p>
               </Reveal>
               <Reveal direction="up" delay={0.15}>
                 <div className="mt-8">
-                  <ContactCTAButton label={t.primaryCta} />
+                  <ContactCTAButton label={primaryCta} />
                 </div>
               </Reveal>
             </div>
@@ -90,13 +126,13 @@ export default async function AboutPage({
         </section>
 
         {/* 2. MISSION — image-left / text-right */}
-        <section id="mission" className="relative border-t border-line px-6 py-20 md:py-28">
+        <section id="mission" className="relative border-t border-line px-6 py-12 md:py-20 lg:py-28">
           <div className="mx-auto grid max-w-6xl items-center gap-12 md:grid-cols-2 md:gap-16">
             <Reveal direction="up">
               <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl border border-line">
                 <Image
                   src="/mission.jpeg"
-                  alt={t.missionImageAlt}
+                  alt={missionImageAlt}
                   fill
                   sizes="(min-width: 768px) 32rem, 100vw"
                   className="object-cover object-[center_30%]"
@@ -111,11 +147,11 @@ export default async function AboutPage({
               </Reveal>
               <Reveal direction="up" delay={0.05}>
                 <h2 className="font-display text-4xl leading-tight md:text-5xl">
-                  {t.missionTitle}
+                  {missionTitle}
                 </h2>
               </Reveal>
               <Reveal direction="up" delay={0.1}>
-                <p className="mt-6 font-serif text-lg leading-relaxed text-ink-dim">{t.missionBody}</p>
+                <p className="mt-6 font-serif text-lg leading-relaxed text-ink-dim">{missionBody}</p>
               </Reveal>
             </div>
           </div>
@@ -125,7 +161,7 @@ export default async function AboutPage({
            Replaces the 2-col numbered card grid; no card chrome, no backdrop
            blur, no rotating accent colour. Letterforms + a thin rule do the
            work. */}
-        <section id="values" className="relative overflow-hidden border-t border-line px-6 py-20 md:py-28">
+        <section id="values" className="relative overflow-hidden border-t border-line px-6 py-12 md:py-20 lg:py-28">
           <BackdropMesh
             cell={32}
             opacity={0.09}
@@ -142,15 +178,15 @@ export default async function AboutPage({
               </Reveal>
               <Reveal direction="up" delay={0.05}>
                 <h2 className="font-display text-4xl leading-tight md:text-5xl">
-                  {dict.values.title}
+                  {valuesTitle}
                 </h2>
               </Reveal>
               <Reveal direction="up" delay={0.1}>
-                <p className="mt-6 font-serif text-lg leading-relaxed text-ink-dim">{dict.values.body}</p>
+                <p className="mt-6 font-serif text-lg leading-relaxed text-ink-dim">{valuesBody}</p>
               </Reveal>
             </div>
             <ol className="divide-y divide-line">
-              {dict.values.items.map((v, i) => (
+              {valuesItems.map((v, i) => (
                 <li key={v.title}>
                   <Reveal direction="up" delay={i * 0.05}>
                     <div className="grid grid-cols-[3rem_1fr] gap-6 py-8 md:gap-10 md:py-10">
@@ -177,7 +213,7 @@ export default async function AboutPage({
            chrome, no backdrop blur, no border. The 30+ numeral floats in the
            margin like a magazine pull-quote; the body sits in the main column
            in the editorial serif. */}
-        <section id="experience" className="relative border-t border-line px-6 py-20 md:py-28">
+        <section id="experience" className="relative border-t border-line px-6 py-12 md:py-20 lg:py-28">
           <div className="mx-auto grid max-w-6xl gap-x-12 gap-y-10 md:grid-cols-[auto_1fr] md:gap-x-16">
             <Reveal direction="up" className="md:col-start-2">
               <div className="mb-6 text-magenta">
@@ -186,32 +222,32 @@ export default async function AboutPage({
             </Reveal>
             <Reveal direction="up" delay={0.05} className="md:col-start-2">
               <h2 className="font-display text-4xl leading-tight md:text-5xl">
-                {t.experienceTitle}
+                {experienceTitle}
               </h2>
             </Reveal>
 
             <Reveal direction="up" delay={0.15} className="md:row-start-3 md:self-start">
               <div className="flex items-start gap-5 md:flex-col md:gap-3">
                 <CountUp
-                  value={t.experienceStatValue}
+                  value={experienceStatValue}
                   className="font-display text-[clamp(4rem,9vw,7rem)] leading-[0.85] tabular-nums tracking-tight text-accent"
                   style={{ fontVariationSettings: '"SHRP" 100' }}
                 />
                 <div className="max-w-[14rem] pt-2 md:pt-0">
-                  <p className="text-xs uppercase tracking-[0.2em] text-ink-dim">{t.experienceStatLabel}</p>
-                  <p className="mt-2 text-xs leading-relaxed text-ink-dim">{t.experienceStatNote}</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-ink-dim">{experienceStatLabel}</p>
+                  <p className="mt-2 text-xs leading-relaxed text-ink-dim">{experienceStatNote}</p>
                 </div>
               </div>
             </Reveal>
 
             <Reveal direction="up" delay={0.2} className="md:col-start-2 md:row-start-3">
-              <p className="font-serif text-lg leading-relaxed text-ink-dim md:text-xl">{t.experienceBody}</p>
+              <p className="font-serif text-lg leading-relaxed text-ink-dim md:text-xl">{experienceBody}</p>
             </Reveal>
           </div>
         </section>
 
         {/* 5. FOUNDER — ramon2.png + rings/dots */}
-        <section id="founder" className="relative border-t border-line px-6 py-20 md:py-32">
+        <section id="founder" className="relative border-t border-line px-6 py-14 md:py-24 lg:py-32">
           <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-16 md:grid-cols-[1fr_1.2fr]">
             <div className="relative mx-auto aspect-square w-full max-w-xs md:mx-0 md:max-w-md">
               <svg viewBox="0 0 400 400" className="absolute inset-0 h-full w-full" aria-hidden>
@@ -228,7 +264,7 @@ export default async function AboutPage({
               <div className="absolute inset-0">
                 <Image
                   src="/ramon2.png"
-                  alt={dict.ramon.title}
+                  alt={founderImageAlt}
                   fill
                   sizes="(min-width: 768px) 28rem, 20rem"
                   className="object-contain object-bottom"
@@ -243,15 +279,15 @@ export default async function AboutPage({
               </Reveal>
               <Reveal direction="up" delay={0.05}>
                 <h2 className="font-display text-4xl leading-tight md:text-5xl">
-                  {dict.ramon.title}
+                  {founderTitle}
                 </h2>
               </Reveal>
               <Reveal direction="up" delay={0.1}>
-                <p className="max-w-lg font-serif text-lg leading-relaxed text-ink-dim">{dict.ramon.body}</p>
+                <p className="max-w-lg font-serif text-lg leading-relaxed text-ink-dim">{founderBio}</p>
               </Reveal>
               <Reveal direction="up" delay={0.15}>
                 <dl className="grid grid-cols-3 gap-6 border-t border-line pt-8">
-                  {dict.ramon.stats.map((s, i) => {
+                  {founderStats.map((s, i) => {
                     // Three stats, three brand colours — orange, violet, magenta.
                     const valColor =
                       ["text-accent", "text-violet", "text-magenta"][i % 3];
@@ -275,7 +311,7 @@ export default async function AboutPage({
           </div>
         </section>
 
-        <GlobalCTA dict={dict} variant="centered" />
+        <GlobalCTA dict={dict} variant="centered" content={contactCta} />
       </main>
   );
 }

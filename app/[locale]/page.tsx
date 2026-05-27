@@ -5,6 +5,13 @@ import {
   testimonialsQuery,
   type TestimonialDoc,
 } from "@/lib/sanity/queries";
+import {
+  loadEvents,
+  loadPartners,
+  loadHomepage,
+  loadEventsPage,
+  loadContactCta,
+} from "@/lib/sanity/loaders";
 import { Hero } from "@/components/sections/Hero";
 import { WhoWeAre } from "@/components/sections/WhoWeAre";
 import { Assessment } from "@/components/sections/Assessment";
@@ -51,20 +58,43 @@ export default async function Home({
   params: Promise<{ locale: Locale }>;
 }) {
   const { locale } = await params;
-  const [dict, testimonials] = await Promise.all([
+  // All Sanity fetches run in parallel at build time. With static export
+  // they happen during `next build`; visitors never wait on these.
+  const [
+    dict,
+    testimonials,
+    events,
+    partners,
+    homepage,
+    eventsPage,
+    contactCta,
+  ] = await Promise.all([
     getDictionary(locale),
     loadTestimonials(locale),
+    loadEvents(locale),
+    loadPartners(),
+    loadHomepage(locale),
+    loadEventsPage(locale),
+    loadContactCta(locale),
   ]);
   return (
     <main id="main">
-      <Hero dict={dict} locale={locale} />
-      <WhoWeAre dict={dict} />
-      <Assessment dict={dict} />
-      <Events dict={dict} locale={locale} />
-      <OnStage dict={dict} />
-      <PartnersTicker dict={dict} />
-      <Testimonials dict={dict} items={testimonials} />
-      <GlobalCTA dict={dict} variant="home" />
+      <Hero dict={dict} locale={locale} content={homepage?.hero} />
+      <WhoWeAre dict={dict} content={homepage?.whoWeAre} />
+      <Assessment dict={dict} content={homepage?.assessment} />
+      <Events dict={dict} locale={locale} items={events} content={eventsPage} />
+      <OnStage dict={dict} items={events} content={homepage?.onStage} />
+      <PartnersTicker
+        dict={dict}
+        items={partners}
+        content={homepage?.partners}
+      />
+      <Testimonials
+        dict={dict}
+        items={testimonials}
+        content={homepage?.testimonials}
+      />
+      <GlobalCTA dict={dict} variant="home" content={contactCta} />
     </main>
   );
 }

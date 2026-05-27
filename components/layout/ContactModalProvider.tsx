@@ -12,6 +12,7 @@ import { Modal } from "@/components/ui/Modal";
 import { HumanForm } from "@/components/forms/HumanForm";
 import { buildContactFields } from "@/lib/contactFields";
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
+import type { ContactCtaContent } from "@/lib/sanity/loaders";
 
 type ContactModalContextValue = {
   open: () => void;
@@ -31,9 +32,12 @@ export function useContactModal(): ContactModalContextValue {
 
 export function ContactModalProvider({
   dict,
+  content,
   children,
 }: {
   dict: Dictionary;
+  /** Sanity-resolved contactCta. Used for modal title/close/submit + fields. */
+  content?: ContactCtaContent | null;
   children: ReactNode;
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -42,7 +46,10 @@ export function ContactModalProvider({
   const close = useCallback(() => setIsOpen(false), []);
   const value = useMemo(() => ({ open, close, isOpen }), [open, close, isOpen]);
 
-  const fields = buildContactFields(dict);
+  const fields = buildContactFields(dict, content);
+  const modalTitle = content?.modalTitle ?? dict.cta.modalTitle;
+  const modalClose = content?.modalClose ?? dict.cta.modalClose;
+  const submit = content?.submit ?? dict.cta.submit;
 
   return (
     <ContactModalContext.Provider value={value}>
@@ -50,10 +57,10 @@ export function ContactModalProvider({
       <Modal
         open={isOpen}
         onClose={close}
-        title={dict.cta.modalTitle}
-        closeLabel={dict.cta.modalClose}
+        title={modalTitle}
+        closeLabel={modalClose}
       >
-        <HumanForm dict={dict} title="" fields={fields} submitLabel={dict.cta.submit} />
+        <HumanForm dict={dict} title="" fields={fields} submitLabel={submit} />
       </Modal>
     </ContactModalContext.Provider>
   );

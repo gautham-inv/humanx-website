@@ -2,6 +2,7 @@
 
 import { useRef, useState, type FormEvent } from "react";
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
+import { submitToHubspot, isHubspotConfigured } from "@/lib/hubspot";
 
 export type FieldConfig =
   | {
@@ -76,6 +77,12 @@ export function HumanForm({
   const [errors, setErrors] = useState<Errors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [sent, setSent] = useState(false);
+  // `submitting` disables the button + swaps the label to "Sending…" while
+  // the HubSpot POST is in flight. `submitError` surfaces a friendly retry
+  // hint when the fetch fails (HubSpot 4xx/5xx, offline, etc.).
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const hubspotReady = isHubspotConfigured();
 
   function setField(id: string, value: string) {
     setValues((v) => ({ ...v, [id]: value }));
@@ -92,8 +99,10 @@ export function HumanForm({
     setErrors((prev) => ({ ...prev, [field.id]: e }));
   }
 
-  function onSubmit(e: FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (submitting) return;
+
     const next: Errors = {};
     for (const f of fields) {
       const err = validate(f, values[f.id] ?? "", dict);
@@ -107,10 +116,41 @@ export function HumanForm({
       formRef.current?.querySelector<HTMLElement>(`#${CSS.escape(firstErr.id)}`)?.focus();
       return;
     }
-    setSent(true);
+
+    setSubmitError(null);
+
+    // If HubSpot isn't wired (env vars missing), fall through to the legacy
+    // "coming soon" UX. The build still ships safely before IDs land.
+    if (!hubspotReady) {
+      setSent(true);
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await submitToHubspot({
+        name: values.name ?? "",
+        email: values.email ?? "",
+        topic: values.topic ?? "",
+        message: values.message ?? "",
+      });
+      setSent(true);
+    } catch (err) {
+      // Keep the form populated so users don't lose what they typed. Log
+      // the underlying reason to the console for ops debugging.
+      console.error(err);
+      setSubmitError(dict.forms.submitError);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   if (sent) {
+    // Two success copy paths:
+    //  - HubSpot live → "We'll be in touch" (proper confirmation)
+    //  - HubSpot unconfigured → legacy "Coming soon" + mailto fallback so
+    //    the site still has somewhere to send leads while the form is
+    //    being set up at HubSpot's side.
     return (
       <div
         role="status"
@@ -118,17 +158,26 @@ export function HumanForm({
         className="rounded-2xl border border-line bg-bg-elev p-8"
       >
         <div className="text-xs uppercase tracking-[0.3em] text-accent">
-          {dict.forms.comingSoon}
+          {hubspotReady ? dict.forms.successEyebrow : dict.forms.comingSoon}
         </div>
         <h3 className="mt-3 font-display text-2xl text-ink">
-          {title}
+          {hubspotReady ? dict.forms.successTitle : title}
         </h3>
         <p className="mt-3 max-w-md text-sm text-ink-dim">
-          Form delivery is being wired up. For now, write to{" "}
-          <a className="text-accent underline-offset-4 hover:underline" href="mailto:hello@humanx.es">
-            hello@humanx.es
-          </a>
-          .
+          {hubspotReady ? (
+            dict.forms.successBody
+          ) : (
+            <>
+              Form delivery is being wired up. For now, write to{" "}
+              <a
+                className="text-accent underline-offset-4 hover:underline"
+                href="mailto:contact@humanxinsights.com"
+              >
+                contact@humanxinsights.com
+              </a>
+              .
+            </>
+          )}
         </p>
         <button
           type="button"
@@ -137,10 +186,11 @@ export function HumanForm({
             setValues(Object.fromEntries(fields.map((f) => [f.id, ""])));
             setErrors({});
             setTouched({});
+            setSubmitError(null);
           }}
           className="mt-6 inline-flex items-center gap-2 text-xs uppercase tracking-widest text-ink-dim hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
-          ← Reset
+          ← {hubspotReady ? dict.forms.successReset : "Reset"}
         </button>
       </div>
     );
@@ -246,11 +296,29 @@ export function HumanForm({
         })}
       </div>
 
+      {submitError && (
+        <div
+          role="alert"
+          className="mt-6 rounded-lg border border-magenta/40 bg-magenta/10 p-4 text-sm text-ink"
+        >
+          {submitError}{" "}
+          <a
+            className="text-accent underline-offset-4 hover:underline"
+            href="mailto:contact@humanxinsights.com"
+          >
+            contact@humanxinsights.com
+          </a>
+          .
+        </div>
+      )}
+
       <button
         type="submit"
-        className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-accent px-6 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-bright focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-bright"
+        disabled={submitting}
+        aria-busy={submitting || undefined}
+        className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-accent px-6 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-bright focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-bright disabled:cursor-not-allowed disabled:opacity-70"
       >
-        {submitLabel}
+        {submitting ? dict.forms.sending : submitLabel}
       </button>
     </form>
   );

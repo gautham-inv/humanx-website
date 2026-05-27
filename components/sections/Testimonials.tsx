@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
+import type { HomepageContent } from "@/lib/sanity/loaders";
 import { prefersReducedMotion } from "@/lib/motion";
 import { BackdropMesh } from "@/components/motion/Backdrops";
 
@@ -30,11 +31,21 @@ type TestimonialsProps = {
    * section never renders blank.
    */
   items?: TestimonialItem[];
+  /**
+   * Section header copy from the homepage singleton — eyebrow/heading/etc.
+   * Falls back to dict on each field independently.
+   */
+  content?: HomepageContent["testimonials"];
 };
 
-export function Testimonials({ dict, items: itemsProp }: TestimonialsProps) {
+export function Testimonials({
+  dict,
+  items: itemsProp,
+  content,
+}: TestimonialsProps) {
   const items: readonly TestimonialItem[] =
     itemsProp && itemsProp.length > 0 ? itemsProp : dict.testimonials.items;
+  const heading = content?.heading ?? dict.testimonials.heading;
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
@@ -77,7 +88,7 @@ export function Testimonials({ dict, items: itemsProp }: TestimonialsProps) {
   return (
     <section
       ref={ref}
-      aria-label={dict.testimonials.heading}
+      aria-label={heading}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
@@ -86,7 +97,7 @@ export function Testimonials({ dict, items: itemsProp }: TestimonialsProps) {
         if (e.key === "ArrowLeft") go(index - 1);
         if (e.key === "ArrowRight") go(index + 1);
       }}
-      className="relative overflow-hidden border-t border-line px-6 py-20 md:py-28"
+      className="relative overflow-hidden border-t border-line px-6 py-12 md:py-20 lg:py-24"
     >
       <BackdropMesh
         cell={30}

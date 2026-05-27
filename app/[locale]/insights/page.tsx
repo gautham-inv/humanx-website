@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { locales, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { loadInsights, loadInsightsPage } from "@/lib/sanity/loaders";
 import { Reveal } from "@/components/motion/Reveal";
 
 const SLUG = "insights";
@@ -49,26 +50,35 @@ export default async function InsightsPage({
 }) {
   const { locale } = await params;
   if (!locales.includes(locale as Locale)) notFound();
-  const dict = await getDictionary(locale as Locale);
+  const [dict, sanityInsights, insightsPage] = await Promise.all([
+    getDictionary(locale as Locale),
+    loadInsights(locale as Locale),
+    loadInsightsPage(locale as Locale),
+  ]);
   const t = dict.insights;
+  const items = sanityInsights.length > 0 ? sanityInsights : t.items;
+  const eyebrow = insightsPage?.eyebrow ?? t.eyebrow;
+  const title = insightsPage?.title ?? t.title;
+  const body = insightsPage?.body ?? t.body;
+  const listTitle = insightsPage?.listTitle ?? t.listTitle;
 
   return (
     <main id="main">
-      <section className="relative px-6 pt-20 pb-12 md:pt-32 md:pb-20">
+      <section className="relative px-6 pt-14 pb-8 md:pt-24 md:pb-14 lg:pt-32 lg:pb-20">
         <div className="mx-auto max-w-6xl">
           <Reveal direction="up">
             <div className="mb-6 text-xs uppercase tracking-[0.3em] text-ink-dim">
               <span className="mr-3 inline-block h-px w-8 bg-accent align-middle" />
-              {t.eyebrow}
+              {eyebrow}
             </div>
           </Reveal>
           <Reveal direction="up" delay={0.05}>
             <h1 className="font-display text-[clamp(2.5rem,6vw,5rem)] leading-[1.05] tracking-tight max-w-3xl">
-              {t.title}
+              {title}
             </h1>
           </Reveal>
           <Reveal direction="up" delay={0.1}>
-            <p className="mt-6 max-w-xl font-serif text-lg leading-relaxed text-ink-dim">{t.body}</p>
+            <p className="mt-6 max-w-xl font-serif text-lg leading-relaxed text-ink-dim">{body}</p>
           </Reveal>
         </div>
       </section>
@@ -77,16 +87,16 @@ export default async function InsightsPage({
        * photo; otherwise we render a brand-token decorative tile so the grid
        * never has empty placeholders. Cards are not interactive until real
        * detail pages exist (current item.href values are anchors-only). */}
-      <section className="relative px-6 py-16 md:py-24 border-t border-line">
+      <section className="relative px-6 py-10 md:py-16 lg:py-24 border-t border-line">
         <div className="mx-auto max-w-6xl">
           <Reveal direction="up">
             <h2 className="text-xs uppercase tracking-[0.3em] text-ink-dim">
-              {t.listTitle}
+              {listTitle}
             </h2>
           </Reveal>
 
           <ul className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {t.items.map((item, idx) => {
+            {items.map((item, idx) => {
               const role = TILE_ROLES[idx % TILE_ROLES.length];
               const hasImage = Boolean(item.image);
               return (

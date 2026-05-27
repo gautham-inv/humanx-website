@@ -4,9 +4,27 @@ import { useRef } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
+import type { SummitBarContent } from "@/lib/sanity/loaders";
 import { prefersReducedMotion } from "@/lib/motion";
 
-export function SummitBar({ dict }: { dict: Dictionary }) {
+type SummitBarProps = {
+  dict: Dictionary;
+  /**
+   * Sanity-resolved summit bar copy. The bar can be toggled off entirely
+   * via `enabled: false` in the studio; when absent, dict copy is used.
+   */
+  content?: SummitBarContent | null;
+};
+
+export function SummitBar({ dict, content }: SummitBarProps) {
+  // Allow editors to hide the bar without touching code.
+  if (content && content.enabled === false) return null;
+
+  const label = content?.label ?? dict.summit.label;
+  const text = content?.text ?? dict.summit.text;
+  const cta = content?.cta ?? dict.summit.cta;
+  const ctaUrl = content?.ctaUrl ?? "/events#humanx-summit";
+
   const ref = useRef<HTMLDivElement | null>(null);
 
   useGSAP(
@@ -48,12 +66,12 @@ export function SummitBar({ dict }: { dict: Dictionary }) {
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1.5 rounded-full border border-magenta/60 bg-magenta/15 px-2 py-0.5 text-magenta">
             <span data-live-dot className="block h-1.5 w-1.5 rounded-full bg-magenta" />
-            {dict.summit.label}
+            {label}
           </span>
-          <span className="text-ink-dim">{dict.summit.text}</span>
+          <span className="text-ink-dim">{text}</span>
         </div>
-        <a href="/events#humanx-summit" className="text-ink-dim transition-colors hover:text-ink">
-          {dict.summit.cta} →
+        <a href={ctaUrl} className="text-ink-dim transition-colors hover:text-ink">
+          {cta} →
         </a>
       </div>
     </div>

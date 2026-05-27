@@ -250,6 +250,12 @@ export const en = {
     comingSoon: "Coming soon",
     submit: "Send",
     selectPlaceholder: "Select…",
+    sending: "Sending…",
+    successEyebrow: "Thank you",
+    successTitle: "We'll be in touch",
+    successBody: "Your message has landed in our inbox. Ramon or someone on the team will reply within two working days.",
+    successReset: "Send another",
+    submitError: "Something went wrong sending your message. Please try again, or write to",
   },
   insights: {
     eyebrow: "Insights",

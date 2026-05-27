@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { Reveal } from "@/components/motion/Reveal";
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
 import type { Locale } from "@/lib/i18n/config";
+import type { EventRow } from "@/components/sections/Events";
+import type { EventsPageContent } from "@/lib/sanity/loaders";
 
 function LiteYouTube({ id, title }: { id: string; title: string }) {
   const [active, setActive] = useState(false);
@@ -44,14 +46,33 @@ function LiteYouTube({ id, title }: { id: string; title: string }) {
   );
 }
 
-export function EventsList({ dict, locale }: { dict: Dictionary; locale: Locale }) {
+type EventsListProps = {
+  dict: Dictionary;
+  locale: Locale;
+  /** Sanity-sourced events. Empty falls back to dict items. */
+  items?: readonly EventRow[];
+  /** Section headers + empty-state strings from the eventsPage singleton. */
+  content?: EventsPageContent | null;
+};
+
+export function EventsList({
+  dict,
+  locale,
+  items: itemsProp,
+  content,
+}: EventsListProps) {
   const [now, setNow] = useState<number | null>(null);
 
   useEffect(() => {
     setNow(Date.now());
   }, []);
 
-  const items = dict.events.items;
+  const items: readonly EventRow[] =
+    itemsProp && itemsProp.length > 0 ? itemsProp : dict.events.items;
+  const upcomingHeading = content?.upcomingHeading ?? dict.events.upcomingHeading;
+  const pastHeading = content?.pastHeading ?? dict.events.pastHeading;
+  const noUpcoming = content?.noUpcoming ?? dict.events.noUpcoming;
+  const noPast = content?.noPast ?? dict.events.noPast;
   const upcoming =
     now === null
       ? []
@@ -69,15 +90,15 @@ export function EventsList({ dict, locale }: { dict: Dictionary; locale: Locale 
 
   return (
     <>
-      <section className="relative px-6 py-16 md:py-24 border-t border-line">
+      <section className="relative px-6 py-10 md:py-16 lg:py-24 border-t border-line">
         <div className="mx-auto max-w-6xl">
           <Reveal direction="up">
-            <h2 className="font-display text-3xl md:text-4xl">{dict.events.upcomingHeading}</h2>
+            <h2 className="font-display text-3xl md:text-4xl">{upcomingHeading}</h2>
           </Reveal>
 
           {now !== null && upcoming.length === 0 ? (
             <Reveal direction="up">
-              <p className="mt-8 text-ink-dim">{dict.events.noUpcoming}</p>
+              <p className="mt-8 text-ink-dim">{noUpcoming}</p>
             </Reveal>
           ) : (
             <Reveal direction="up" stagger={0.1} className="mt-12 grid gap-6 md:grid-cols-2">
@@ -109,15 +130,15 @@ export function EventsList({ dict, locale }: { dict: Dictionary; locale: Locale 
         </div>
       </section>
 
-      <section className="relative px-6 py-16 md:py-24 border-t border-line">
+      <section className="relative px-6 py-10 md:py-16 lg:py-24 border-t border-line">
         <div className="mx-auto max-w-6xl">
           <Reveal direction="up">
-            <h2 className="font-display text-3xl md:text-4xl">{dict.events.pastHeading}</h2>
+            <h2 className="font-display text-3xl md:text-4xl">{pastHeading}</h2>
           </Reveal>
 
           {now !== null && past.length === 0 ? (
             <Reveal direction="up">
-              <p className="mt-8 text-ink-dim">{dict.events.noPast}</p>
+              <p className="mt-8 text-ink-dim">{noPast}</p>
             </Reveal>
           ) : (
             <Reveal direction="up" stagger={0.15} className="mt-12 grid gap-10 md:grid-cols-2">

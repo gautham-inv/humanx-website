@@ -1,12 +1,35 @@
 import Link from "next/link";
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
 import type { Locale } from "@/lib/i18n/config";
+import type { FooterContent } from "@/lib/sanity/loaders";
 
 type FooterNavKey = "about" | "services" | "events" | "insights" | "publications";
 const NAV_ITEMS: FooterNavKey[] = ["about", "services", "events", "insights", "publications"];
 
-export function Footer({ dict, locale }: { dict: Dictionary; locale: Locale }) {
+type FooterProps = {
+  dict: Dictionary;
+  locale: Locale;
+  /** Sanity-resolved footer content. Each leaf falls back to dict. */
+  content?: FooterContent | null;
+};
+
+export function Footer({ dict, locale, content }: FooterProps) {
   const t = dict.footer;
+  const brandTagline = content?.brandTagline ?? t.brandTagline;
+  const kindToday = content?.kindToday ?? t.kindToday;
+  const exploreHeading = content?.exploreHeading ?? t.exploreHeading;
+  const connectHeading = content?.connectHeading ?? t.connectHeading;
+  const contactHeading = content?.contactHeading ?? t.contactHeading;
+  const contactEmail = content?.contactEmail ?? t.contactEmail;
+  const privacyTitle = content?.privacyTitle ?? t.privacyTitle;
+  const privacyLinkLabel = content?.privacyLinkLabel ?? t.privacyLinkLabel;
+  const rights = content?.rights ?? t.rights;
+  const social = {
+    linkedin: content?.social?.linkedin ?? t.social.linkedin,
+    youtube: content?.social?.youtube ?? t.social.youtube,
+    twitter: content?.social?.twitter ?? t.social.twitter,
+    instagram: content?.social?.instagram ?? t.social.instagram,
+  };
 
   return (
     <footer className="relative border-t border-line bg-bg-elev/30 px-6 pt-16 pb-8 text-sm text-ink-dim">
@@ -22,16 +45,16 @@ export function Footer({ dict, locale }: { dict: Dictionary; locale: Locale }) {
             >
               Human<span className="brand-x">X</span>
             </Link>
-            <p className="max-w-xs leading-relaxed">{t.brandTagline}</p>
+            <p className="max-w-xs leading-relaxed">{brandTagline}</p>
             <p className="pt-2 font-display text-sm uppercase tracking-[0.2em] text-accent">
-              {t.kindToday}
+              {kindToday}
             </p>
           </div>
 
           {/* Explore */}
-          <nav aria-label={t.exploreHeading}>
+          <nav aria-label={exploreHeading}>
             <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-ink">
-              {t.exploreHeading}
+              {exploreHeading}
             </h3>
             <ul className="space-y-2.5">
               {NAV_ITEMS.map((key) => (
@@ -50,26 +73,26 @@ export function Footer({ dict, locale }: { dict: Dictionary; locale: Locale }) {
           {/* Connect With Us — social icons */}
           <div>
             <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-ink">
-              {t.connectHeading}
+              {connectHeading}
             </h3>
             <ul className="flex flex-wrap gap-3">
               <li>
-                <SocialLink href={t.social.linkedin} label="LinkedIn">
+                <SocialLink href={social.linkedin} label="LinkedIn">
                   <LinkedInIcon />
                 </SocialLink>
               </li>
               <li>
-                <SocialLink href={t.social.youtube} label="YouTube">
+                <SocialLink href={social.youtube} label="YouTube">
                   <YouTubeIcon />
                 </SocialLink>
               </li>
               <li>
-                <SocialLink href={t.social.twitter} label="X (Twitter)">
+                <SocialLink href={social.twitter} label="X (Twitter)">
                   <XIcon />
                 </SocialLink>
               </li>
               <li>
-                <SocialLink href={t.social.instagram} label="Instagram">
+                <SocialLink href={social.instagram} label="Instagram">
                   <InstagramIcon />
                 </SocialLink>
               </li>
@@ -80,24 +103,24 @@ export function Footer({ dict, locale }: { dict: Dictionary; locale: Locale }) {
           <div className="space-y-5">
             <div>
               <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-ink">
-                {t.contactHeading}
+                {contactHeading}
               </h3>
               <a
-                href={`mailto:${t.contactEmail}`}
+                href={`mailto:${contactEmail}`}
                 className="block break-all text-ink transition-colors hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent rounded-sm"
               >
-                {t.contactEmail}
+                {contactEmail}
               </a>
             </div>
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-ink-dim">
-                {t.privacyTitle}
+                {privacyTitle}
               </p>
               <Link
                 href={`/${locale}/privacy`}
                 className="mt-2 inline-block text-sm text-ink-dim underline-offset-4 hover:text-ink hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent rounded-sm"
               >
-                {t.privacyLinkLabel}
+                {privacyLinkLabel}
               </Link>
             </div>
           </div>
@@ -105,7 +128,7 @@ export function Footer({ dict, locale }: { dict: Dictionary; locale: Locale }) {
 
         {/* Bottom row: copyright */}
         <div className="mt-14 flex flex-col items-start justify-between gap-3 border-t border-line pt-6 text-xs sm:flex-row sm:items-center">
-          <span>{t.rights}</span>
+          <span>{rights}</span>
         </div>
       </div>
     </footer>

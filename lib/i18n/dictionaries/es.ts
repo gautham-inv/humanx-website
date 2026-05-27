@@ -252,6 +252,12 @@ export const es: Dictionary = {
     comingSoon: "Próximamente",
     submit: "Enviar",
     selectPlaceholder: "Selecciona…",
+    sending: "Enviando…",
+    successEyebrow: "Gracias",
+    successTitle: "Te responderemos pronto",
+    successBody: "Tu mensaje ha llegado a nuestra bandeja. Ramon o alguien del equipo te responderá en dos días hábiles.",
+    successReset: "Enviar otro",
+    submitError: "Algo salió mal al enviar tu mensaje. Inténtalo de nuevo o escribe a",
   },
   insights: {
     eyebrow: "Insights",

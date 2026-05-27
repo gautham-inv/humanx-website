@@ -43,7 +43,7 @@ export default async function PrivacyPage({
   void (await getDictionary(locale as Locale));
 
   return (
-    <main id="main" className="px-6 py-24 md:py-32">
+    <main id="main" className="px-6 py-14 md:py-24 lg:py-32">
       <article className="mx-auto max-w-3xl">
         <Reveal direction="up">
           <div className="mb-6 text-xs uppercase tracking-[0.3em] text-ink-dim">

@@ -1,13 +1,33 @@
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
+import type { HomepageContent } from "@/lib/sanity/loaders";
 
-export function PartnersTicker({ dict }: { dict: Dictionary }) {
+type PartnersTickerProps = {
+  dict: Dictionary;
+  /**
+   * Sanity-sourced partner names, already resolved at build time. When the
+   * list is empty (Sanity unreachable, or the dataset has no partner docs
+   * yet) we fall back to dict so the ticker never renders blank.
+   */
+  items?: readonly string[];
+  /** Section header copy from the homepage singleton. Falls back to dict. */
+  content?: HomepageContent["partners"];
+};
+
+export function PartnersTicker({
+  dict,
+  items: itemsProp,
+  content,
+}: PartnersTickerProps) {
+  const items =
+    itemsProp && itemsProp.length > 0 ? itemsProp : dict.partnersTicker.items;
+  const heading = content?.heading ?? dict.partnersTicker.heading;
   // Duplicate the set so the translate animation loops seamlessly.
-  const loop = [...dict.partnersTicker.items, ...dict.partnersTicker.items];
+  const loop = [...items, ...items];
 
   return (
     <section
-      aria-label={dict.partnersTicker.heading}
-      className="relative border-y border-line bg-bg py-12 md:py-16"
+      aria-label={heading}
+      className="relative border-y border-line bg-bg py-8 md:py-12 lg:py-16"
     >
       <div
         className="group relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]"

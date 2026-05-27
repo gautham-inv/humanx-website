@@ -10,6 +10,7 @@ import { ContactModalProvider } from "@/components/layout/ContactModalProvider";
 import { ThemeSync } from "@/components/layout/ThemeSync";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { LocaleFade } from "@/components/motion/LocaleFade";
+import { loadContactCta, loadFooter } from "@/lib/sanity/loaders";
 import "../globals.css";
 
 const geologica = Geologica({
@@ -86,7 +87,14 @@ export default async function LocaleLayout({
   const { locale } = await params;
   if (!locales.includes(locale as Locale)) notFound();
 
-  const dict = await getDictionary(locale as Locale);
+  // Locale-level chrome: dict + contactCta + footer fetched in parallel at
+  // build time. ContactCta drives the modal opened from anywhere on the
+  // site; footer drives copy + social links in every page footer.
+  const [dict, contactCta, footerContent] = await Promise.all([
+    getDictionary(locale as Locale),
+    loadContactCta(locale as Locale),
+    loadFooter(locale as Locale),
+  ]);
 
   return (
     <html
@@ -105,6 +113,13 @@ export default async function LocaleLayout({
           src="/theme-init.js"
           strategy="beforeInteractive"
         />
+        {/* HubSpot tracking script intentionally NOT loaded — GA4 covers
+            site analytics, and the Forms Submissions API in lib/hubspot.ts
+            populates the CRM directly without needing HubSpot's tracker
+            on the page. If you ever want anonymous-visit attribution
+            (browsing history merged into each contact's CRM timeline),
+            add the <Script src="https://js-na2.hs-scripts.com/{portalId}.js"
+            strategy="afterInteractive" /> back here. */}
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-on-accent focus:text-sm focus:font-semibold"
@@ -112,11 +127,15 @@ export default async function LocaleLayout({
           Skip to content
         </a>
         <ThemeSync />
-        <ContactModalProvider dict={dict}>
+        <ContactModalProvider dict={dict} content={contactCta}>
           <SmoothScroll>
             <Nav locale={locale as Locale} dict={dict} />
             <LocaleFade locale={locale}>{children}</LocaleFade>
-            <Footer dict={dict} locale={locale as Locale} />
+            <Footer
+              dict={dict}
+              locale={locale as Locale}
+              content={footerContent}
+            />
           </SmoothScroll>
         </ContactModalProvider>
       </body>

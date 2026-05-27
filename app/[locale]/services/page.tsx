@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { locales, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
+import {
+  loadServices,
+  loadServicesPage,
+  loadContactCta,
+} from "@/lib/sanity/loaders";
 import { Reveal } from "@/components/motion/Reveal";
 import { GlobalCTA } from "@/components/sections/GlobalCTA";
 import { ServicesHeroSolarSystem } from "@/components/sections/services/ServicesHeroSolarSystem";
@@ -40,19 +45,30 @@ export default async function ServicesPage({
 }) {
   const { locale } = await params;
   if (!locales.includes(locale as Locale)) notFound();
-  const dict = await getDictionary(locale as Locale);
+  const [dict, sanityServices, servicesPage, contactCta] = await Promise.all([
+    getDictionary(locale as Locale),
+    loadServices(locale as Locale),
+    loadServicesPage(locale as Locale),
+    loadContactCta(locale as Locale),
+  ]);
   const t = dict.services;
+  // Sanity is the source of truth once seeded; fall back to dict items if
+  // the fetch returned nothing (e.g. dataset still empty).
+  const items = sanityServices.length > 0 ? sanityServices : t.items;
+  const eyebrow = servicesPage?.eyebrow ?? t.eyebrow;
+  const titleRaw = servicesPage?.title ?? t.title;
+  const body = servicesPage?.body ?? t.body;
 
   return (
     <main id="main">
       {/* HERO — text left / solar system right */}
-      <section className="relative overflow-hidden px-6 pt-20 pb-16 md:pt-32 md:pb-24">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.2fr_auto]">
+      <section className="relative overflow-hidden px-6 pt-14 pb-10 md:pt-24 md:pb-16 lg:pt-32 lg:pb-24">
+        <div className="mx-auto grid max-w-6xl items-start gap-12 lg:grid-cols-[1.2fr_auto]">
           <div className="order-2 lg:order-1">
             <Reveal direction="up">
               <div className="mb-6 text-xs uppercase tracking-[0.3em] text-ink-dim">
                 <span className="mr-3 inline-block h-px w-8 bg-accent align-middle" />
-                {t.eyebrow}
+                {eyebrow}
               </div>
             </Reveal>
             <Reveal direction="up" delay={0.05}>
@@ -60,12 +76,12 @@ export default async function ServicesPage({
                 as="h1"
                 className="font-display text-[clamp(2.5rem,6vw,5rem)] leading-[1.05] tracking-tight"
               >
-                {t.title}
+                {titleRaw}
               </HighlightedTitle>
             </Reveal>
             <Reveal direction="up" delay={0.1}>
               <p className="mt-6 max-w-xl font-serif text-lg leading-relaxed text-ink-dim">
-                {t.body}
+                {body}
               </p>
             </Reveal>
           </div>
@@ -80,9 +96,9 @@ export default async function ServicesPage({
       {/* EDITORIAL ZIGZAG — each service is a wide row, icon and text alternate sides.
        * No numbers, no eyebrows, no audience/deliverable dl, no per-card CTA.
        * Just the icon, the title, the body. A hairline rule between rows. */}
-      <section className="relative border-t border-line px-6 py-24 md:py-32">
+      <section className="relative border-t border-line px-6 py-14 md:py-24 lg:py-32">
         <div className="mx-auto max-w-5xl divide-y divide-line/70">
-          {t.items.map((item, idx) => {
+          {items.map((item, idx) => {
             const Icon = SERVICE_ICONS[item.id];
             const reverse = idx % 2 === 1;
             return (
@@ -133,7 +149,7 @@ export default async function ServicesPage({
         </div>
       </section>
 
-      <GlobalCTA dict={dict} variant="centered" />
+      <GlobalCTA dict={dict} variant="centered" content={contactCta} />
     </main>
   );
 }

@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Reveal } from "@/components/motion/Reveal";
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
+import type { HomepageContent } from "@/lib/sanity/loaders";
+import type { EventRow } from "./Events";
 
 function LiteYouTube({ id, title }: { id: string; title: string }) {
   const [active, setActive] = useState(false);
@@ -43,7 +45,22 @@ function LiteYouTube({ id, title }: { id: string; title: string }) {
   );
 }
 
-export function OnStage({ dict }: { dict: Dictionary }) {
+type OnStageProps = {
+  dict: Dictionary;
+  /**
+   * Same Sanity-sourced events list the homepage Events block uses — `OnStage`
+   * filters it for past + has-video. Empty falls back to dict.
+   */
+  items?: readonly EventRow[];
+  /** Section header copy from the homepage singleton. Per-field dict fallback. */
+  content?: HomepageContent["onStage"];
+};
+
+export function OnStage({ dict, items: itemsProp, content }: OnStageProps) {
+  const title = content?.title ?? dict.onStage.title;
+  const body = content?.body ?? dict.onStage.body;
+  // `note` is small static UI flair, not editable in the studio — keep dict.
+  const note = dict.onStage.note;
   const ref = useRef<HTMLElement | null>(null);
   const [now, setNow] = useState<number | null>(null);
 
@@ -51,10 +68,13 @@ export function OnStage({ dict }: { dict: Dictionary }) {
     setNow(Date.now());
   }, []);
 
+  const items: readonly EventRow[] =
+    itemsProp && itemsProp.length > 0 ? itemsProp : dict.events.items;
+
   const past =
     now === null
-      ? dict.events.items
-      : dict.events.items
+      ? items
+      : items
           .filter((ev) => ev.youtubeId && new Date(ev.startsAt).getTime() < now)
           .sort(
             (a, b) =>
@@ -67,21 +87,21 @@ export function OnStage({ dict }: { dict: Dictionary }) {
     <section
       id="speaking"
       ref={ref}
-      className="relative px-6 py-28 md:py-40 border-t border-line"
+      className="relative px-6 py-16 md:py-24 lg:py-32 border-t border-line"
     >
       <div className="mx-auto max-w-6xl">
         <Reveal direction="up">
           <div className="mb-16 flex flex-col md:flex-row md:items-end md:justify-between gap-8">
             <div>
-              <h2 className="font-display text-4xl md:text-5xl leading-[1.0] tracking-tight">{dict.onStage.title}</h2>
+              <h2 className="font-display text-4xl md:text-5xl leading-[1.0] tracking-tight">{title}</h2>
               <p
                 className="mt-3 text-xs text-ink-dim"
                 style={{ fontVariationSettings: '"slnt" -8' }}
               >
-                ({dict.onStage.note})
+                ({note})
               </p>
             </div>
-            <p className="max-w-sm text-ink-dim">{dict.onStage.body}</p>
+            <p className="max-w-sm text-ink-dim">{body}</p>
           </div>
         </Reveal>
 

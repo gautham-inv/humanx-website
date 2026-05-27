@@ -1,6 +1,7 @@
 "use client";
 
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
+import type { EventsPageContent } from "@/lib/sanity/loaders";
 import { ContactCTAButton } from "@/components/layout/ContactCTAButton";
 import { Reveal } from "@/components/motion/Reveal";
 
@@ -12,13 +13,23 @@ import { Reveal } from "@/components/motion/Reveal";
  *   - calendar-grid background texture (echoes /events page motif)
  *   - eyebrow "On stage" instead of "Let's talk"
  */
-export function EventsCTA({ dict }: { dict: Dictionary }) {
+type EventsCTAProps = {
+  dict: Dictionary;
+  /** Sanity-resolved `eventsPage.book` slice. Per-field dict fallback. */
+  content?: EventsPageContent["book"];
+};
+
+export function EventsCTA({ dict, content }: EventsCTAProps) {
   const t = dict.events;
+  const bookEyebrow = content?.eyebrow ?? t.bookEyebrow;
+  const bookTitle = content?.title ?? t.bookTitle;
+  const bookBody = content?.body ?? t.bookBody;
+  const bookCta = content?.cta ?? t.bookCta;
 
   return (
     <section
       id="contact"
-      className="relative overflow-hidden border-t border-line bg-bg-elev/30 px-6 py-24 md:py-32"
+      className="relative overflow-hidden border-t border-line bg-bg-elev/30 px-6 py-14 md:py-20 lg:py-28"
     >
       {/* Subtle grid texture as a stage motif. Same dot-pattern technique
           used on /insights so the visual language stays consistent. */}
@@ -39,22 +50,22 @@ export function EventsCTA({ dict }: { dict: Dictionary }) {
           <Reveal direction="up">
             <div className="mb-4 text-xs uppercase tracking-[0.3em] text-accent">
               <span className="mr-3 inline-block h-px w-8 bg-accent align-middle" />
-              {t.bookEyebrow}
+              {bookEyebrow}
             </div>
           </Reveal>
           <Reveal direction="up" delay={0.05}>
             <h2 className="font-display text-[clamp(2.25rem,5vw,4rem)] leading-[1.05] tracking-tight">
-              {t.bookTitle}
+              {bookTitle}
             </h2>
           </Reveal>
           <Reveal direction="up" delay={0.1}>
-            <p className="mt-6 max-w-xl text-lg text-ink-dim">{t.bookBody}</p>
+            <p className="mt-6 max-w-xl text-lg text-ink-dim">{bookBody}</p>
           </Reveal>
         </div>
 
         <Reveal direction="up" delay={0.15}>
           <div className="flex flex-col gap-4 md:items-end">
-            <ContactCTAButton label={t.bookCta} />
+            <ContactCTAButton label={bookCta} />
             <p className="text-xs uppercase tracking-[0.2em] text-ink-dim">
               {/* Reuse the global 'one inbox' messaging from cta.body */}
               {dict.cta.body.split(".")[0]}.
