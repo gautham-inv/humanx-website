@@ -17,7 +17,10 @@ export const testimonialsQuery = /* groq */ `
     "id": _id,
     quote,
     author,
-    org
+    org,
+    "imageUrl": image.asset->url,
+    "imageAlt": image.alt,
+    linkedinUrl
   }
 `;
 
@@ -27,6 +30,11 @@ export type TestimonialDoc = {
   quote: { en?: string; es?: string };
   author: { en?: string; es?: string };
   org?: { en?: string; es?: string };
+  /** Resolved Sanity CDN URL of the uploaded headshot, or undefined. */
+  imageUrl?: string;
+  imageAlt?: string;
+  /** LinkedIn profile — makes the attribution clickable when set. */
+  linkedinUrl?: string;
 };
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -139,6 +147,7 @@ export const partnersQuery = /* groq */ `
   *[_type == "partner"] | order(order asc, _createdAt asc) {
     "id": _id,
     name,
+    website,
     "logoUrl": logo.asset->url,
     "logoWidth": logo.asset->metadata.dimensions.width,
     "logoHeight": logo.asset->metadata.dimensions.height
@@ -148,6 +157,8 @@ export const partnersQuery = /* groq */ `
 export type PartnerDoc = {
   id: string;
   name: string;
+  /** External URL — when set, ticker entry becomes a link. */
+  website?: string;
   /** Resolved CDN URL of the uploaded logo asset, or undefined. */
   logoUrl?: string;
   logoWidth?: number;

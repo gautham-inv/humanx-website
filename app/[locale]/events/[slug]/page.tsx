@@ -133,25 +133,34 @@ export default async function EventDetailPage({
 
   return (
     <main id="main" className="relative">
-      {/* HERO IMAGE — full width, capped at a sensible aspect ratio so the
-          page never goes uncomfortably tall on widescreen. Skipped entirely
-          when no image has been uploaded yet. */}
+      {/* HERO IMAGE — centered, contained "poster" presentation. Event
+          posters often carry QR codes, dates, venue text — anything we'd
+          crop with `object-cover` is information the visitor came for. So
+          we use `object-contain` inside a max-width / max-height frame: the
+          image always shows in full, the container letterboxes top/bottom
+          (or left/right) as needed. Skipped entirely when no image has been
+          uploaded yet. */}
       {event.imageUrl ? (
-        <section className="relative h-[40vh] min-h-[260px] w-full md:h-[55vh] md:min-h-[420px]">
-          <Image
-            src={event.imageUrl}
-            alt={event.imageAlt || event.title}
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover"
-          />
-          {/* Bottom gradient so the text-anchored back-link below the image
-              still has contrast against bright photos. */}
-          <div
-            aria-hidden
-            className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-bg to-transparent"
-          />
+        <section className="px-6 pt-10 pb-2 md:pt-14">
+          <div className="mx-auto flex max-w-3xl justify-center">
+            {/* Native <img> rather than `next/image` — we have
+                `images.unoptimized: true` (static export), so next/image is
+                just a passthrough, and using <img> lets the rendered height
+                track the natural aspect ratio of the uploaded asset instead
+                of being locked to a fixed container ratio. `max-h-[70vh]`
+                caps the height so portrait posters don't run the page off
+                screen; `max-w-md` keeps landscape shots from going wider
+                than ~28rem so QR codes / printed copy stay scan-sized
+                rather than billboard-sized. */}
+            <img
+              src={event.imageUrl}
+              alt={event.imageAlt || event.title}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              className="block h-auto w-auto max-h-[70vh] max-w-md rounded-2xl border border-line bg-bg-elev/40 object-contain"
+            />
+          </div>
         </section>
       ) : null}
 

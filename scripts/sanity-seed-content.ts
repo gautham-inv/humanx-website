@@ -30,6 +30,9 @@
  *   SANITY_WRITE_TOKEN=skXXXX npm run seed:content
  */
 import { createClient } from "@sanity/client";
+import { createReadStream } from "node:fs";
+import { stat } from "node:fs/promises";
+import path from "node:path";
 
 const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "r3bmhb31";
 const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || "production";
@@ -66,6 +69,146 @@ const locText = (en: string, es: string) => ({
 });
 
 type Doc = Record<string, unknown> & { _id: string; _type: string };
+
+const ROOT = process.cwd();
+const uploadedImageRefByPath = new Map<string, string>();
+
+async function maybeUploadImageAsset(relativePath?: string): Promise<{ _type: "image"; asset: { _type: "reference"; _ref: string } } | undefined> {
+  if (!relativePath) return undefined;
+  const abs = path.join(ROOT, relativePath);
+  try {
+    await stat(abs);
+  } catch {
+    console.warn(`  · image not found, skipping: ${relativePath}`);
+    return undefined;
+  }
+
+  const cached = uploadedImageRefByPath.get(abs);
+  if (cached) {
+    return { _type: "image", asset: { _type: "reference", _ref: cached } };
+  }
+
+  const filename = path.basename(abs);
+  const ext = path.extname(filename).toLowerCase();
+  const contentType =
+    ext === ".png" ? "image/png" :
+    ext === ".webp" ? "image/webp" :
+    ext === ".jpeg" || ext === ".jpg" ? "image/jpeg" :
+    "application/octet-stream";
+
+  const asset = await client.assets.upload("image", createReadStream(abs), {
+    filename,
+    contentType,
+  });
+  uploadedImageRefByPath.set(abs, asset._id);
+  return { _type: "image", asset: { _type: "reference", _ref: asset._id } };
+}
+
+// ---------- testimonials ----------------------------------------------------
+
+async function buildTestimonials(): Promise<Doc[]> {
+  const items: Array<{
+    slug: string;
+    quote: string;
+    author: string;
+    org: string;
+    imageFile?: string;
+    /** When set, the avatar+name block in the carousel becomes a link. */
+    linkedinUrl?: string;
+  }> = [
+    {
+      slug: "paco-underhill",
+      author: "Paco Underhill",
+      org: "Founder of Envirosell Inc., Global best-selling author, and Futurist",
+      quote:
+        "One of the best decision Walmart made as it expanded internationally was to harvest the best and brightest and bring them back to Bentonville. Ramon was one their best finds. An Oxford University education, a clear global awareness and gift for management, I was struck as I met him some 20 years ago of the elegance and grace at which both he projected and used in his leadership role. The combination of a big fast brain, a caring heart and ability to listen is a unique combination in modern management. Over the past twenty years he has built a remarkable record of both strategic thinking and hands on accomplishment.",
+      imageFile: "paco-underhill.jpg",
+      linkedinUrl: "https://www.linkedin.com/in/pacounderhill/",
+    },
+    {
+      slug: "allan-steinmetz",
+      author: "Allan Steinmetz",
+      org: "CEO, Founder, Inward Strategic Consulting",
+      quote:
+        "Ramon is a visionary with a knack for uncovering trends and shaping strategy. His ability to distill complex data into clear recommendations is unparalleled. He brings a passionate customer focus to every discussion, driving customer-led decisions. As a servant leader, he inspires teams to align with company's purpose and deliver impactful results through creative execution and ideas. Ramon excels in implementing metrics like NPS to enhance both customer and employee experience and impactful insights. His retail expertise, coupled with technological prowess, accelerates customer-focused strategies locally and globally.",
+      imageFile: "allan-steinmitz.jpeg",
+    },
+    {
+      slug: "laureano-turienzo",
+      author: "Laureano Turienzo",
+      org: "CEO Retail News Trends y Presidente del Círculo Iberoamericano de Retail",
+      quote:
+        "Ramón es uno de los profesionales más brillantes que he conocido. Un verdadero líder y profesional destacado en el Sector Retail a Nivel Mundial. No solo posee un conocimiento profundo y una experiencia vasta en todas las facetas del sector, sino que también se destaca por su visión de futuro excepcional. Su capacidad para anticipar las tendencias y adaptarse a las dinámicas cambiantes del mercado lo coloca en una posición única como estratega empresarial. Ramón va más allá de los aspectos comerciales; comprende que el sector retail es intrínsecamente humano. Su enfoque humanista centrado en las personas refleja su comprensión de que, en última instancia, se trata de crear momentos significativos para clientes y empleados. Esta perspectiva hace que su liderazgo sea no solo efectivo sino también inspirador.",
+      imageFile: "laureano-turienzo.png",
+      linkedinUrl: "https://www.linkedin.com/in/laurenturienzo/",
+    },
+    {
+      slug: "carla-giovannetti-dodds",
+      author: "Carla Giovannetti Dodds",
+      org: "Global Growth and Brand Strategist",
+      quote:
+        "I can best describe Ramon as an insight retail leader with unique expertise who translates insights to strategy, accelerating customer-focus strategies for higher engagement and revenue growth. I partnered with Ramon during two of my assignments at Walmart US. During my last tenure in Marketing, he provided our team with critical insights to drive our Financial Services business. Previously, as Head of Multicultural for Walmart, he became a key advisor in differentiating insights from the Hispanic customer that fed our multicultural strategy. His work included partnerships with key category brands (P&G, Coca-Cola, Frito Lay, L'Oreal, etc.) that yielded significant growth with the US Hispanic Retail segment.",
+      imageFile: "Carla-giovanni.png",
+      linkedinUrl: "https://www.linkedin.com/in/carladodds/",
+    },
+    {
+      slug: "dario-brasca",
+      author: "Darío Brasca",
+      org: "Presidente CYRE, S.A., Argentina",
+      quote:
+        "Ramón personifica la Experiencia Humana, fusionando valores y propósito para impulsar organizaciones hacia un crecimiento diferenciado. Su visión innovadora y habilidad para inspirar a través de historias cautivan, mientras su liderazgo apasionado nutre equipos centrados en el propósito, elevando cada experiencia del cliente y empleado con una creatividad sin igual. Además, como líder en estrategias de retail, Ramón anticipa tendencias, influyendo en decisiones comerciales y trascendiendo fronteras, especialmente en América Latina y Europa, consolidándolo como un referente en el mundo del retail.",
+      imageFile: "dario-brasca.jpg",
+      linkedinUrl:
+        "https://www.linkedin.com/in/dar%C3%ADo-sebasti%C3%A1n-brasca-0bab78174/",
+    },
+    {
+      slug: "mauricio-sabogal",
+      author: "Mauricio Sabogal",
+      org: "CEO, Founder, SAB Marketing Connections",
+      quote:
+        "Ramon Portilla stands out as a visionary leader whose impact transcends our organization to leave a lasting mark on the industry. His commitment to excellence and innovative insights into customer and market dynamics has inspired teams to achieve remarkable goals. I am honored to endorse him as a professional par excellence, confident in his ability to elevate HumanX Insights to unprecedented success. His exceptional leadership and expertise in translating market strategies across diverse regions, especially in leveraging AI for strategic planning, resonate deeply with SAB Marketing Connections' mission.",
+      imageFile: "Mauricio Sabogal.jpg",
+      // Source URL had a trailing `/in/` (likely typo); LinkedIn rejects it
+      // and normalises to the bare `/in/{handle}/` form below.
+      linkedinUrl: "https://www.linkedin.com/in/mauriciosabog/",
+    },
+    {
+      slug: "laston-charriez",
+      author: "Laston Charriez",
+      org: "Colorado State University, Assistant Professor of Practice and Industry Liaison",
+      quote:
+        "I have known Ramon for many years. He is an Insight Generating machine. Using his tentacles at Wal-Mart, he helped my team and I, justify new investments in Hispanic Shopper marketing. His unique expertise to translate strategy of customer-focus strategies within the US Hispanic Retail segment allowed us to create win-win Shopper programs that had above benchmark ROI.",
+    },
+    {
+      slug: "cesar-enamorado",
+      author: "Cesar Enamorado",
+      org: "VP Estrategia, DIUNSA, Honduras",
+      quote:
+        "Mi experiencia con HumanX Insights ha sido excepcional. Su enfoque apasionado por el cliente se refleja en cada interacción comercial. Tienen una capacidad única para influir en decisiones impulsadas por el cliente, ofreciendo soluciones personalizadas que superan expectativas. ¡Recomiendo sus servicios a cualquiera que busque resultados tangibles y una atención centrada en el cliente!.",
+      imageFile: "Cesar Enamorado.jpg",
+      linkedinUrl: "https://www.linkedin.com/in/cesarenamorado/",
+    },
+  ];
+
+  const docs: Doc[] = [];
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i];
+    const relativePath = it.imageFile ? path.join("public", "testimonials", it.imageFile) : undefined;
+    const image = await maybeUploadImageAsset(relativePath);
+    docs.push({
+      _id: `testimonial-${it.slug}`,
+      _type: "testimonial",
+      quote: locText(it.quote, it.quote),
+      author: loc(it.author, it.author),
+      org: loc(it.org, it.org),
+      image,
+      linkedinUrl: it.linkedinUrl,
+      order: i + 1,
+    });
+  }
+
+  return docs;
+}
 
 // ---------- events ----------------------------------------------------------
 //
@@ -509,6 +652,7 @@ async function seed() {
   }
 
   const groups: { label: string; docs: Doc[] }[] = [
+    { label: "testimonials", docs: await buildTestimonials() },
     { label: "events", docs: buildEvents() },
     { label: "videos", docs: buildVideos() },
     { label: "insights (LinkedIn)", docs: buildInsights() },
@@ -533,9 +677,16 @@ async function seed() {
 
   // Surface anything else still lying around — most likely the original
   // dict-derived placeholders (event-2026-*, insight-i1, …).
+  const realTestimonialIds = groups
+    .find((g) => g.label === "testimonials")
+    ?.docs.map((d) => d._id) ?? [];
   const realEventIds = buildEvents().map((d) => d._id);
   const realInsightIds = buildInsights().map((d) => d._id);
 
+  const strayTestimonials = await client.fetch<{ _id: string; author?: { en?: string } }[]>(
+    `*[_type == "testimonial" && !(_id in $ids)]{ _id, author }`,
+    { ids: realTestimonialIds }
+  );
   const strayEvents = await client.fetch<{ _id: string; title?: { en?: string } }[]>(
     `*[_type == "event" && !(_id in $ids)]{ _id, title }`,
     { ids: realEventIds }
@@ -545,10 +696,15 @@ async function seed() {
     { ids: realInsightIds }
   );
 
-  if (strayEvents.length || strayInsights.length) {
+  if (strayTestimonials.length || strayEvents.length || strayInsights.length) {
     console.log(
       "\n⚠  Placeholder docs still in the dataset (delete in the studio if no longer needed):"
     );
+    for (const s of strayTestimonials) {
+      console.log(
+        `   - testimonial ${s._id.padEnd(38)} "${(s.author?.en ?? "").slice(0, 60)}"`
+      );
+    }
     for (const s of strayEvents) {
       console.log(
         `   - event   ${s._id.padEnd(42)} "${(s.title?.en ?? "").slice(0, 60)}"`

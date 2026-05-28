@@ -52,20 +52,33 @@ export function Nav({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   return (
     <nav
       aria-label="Primary"
-      className="sticky top-0 z-40 flex items-center justify-between px-6 py-4 backdrop-blur-md bg-bg/95 border-b border-line"
+      // `py-2` (was `py-4`) compensates for the new SummitBar strip
+      // sitting above the nav. Combined SummitBar (~26px) + Nav (~52px)
+      // ≈ old standalone Nav height (~76px), so the page below doesn't
+      // get pushed down compared to the pre-summit layout.
+      className="sticky top-0 z-40 flex items-center justify-between px-6 py-2 backdrop-blur-md bg-bg/95 border-b border-line"
     >
       <Link
         href={`/${locale}`}
         aria-label="HumanX home"
-        className="rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+        // `.brand-tile-chip` is a CSS class in globals.css that paints a
+        // cream tile + soft shadow + 1px inset stroke in dark theme, and
+        // automatically flattens to a transparent no-chip presentation in
+        // light theme via the `:root[data-theme="light"]` override. Means
+        // we don't need conditional render logic — the same JSX serves
+        // both themes and the chip simply disappears when not needed.
+        // Slimmer chip padding (`px-3 py-1.5`) now that the nav itself is
+        // tighter — keeps the logo from feeling cramped without bloating
+        // the chrome.
+        className="brand-tile-chip inline-flex items-center rounded-xl px-3 py-1.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-bright"
       >
         <Image
           src="/logo.webp"
           alt="HumanX"
-          width={140}
-          height={40}
+          width={180}
+          height={52}
           priority
-          className="h-8 w-auto"
+          className="h-8 w-auto md:h-9"
         />
       </Link>
 

@@ -20,6 +20,14 @@ export type TestimonialItem = {
   quote: string;
   author: string;
   org?: string;
+  /** Sanity CDN URL of the author headshot. Empty / undefined → no avatar. */
+  imageUrl?: string;
+  imageAlt?: string;
+  /**
+   * LinkedIn profile URL. When set, the avatar + author block becomes a
+   * link that opens LinkedIn in a new tab.
+   */
+  linkedinUrl?: string;
 };
 
 type TestimonialsProps = {
@@ -124,9 +132,54 @@ export function Testimonials({
             {current.quote}
           </blockquote>
           <figcaption className="mt-6 text-sm text-ink-dim">
-            <span className="text-ink">{current.author}</span>
-            <span className="mx-2 text-line">·</span>
-            <span>{current.org}</span>
+            {/* The avatar + author block is one clickable unit when the
+                author has a LinkedIn URL set in Sanity — opens the profile
+                in a new tab. Without a URL the same content renders as a
+                non-interactive block (no anchor wrapper) so the carousel
+                still reads correctly. */}
+            {(() => {
+              const inner = (
+                <>
+                  {current.imageUrl ? (
+                    /* Native <img> rather than next/image — the URL is
+                     * cross-origin (Sanity CDN) and we already have
+                     * `images.unoptimized: true`, so next/image would
+                     * just hand off without optimization. The avatar is
+                     * tiny (48px) and lazy-loaded; no LCP concern. */
+                    <img
+                      src={current.imageUrl}
+                      alt={current.imageAlt || current.author}
+                      width={48}
+                      height={48}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-12 w-12 flex-shrink-0 rounded-full object-cover border border-line"
+                    />
+                  ) : null}
+                  <div className="min-w-0">
+                    <div className="text-ink group-hover:text-accent transition-colors">
+                      {current.author}
+                    </div>
+                    {current.org ? (
+                      <div className="text-ink-dim/80">{current.org}</div>
+                    ) : null}
+                  </div>
+                </>
+              );
+              return current.linkedinUrl ? (
+                <a
+                  href={current.linkedinUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`${current.author} on LinkedIn`}
+                  className="group inline-flex items-center gap-4 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+                >
+                  {inner}
+                </a>
+              ) : (
+                <div className="flex items-center gap-4">{inner}</div>
+              );
+            })()}
           </figcaption>
         </div>
 

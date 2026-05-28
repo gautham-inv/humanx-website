@@ -212,21 +212,36 @@ export default async function AboutPage({
         {/* 4. EXPERIENCE — heading + marginalia stat in the gutter. No card
            chrome, no backdrop blur, no border. The 30+ numeral floats in the
            margin like a magazine pull-quote; the body sits in the main column
-           in the editorial serif. */}
+           in the editorial serif.
+
+           Previous layout put icon, heading, and body in three separate grid
+           rows with `gap-y-10` (2.5rem) between them — that made the
+           icon→heading gap ~2.5× larger than the equivalent transition in
+           Mission/Values/Founder, where icon and heading sit in normal flow
+           with `mb-6` (1.5rem). The grid now has two rows: icon+heading
+           stacked together in row 1 (right column), and stat (left) + body
+           (right) sharing row 2. This restores the editorial rhythm so all
+           four sections feel like siblings, not third-cousin variants. */}
         <section id="experience" className="relative border-t border-line px-6 py-12 md:py-20 lg:py-28">
           <div className="mx-auto grid max-w-6xl gap-x-12 gap-y-10 md:grid-cols-[auto_1fr] md:gap-x-16">
-            <Reveal direction="up" className="md:col-start-2">
-              <div className="mb-6 text-magenta">
-                <ExperienceArcIcon width={36} height={36} />
-              </div>
-            </Reveal>
-            <Reveal direction="up" delay={0.05} className="md:col-start-2">
-              <h2 className="font-display text-4xl leading-tight md:text-5xl">
-                {experienceTitle}
-              </h2>
-            </Reveal>
+            {/* Row 1, right column: icon + heading stacked in normal flow
+                so `mb-6` controls the icon→heading gap, matching the other
+                sections (Mission/Values/Founder). */}
+            <div className="md:col-start-2">
+              <Reveal direction="up">
+                <div className="mb-6 text-magenta">
+                  <ExperienceArcIcon width={36} height={36} />
+                </div>
+              </Reveal>
+              <Reveal direction="up" delay={0.05}>
+                <h2 className="font-display text-4xl leading-tight md:text-5xl">
+                  {experienceTitle}
+                </h2>
+              </Reveal>
+            </div>
 
-            <Reveal direction="up" delay={0.15} className="md:row-start-3 md:self-start">
+            {/* Row 2, left column: the 30+ stat as a magazine pull-quote. */}
+            <Reveal direction="up" delay={0.15} className="md:self-start">
               <div className="flex items-start gap-5 md:flex-col md:gap-3">
                 <CountUp
                   value={experienceStatValue}
@@ -240,7 +255,8 @@ export default async function AboutPage({
               </div>
             </Reveal>
 
-            <Reveal direction="up" delay={0.2} className="md:col-start-2 md:row-start-3">
+            {/* Row 2, right column: body copy. */}
+            <Reveal direction="up" delay={0.2} className="md:col-start-2">
               <p className="font-serif text-lg leading-relaxed text-ink-dim md:text-xl">{experienceBody}</p>
             </Reveal>
           </div>

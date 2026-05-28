@@ -1,31 +1,95 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
-import type { SummitBarContent } from "@/lib/sanity/loaders";
+import type { Locale } from "@/lib/i18n/config";
+import type { SummitBarContent, EventItem } from "@/lib/sanity/loaders";
 import { prefersReducedMotion } from "@/lib/motion";
 
 type SummitBarProps = {
   dict: Dictionary;
+  locale: Locale;
   /**
-   * Sanity-resolved summit bar copy. The bar can be toggled off entirely
-   * via `enabled: false` in the studio; when absent, dict copy is used.
+   * Sanity-resolved summitBar singleton. Two control levers:
+   *   `enabled: false`           → hide the bar entirely
+   *   `text` (any non-empty)     → use this as the headline (manual override)
+   * If `text` is empty AND the events list contains an upcoming entry, the
+   * bar auto-promotes the soonest one with a link to its detail page.
    */
   content?: SummitBarContent | null;
+  /**
+   * Full events list from Sanity. The bar filters client-side for
+   * `startsAt >= now()` so it doesn't promote yesterday's event after the
+   * static build has gone stale.
+   */
+  events?: readonly EventItem[];
 };
 
-export function SummitBar({ dict, content }: SummitBarProps) {
-  // Allow editors to hide the bar without touching code.
+export function SummitBar({ dict, locale, content, events }: SummitBarProps) {
+  // Hide entirely if the author flipped the kill-switch.
   if (content && content.enabled === false) return null;
 
-  const label = content?.label ?? dict.summit.label;
-  const text = content?.text ?? dict.summit.text;
-  const cta = content?.cta ?? dict.summit.cta;
-  const ctaUrl = content?.ctaUrl ?? "/events#humanx-summit";
-
   const ref = useRef<HTMLDivElement | null>(null);
+
+  // Filter for upcoming events client-side using `Date.now()` so the bar
+  // doesn't keep promoting an event after it's already passed (the static
+  // build won't re-run until a redeploy). During SSR / initial render
+  // `now === null` and we treat the events list as empty — so the bar
+  // hides until hydration, avoiding the flicker of "show a past event,
+  // then re-filter and hide" the previous implementation produced.
+  const [now, setNow] = useState<number | null>(null);
+  useEffect(() => {
+    setNow(Date.now());
+  }, []);
+
+  // Pick the soonest upcoming event when no manual text is set in the
+  // summitBar singleton. Manual text always wins; this is the auto fallback.
+  const manualText = content?.text;
+  const upcoming =
+    events && now !== null
+      ? events
+          .filter((e) => new Date(e.startsAt).getTime() >= now)
+          .sort(
+            (a, b) =>
+              new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime()
+          )
+      : [];
+  const nextEvent =
+    !manualText && upcoming.length > 0 ? upcoming[0] : undefined;
+
+  // Resolve the headline text. Precedence:
+  //   1. Manual text in the summitBar singleton
+  //   2. Auto-promoted next upcoming event (from the events list)
+  //   3. Nothing — in which case the bar hides entirely. NO dict fallback
+  //      here: the dict default ("Ramon keynoting…") is just placeholder
+  //      copy, and showing it after every event has passed makes the strip
+  //      lie. Static export still keeps this dynamic: the events list is
+  //      build-time, but the upcoming/past split runs client-side via
+  //      `Date.now()` after hydration.
+  const text = manualText
+    ? manualText
+    : nextEvent
+      ? nextEvent.date
+        ? `${nextEvent.title} · ${nextEvent.date}`
+        : nextEvent.title
+      : "";
+
+  // Don't render anything when there's no content to show. Returning null
+  // here also frees the vertical real estate so the nav slides up to the
+  // top of the viewport — no empty strip artefact.
+  if (!text) return null;
+
+  const label = content?.label ?? dict.summit.label;
+  const cta = content?.cta ?? dict.summit.cta;
+  // Internal link to the event detail page when auto-picked; otherwise the
+  // author-supplied URL or a sensible default to the events listing.
+  const ctaUrl = nextEvent?.slug
+    ? `/${locale}/events/${nextEvent.slug}`
+    : content?.ctaUrl ?? `/${locale}/events`;
+  const isInternal = ctaUrl.startsWith("/");
 
   useGSAP(
     () => {
@@ -62,17 +126,33 @@ export function SummitBar({ dict, content }: SummitBarProps) {
         aria-hidden
         className="pointer-events-none absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-white/10 to-transparent"
       />
-      <div className="relative mx-auto flex max-w-6xl flex-col items-start gap-1 px-6 py-2 text-xs sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5 rounded-full border border-magenta/60 bg-magenta/15 px-2 py-0.5 text-magenta">
+      {/* `py-1.5` keeps this strip ~26px tall so the combined SummitBar +
+          Nav heights stay close to the old standalone Nav height. */}
+      <div className="relative mx-auto flex max-w-6xl flex-col items-start gap-1 px-6 py-1.5 text-xs sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="flex shrink-0 items-center gap-1.5 rounded-full border border-magenta/60 bg-magenta/15 px-2 py-0.5 text-magenta">
             <span data-live-dot className="block h-1.5 w-1.5 rounded-full bg-magenta" />
             {label}
           </span>
-          <span className="text-ink-dim">{text}</span>
+          <span className="truncate text-ink-dim">{text}</span>
         </div>
-        <a href={ctaUrl} className="text-ink-dim transition-colors hover:text-ink">
-          {cta} →
-        </a>
+        {isInternal ? (
+          <Link
+            href={ctaUrl}
+            className="shrink-0 text-ink-dim transition-colors hover:text-ink"
+          >
+            {cta} →
+          </Link>
+        ) : (
+          <a
+            href={ctaUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 text-ink-dim transition-colors hover:text-ink"
+          >
+            {cta} →
+          </a>
+        )}
       </div>
     </div>
   );

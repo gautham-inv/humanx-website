@@ -10,7 +10,13 @@ import { ContactModalProvider } from "@/components/layout/ContactModalProvider";
 import { ThemeSync } from "@/components/layout/ThemeSync";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { LocaleFade } from "@/components/motion/LocaleFade";
-import { loadContactCta, loadFooter } from "@/lib/sanity/loaders";
+import {
+  loadContactCta,
+  loadFooter,
+  loadSummitBar,
+  loadEvents,
+} from "@/lib/sanity/loaders";
+import { SummitBar } from "@/components/layout/SummitBar";
 import "../globals.css";
 
 const geologica = Geologica({
@@ -90,11 +96,18 @@ export default async function LocaleLayout({
   // Locale-level chrome: dict + contactCta + footer fetched in parallel at
   // build time. ContactCta drives the modal opened from anywhere on the
   // site; footer drives copy + social links in every page footer.
-  const [dict, contactCta, footerContent] = await Promise.all([
-    getDictionary(locale as Locale),
-    loadContactCta(locale as Locale),
-    loadFooter(locale as Locale),
-  ]);
+  const [dict, contactCta, footerContent, summitBar, events] =
+    await Promise.all([
+      getDictionary(locale as Locale),
+      loadContactCta(locale as Locale),
+      loadFooter(locale as Locale),
+      loadSummitBar(locale as Locale),
+      // Used by `<SummitBar>` to auto-promote the soonest upcoming event
+      // when no manual text is set in the summitBar singleton. Layout
+      // already runs at build time, so this fetch piggybacks on the
+      // existing chrome data load with no extra request waterfall.
+      loadEvents(locale as Locale),
+    ]);
 
   return (
     <html
@@ -129,6 +142,18 @@ export default async function LocaleLayout({
         <ThemeSync />
         <ContactModalProvider dict={dict} content={contactCta}>
           <SmoothScroll>
+            {/* SummitBar sits above the nav as a thin "what's happening
+                next" strip. When the summitBar singleton has manual text,
+                that wins; otherwise the bar auto-picks the soonest
+                upcoming event from the events list and links to its
+                /events/[slug] detail page. Setting `enabled: false` in
+                Sanity hides the strip entirely. */}
+            <SummitBar
+              dict={dict}
+              locale={locale as Locale}
+              content={summitBar}
+              events={events}
+            />
             <Nav locale={locale as Locale} dict={dict} />
             <LocaleFade locale={locale}>{children}</LocaleFade>
             <Footer

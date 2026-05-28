@@ -45,6 +45,9 @@ async function loadTestimonials(locale: Locale): Promise<TestimonialItem[]> {
         quote: row.quote?.[locale] ?? row.quote?.en ?? "",
         author: row.author?.[locale] ?? row.author?.en ?? "",
         org: row.org?.[locale] ?? row.org?.en,
+        imageUrl: row.imageUrl,
+        imageAlt: row.imageAlt,
+        linkedinUrl: row.linkedinUrl,
       }))
       .filter((row) => row.quote && row.author);
   } catch (err) {

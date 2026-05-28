@@ -18,6 +18,10 @@
   --color-magenta: #c2186a;       /* X gradient end */
   --color-line: rgba(245,241,236,0.09);
   --color-on-accent: #0c0a16;     /* stable dark text on the orange button */
+  /* Cream tile used behind the brand wordmark in the navbar. Only meant to
+   * appear in dark theme — see `.brand-tile-chip` below, which flips to
+   * transparent under `[data-theme="light"]`. */
+  --color-brand-tile: #faf6ed;
 
   --font-sans: var(--font-geologica), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-geologica), ui-sans-serif, system-ui, sans-serif;
@@ -75,6 +79,41 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
+}
+
+/* ---------------------------------------------------------------
+ * Chip backgrounds — only render in dark theme.
+ *
+ *  .brand-tile-chip  — cream tile behind the navbar wordmark. Gives the
+ *                      magenta + yellow + purple logo a warm card to sit on
+ *                      against the dark indigo nav strip.
+ *  .partner-tile-chip — amber tile behind each partner logo in the ticker.
+ *                       Picks up the brand's bright-orange token so dark
+ *                       partner logos read against the spectrum gradient.
+ *
+ * Both flatten to transparent in light theme — the cream page background is
+ * already light enough for the multicolour wordmark and most partner logos
+ * to read without any tile, so chips would just add visual noise.
+ * ------------------------------------------------------------- */
+.brand-tile-chip {
+  background-color: #faf6ed;
+  box-shadow: 0 2px 12px -6px rgba(0,0,0,0.45);
+  /* `box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05)` mimics the Tailwind
+   * `ring-1 ring-black/5` so the tile edge stays defined against both
+   * dark indigo (where the soft shadow does the work) and any future
+   * variant where the bg shifts. */
+  box-shadow:
+    0 2px 12px -6px rgba(0,0,0,0.45),
+    inset 0 0 0 1px rgba(0,0,0,0.05);
+}
+.partner-tile-chip {
+  background-color: var(--color-accent-bright);
+  box-shadow: 0 4px 24px -12px rgba(0,0,0,0.45);
+}
+:root[data-theme="light"] .brand-tile-chip,
+:root[data-theme="light"] .partner-tile-chip {
+  background-color: transparent;
+  box-shadow: none;
 }
 
 /* Hero portrait — swap sources with [data-theme] (no JS; matches theme-init first paint). */

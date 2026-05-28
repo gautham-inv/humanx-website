@@ -185,6 +185,8 @@ export async function loadInsights(locale: Locale): Promise<InsightItem[]> {
 export type PartnerItem = {
   id: string;
   name: string;
+  /** Empty string when no website set — ticker treats as non-link. */
+  website: string;
   logoUrl: string;
   logoWidth: number;
   logoHeight: number;
@@ -221,6 +223,7 @@ export async function loadPartners(): Promise<PartnerItem[]> {
       .map((row) => ({
         id: row.id,
         name: row.name,
+        website: row.website ?? "",
         logoUrl: row.logoUrl ?? "",
         // Native dimensions are useful for setting <img width/height> so the
         // ticker doesn't reflow as logos load. Default to 0 when missing —
