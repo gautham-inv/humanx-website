@@ -56,21 +56,34 @@ export type ServiceDoc = {
 export const eventsQuery = /* groq */ `
   *[_type == "event"] | order(startsAt asc) {
     "id": _id,
+    "slug": slug.current,
     title,
     venue,
     dateDisplay,
     startsAt,
-    youtubeId
+    summary,
+    body,
+    youtubeId,
+    registrationUrl,
+    "imageUrl": image.asset->url,
+    "imageAlt": image.alt
   }
 `;
 
 export type EventDoc = {
   id: string;
+  /** URL path segment from the slug field. Empty if author hasn't set one. */
+  slug?: string;
   title: { en?: string; es?: string };
   venue?: { en?: string; es?: string };
   dateDisplay?: { en?: string; es?: string };
   startsAt: string;
+  summary?: { en?: string; es?: string };
+  body?: { en?: string; es?: string };
   youtubeId?: string;
+  registrationUrl?: string;
+  imageUrl?: string;
+  imageAlt?: string;
 };
 
 /** Insights ordered newest-first by the `publishedAt` timestamp. */
@@ -80,7 +93,9 @@ export const insightsQuery = /* groq */ `
     title,
     kind,
     date,
-    href
+    href,
+    "imageUrl": image.asset->url,
+    "imageAlt": image.alt
   }
 `;
 
@@ -90,19 +105,53 @@ export type InsightDoc = {
   kind?: { en?: string; es?: string };
   date?: { en?: string; es?: string };
   href?: string;
+  /** Resolved Sanity CDN URL of the uploaded card image, or undefined. */
+  imageUrl?: string;
+  imageAlt?: string;
+};
+
+/**
+ * Standalone homepage "On stage" videos. Ordered by the manual `order` field
+ * first, then `publishedAt` newest-first as a tiebreaker. Decoupled from
+ * past-events-with-youtubeId so a video can exist without a corresponding
+ * event doc (interviews, panels) and a past event can omit a recording.
+ */
+export const videosQuery = /* groq */ `
+  *[_type == "video"] | order(coalesce(order, 9999) asc, publishedAt desc, _createdAt desc) {
+    "id": _id,
+    title,
+    caption,
+    youtubeId,
+    publishedAt
+  }
+`;
+
+export type VideoDoc = {
+  id: string;
+  title: { en?: string; es?: string };
+  caption?: { en?: string; es?: string };
+  youtubeId: string;
+  publishedAt?: string;
 };
 
 /** Partners ordered by manual `order`. Names aren't localized. */
 export const partnersQuery = /* groq */ `
   *[_type == "partner"] | order(order asc, _createdAt asc) {
     "id": _id,
-    name
+    name,
+    "logoUrl": logo.asset->url,
+    "logoWidth": logo.asset->metadata.dimensions.width,
+    "logoHeight": logo.asset->metadata.dimensions.height
   }
 `;
 
 export type PartnerDoc = {
   id: string;
   name: string;
+  /** Resolved CDN URL of the uploaded logo asset, or undefined. */
+  logoUrl?: string;
+  logoWidth?: number;
+  logoHeight?: number;
 };
 
 /* ─────────────────────────────────────────────────────────────────────────────

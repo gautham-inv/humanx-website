@@ -16,6 +16,7 @@ import {
   eventsQuery,
   insightsQuery,
   partnersQuery,
+  videosQuery,
   homepageQuery,
   aboutPageQuery,
   servicesPageQuery,
@@ -29,6 +30,7 @@ import {
   type EventDoc,
   type InsightDoc,
   type PartnerDoc,
+  type VideoDoc,
   type HomepageDoc,
   type AboutPageDoc,
   type ServicesPageDoc,
@@ -48,14 +50,29 @@ export type ServiceItem = {
   body: string;
 };
 
-/** Flat row shape used by Events, OnStage, and EventsList. */
+/** Flat row shape used by Events, EventsList, and the /events/[slug] page. */
 export type EventItem = {
   id: string;
+  /** URL path segment. Empty when author hasn't set a slug — listings then
+   * fall back to a non-linked card. */
+  slug: string;
   title: string;
   venue: string;
   date: string;
   startsAt: string;
+  /** Optional teaser; empty when not set. */
+  summary: string;
+  /** Full body for the detail page; empty when not set. */
+  body: string;
   youtubeId: string;
+  /**
+   * External URL the card links to. Empty string means "non-clickable card"
+   * — Events.tsx / EventsList.tsx render a plain article when this is empty.
+   */
+  registrationUrl: string;
+  /** Sanity CDN URL of the hero image; empty when none uploaded. */
+  imageUrl: string;
+  imageAlt: string;
 };
 
 /** Flat row shape used by the insights grid. */
@@ -65,8 +82,15 @@ export type InsightItem = {
   kind: string;
   date: string;
   href: string;
-  /** Unused for now — Sanity insight schema has no image field yet. */
+  /**
+   * Resolved CDN URL of the Sanity-hosted card image, or empty string when
+   * the author hasn't uploaded one yet. `app/[locale]/insights/page.tsx`
+   * keys off truthiness here to switch between real <Image> and the
+   * decorative brand-token fallback tile.
+   */
   image: string;
+  /** Optional alt text from Sanity; falls back to the insight title. */
+  imageAlt: string;
 };
 
 /** Picks `field[locale]`, then `field.en`, then `fallback`. */
@@ -109,13 +133,21 @@ export async function loadEvents(locale: Locale): Promise<EventItem[]> {
     return rows
       .map((row) => ({
         id: row.id,
+        slug: row.slug ?? "",
         title: pickLoc(row.title, locale),
         venue: pickLoc(row.venue, locale),
         date: pickLoc(row.dateDisplay, locale),
         startsAt: row.startsAt,
-        // Components check `youtubeId` for truthiness; empty string means
-        // "no recording yet" (mirrors the dict's existing convention).
+        summary: pickLoc(row.summary, locale),
+        body: pickLoc(row.body, locale),
+        // `youtubeId` only embeds a player on the detail page now — the
+        // homepage "On stage" grid reads from the separate `video` doc type.
         youtubeId: row.youtubeId ?? "",
+        // Empty string = no external CTA. Listing cards prefer the internal
+        // /events/[slug] route; the detail page's Register button uses this.
+        registrationUrl: row.registrationUrl ?? "",
+        imageUrl: row.imageUrl ?? "",
+        imageAlt: row.imageAlt ?? "",
       }))
       .filter((row) => row.title && row.startsAt);
   } catch (err) {
@@ -133,7 +165,11 @@ export async function loadInsights(locale: Locale): Promise<InsightItem[]> {
         kind: pickLoc(row.kind, locale),
         date: pickLoc(row.date, locale),
         href: row.href ?? "",
-        image: "",
+        // Sanity CDN URL (resolved in the GROQ projection via
+        // `image.asset->url`). Empty string falls back to the brand-token
+        // decorative tile in `app/[locale]/insights/page.tsx`.
+        image: row.imageUrl ?? "",
+        imageAlt: row.imageAlt ?? "",
       }))
       .filter((row) => row.title);
   } catch (err) {
@@ -141,10 +177,58 @@ export async function loadInsights(locale: Locale): Promise<InsightItem[]> {
   }
 }
 
-export async function loadPartners(): Promise<string[]> {
+/**
+ * Flat row shape used by `<PartnersTicker>`. The component renders the logo
+ * `<img>` when `logoUrl` is set, falling back to the brand name as text so
+ * partners without uploaded logos still appear in the ticker.
+ */
+export type PartnerItem = {
+  id: string;
+  name: string;
+  logoUrl: string;
+  logoWidth: number;
+  logoHeight: number;
+};
+
+/** Flat row shape used by the homepage `<OnStage>` video grid. */
+export type VideoItem = {
+  id: string;
+  title: string;
+  caption: string;
+  youtubeId: string;
+};
+
+export async function loadVideos(locale: Locale): Promise<VideoItem[]> {
+  try {
+    const rows = await sanityClient.fetch<VideoDoc[]>(videosQuery);
+    return rows
+      .map((row) => ({
+        id: row.id,
+        title: pickLoc(row.title, locale),
+        caption: pickLoc(row.caption, locale),
+        youtubeId: row.youtubeId,
+      }))
+      .filter((row) => row.title && row.youtubeId);
+  } catch (err) {
+    return fail("videos", err);
+  }
+}
+
+export async function loadPartners(): Promise<PartnerItem[]> {
   try {
     const rows = await sanityClient.fetch<PartnerDoc[]>(partnersQuery);
-    return rows.map((row) => row.name).filter(Boolean);
+    return rows
+      .map((row) => ({
+        id: row.id,
+        name: row.name,
+        logoUrl: row.logoUrl ?? "",
+        // Native dimensions are useful for setting <img width/height> so the
+        // ticker doesn't reflow as logos load. Default to 0 when missing —
+        // the component treats 0 as "let CSS size it".
+        logoWidth: row.logoWidth ?? 0,
+        logoHeight: row.logoHeight ?? 0,
+      }))
+      .filter((row) => row.name);
   } catch (err) {
     return fail("partners", err);
   }

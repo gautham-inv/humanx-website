@@ -99,57 +99,79 @@ export default async function InsightsPage({
             {items.map((item, idx) => {
               const role = TILE_ROLES[idx % TILE_ROLES.length];
               const hasImage = Boolean(item.image);
+              // Sanity-sourced items may carry author-provided alt text;
+              // dict fallback items don't have the field, so we default to
+              // the title for accessibility either way.
+              const imageAlt =
+                ("imageAlt" in item && (item as { imageAlt?: string }).imageAlt) || item.title;
+              // Real external link (LinkedIn post, etc.). Dict items use
+              // anchor-only hrefs like "#i1" — treat those as non-clickable.
+              const externalHref = item.href && /^https?:\/\//.test(item.href) ? item.href : "";
+              const cardInner = (
+                <article className="group">
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-line">
+                    {hasImage ? (
+                      <Image
+                        src={item.image}
+                        alt={imageAlt}
+                        fill
+                        sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
+                        className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                      />
+                    ) : (
+                      <div
+                        aria-hidden
+                        className="absolute inset-0"
+                        style={{
+                          background: `radial-gradient(120% 90% at ${30 + (idx % 3) * 20}% ${30 + (idx % 2) * 30}%, color-mix(in oklch, ${role.hue} 35%, transparent), transparent 65%), linear-gradient(${role.angle}deg, var(--color-bg-elev), var(--color-bg))`,
+                        }}
+                      />
+                    )}
+                    {!hasImage && (
+                      <div
+                        aria-hidden
+                        className="absolute inset-0 opacity-[0.08]"
+                        style={{
+                          backgroundImage:
+                            "linear-gradient(var(--color-ink) 1px, transparent 1px), linear-gradient(90deg, var(--color-ink) 1px, transparent 1px)",
+                          backgroundSize: "28px 28px",
+                        }}
+                      />
+                    )}
+                    <span
+                      aria-hidden
+                      className="absolute left-5 top-5 font-display text-2xl tabular-nums text-ink/80 mix-blend-difference"
+                      style={{ fontVariationSettings: '"SHRP" 80' }}
+                    >
+                      {String(idx + 1).padStart(2, "0")}
+                    </span>
+                  </div>
+
+                  <div className="mt-4 px-1">
+                    <div className="text-[11px] uppercase tracking-[0.2em] text-accent">
+                      {item.kind} · {item.date}
+                    </div>
+                    <h3 className="mt-2 font-display text-lg leading-snug text-ink md:text-xl transition group-hover:text-accent">
+                      {item.title}
+                    </h3>
+                  </div>
+                </article>
+              );
               return (
                 <li key={item.id}>
                   <Reveal direction="up" delay={Math.min(idx * 0.04, 0.2)}>
-                    <article className="group">
-                      <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-line">
-                        {hasImage ? (
-                          <Image
-                            src={item.image}
-                            alt={item.title}
-                            fill
-                            sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
-                            className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                          />
-                        ) : (
-                          <div
-                            aria-hidden
-                            className="absolute inset-0"
-                            style={{
-                              background: `radial-gradient(120% 90% at ${30 + (idx % 3) * 20}% ${30 + (idx % 2) * 30}%, color-mix(in oklch, ${role.hue} 35%, transparent), transparent 65%), linear-gradient(${role.angle}deg, var(--color-bg-elev), var(--color-bg))`,
-                            }}
-                          />
-                        )}
-                        {!hasImage && (
-                          <div
-                            aria-hidden
-                            className="absolute inset-0 opacity-[0.08]"
-                            style={{
-                              backgroundImage:
-                                "linear-gradient(var(--color-ink) 1px, transparent 1px), linear-gradient(90deg, var(--color-ink) 1px, transparent 1px)",
-                              backgroundSize: "28px 28px",
-                            }}
-                          />
-                        )}
-                        <span
-                          aria-hidden
-                          className="absolute left-5 top-5 font-display text-2xl tabular-nums text-ink/80 mix-blend-difference"
-                          style={{ fontVariationSettings: '"SHRP" 80' }}
-                        >
-                          {String(idx + 1).padStart(2, "0")}
-                        </span>
-                      </div>
-
-                      <div className="mt-4 px-1">
-                        <div className="text-[11px] uppercase tracking-[0.2em] text-accent">
-                          {item.kind} · {item.date}
-                        </div>
-                        <h3 className="mt-2 font-display text-lg leading-snug text-ink md:text-xl">
-                          {item.title}
-                        </h3>
-                      </div>
-                    </article>
+                    {externalHref ? (
+                      <a
+                        href={externalHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-bright"
+                      >
+                        {cardInner}
+                      </a>
+                    ) : (
+                      cardInner
+                    )}
                   </Reveal>
                 </li>
               );

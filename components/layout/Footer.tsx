@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
 import type { Locale } from "@/lib/i18n/config";
 import type { FooterContent } from "@/lib/sanity/loaders";
@@ -19,8 +20,6 @@ export function Footer({ dict, locale, content }: FooterProps) {
   const kindToday = content?.kindToday ?? t.kindToday;
   const exploreHeading = content?.exploreHeading ?? t.exploreHeading;
   const connectHeading = content?.connectHeading ?? t.connectHeading;
-  const contactHeading = content?.contactHeading ?? t.contactHeading;
-  const contactEmail = content?.contactEmail ?? t.contactEmail;
   const privacyTitle = content?.privacyTitle ?? t.privacyTitle;
   const privacyLinkLabel = content?.privacyLinkLabel ?? t.privacyLinkLabel;
   const rights = content?.rights ?? t.rights;
@@ -34,16 +33,22 @@ export function Footer({ dict, locale, content }: FooterProps) {
   return (
     <footer className="relative border-t border-line bg-bg-elev/30 px-6 pt-16 pb-8 text-sm text-ink-dim">
       <div className="mx-auto max-w-6xl">
-        {/* Top: 4-col grid (brand | explore | connect | contact). Stacks on mobile. */}
+        {/* Top: 4-col grid (brand | explore | connect | privacy). Stacks on mobile. */}
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
           {/* Brand + tagline + kindness tag */}
           <div className="space-y-4">
             <Link
               href={`/${locale}`}
-              className="font-display text-xl font-semibold tracking-tight text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent rounded-sm"
-              style={{ fontVariationSettings: '"SHRP" 100' }}
+              aria-label="HumanX home"
+              className="inline-block rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
             >
-              Human<span className="brand-x">X</span>
+              <Image
+                src="/logo.webp"
+                alt="HumanX"
+                width={140}
+                height={40}
+                className="h-8 w-auto"
+              />
             </Link>
             <p className="max-w-xs leading-relaxed">{brandTagline}</p>
             <p className="pt-2 font-display text-sm uppercase tracking-[0.2em] text-accent">
@@ -99,30 +104,17 @@ export function Footer({ dict, locale, content }: FooterProps) {
             </ul>
           </div>
 
-          {/* Contact + privacy */}
-          <div className="space-y-5">
-            <div>
-              <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-ink">
-                {contactHeading}
-              </h3>
-              <a
-                href={`mailto:${contactEmail}`}
-                className="block break-all text-ink transition-colors hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent rounded-sm"
-              >
-                {contactEmail}
-              </a>
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-ink-dim">
-                {privacyTitle}
-              </p>
-              <Link
-                href={`/${locale}/privacy`}
-                className="mt-2 inline-block text-sm text-ink-dim underline-offset-4 hover:text-ink hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent rounded-sm"
-              >
-                {privacyLinkLabel}
-              </Link>
-            </div>
+          {/* Privacy */}
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-ink-dim">
+              {privacyTitle}
+            </p>
+            <Link
+              href={`/${locale}/privacy`}
+              className="mt-2 inline-block text-sm text-ink-dim underline-offset-4 hover:text-ink hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent rounded-sm"
+            >
+              {privacyLinkLabel}
+            </Link>
           </div>
         </div>
 

@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Reveal } from "@/components/motion/Reveal";
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
-import type { HomepageContent } from "@/lib/sanity/loaders";
-import type { EventRow } from "./Events";
+import type { HomepageContent, VideoItem } from "@/lib/sanity/loaders";
 
 function LiteYouTube({ id, title }: { id: string; title: string }) {
   const [active, setActive] = useState(false);
@@ -48,10 +47,11 @@ function LiteYouTube({ id, title }: { id: string; title: string }) {
 type OnStageProps = {
   dict: Dictionary;
   /**
-   * Same Sanity-sourced events list the homepage Events block uses — `OnStage`
-   * filters it for past + has-video. Empty falls back to dict.
+   * Sanity-sourced video docs (decoupled from `event` so a video can exist
+   * without an event and vice versa). Empty falls back to the dict-derived
+   * legacy shape that piggybacked on past events.
    */
-  items?: readonly EventRow[];
+  items?: readonly VideoItem[];
   /** Section header copy from the homepage singleton. Per-field dict fallback. */
   content?: HomepageContent["onStage"];
 };
@@ -62,26 +62,24 @@ export function OnStage({ dict, items: itemsProp, content }: OnStageProps) {
   // `note` is small static UI flair, not editable in the studio — keep dict.
   const note = dict.onStage.note;
   const ref = useRef<HTMLElement | null>(null);
-  const [now, setNow] = useState<number | null>(null);
 
-  useEffect(() => {
-    setNow(Date.now());
-  }, []);
+  // Map dict events (legacy shape, has youtubeId + title + venue + date) into
+  // the VideoItem shape only when Sanity returned nothing. Once an author
+  // creates real `video` docs in the studio, this branch is dead code — but
+  // it keeps the homepage from going blank on a fresh-dataset deploy.
+  const videos: readonly VideoItem[] =
+    itemsProp && itemsProp.length > 0
+      ? itemsProp
+      : dict.events.items
+          .filter((ev) => Boolean(ev.youtubeId))
+          .map((ev) => ({
+            id: ev.id,
+            title: ev.title,
+            caption: `${ev.venue} · ${ev.date}`,
+            youtubeId: ev.youtubeId,
+          }));
 
-  const items: readonly EventRow[] =
-    itemsProp && itemsProp.length > 0 ? itemsProp : dict.events.items;
-
-  const past =
-    now === null
-      ? items
-      : items
-          .filter((ev) => ev.youtubeId && new Date(ev.startsAt).getTime() < now)
-          .sort(
-            (a, b) =>
-              new Date(b.startsAt).getTime() - new Date(a.startsAt).getTime()
-          );
-
-  if (past.length === 0) return null;
+  if (videos.length === 0) return null;
 
   return (
     <section
@@ -106,14 +104,14 @@ export function OnStage({ dict, items: itemsProp, content }: OnStageProps) {
         </Reveal>
 
         <Reveal direction="up" stagger={0.15} className="grid gap-10 md:grid-cols-2">
-          {past.map((ev) => (
-            <article key={ev.id} data-reveal-child className="space-y-4">
-              <LiteYouTube id={ev.youtubeId} title={ev.title} />
+          {videos.map((v) => (
+            <article key={v.id} data-reveal-child className="space-y-4">
+              <LiteYouTube id={v.youtubeId} title={v.title} />
               <div>
-                <h3 className="font-display text-xl">{ev.title}</h3>
-                <p className="mt-1 text-sm text-ink-dim">
-                  {ev.venue} · {ev.date}
-                </p>
+                <h3 className="font-display text-xl">{v.title}</h3>
+                {v.caption ? (
+                  <p className="mt-1 text-sm text-ink-dim">{v.caption}</p>
+                ) : null}
               </div>
             </article>
           ))}

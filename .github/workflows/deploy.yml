@@ -34,6 +34,13 @@ jobs:
         run: npm ci
 
       - name: Build
+        # NEXT_PUBLIC_* env vars must be present at build time — Next.js
+        # inlines them into the static bundle during `next build`. Both
+        # HubSpot IDs are public (the same IDs HubSpot's own embed snippet
+        # exposes), so they live as Variables, not Secrets.
+        env:
+          NEXT_PUBLIC_HUBSPOT_PORTAL_ID: ${{ vars.NEXT_PUBLIC_HUBSPOT_PORTAL_ID }}
+          NEXT_PUBLIC_HUBSPOT_FORM_GUID: ${{ vars.NEXT_PUBLIC_HUBSPOT_FORM_GUID }}
         run: npm run build
 
       - name: Deploy to Cloudflare Pages

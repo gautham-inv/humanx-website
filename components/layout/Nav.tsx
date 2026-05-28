@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
@@ -55,10 +56,17 @@ export function Nav({ locale, dict }: { locale: Locale; dict: Dictionary }) {
     >
       <Link
         href={`/${locale}`}
-        className="font-display text-xl font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent rounded-sm"
-        style={{ fontVariationSettings: '"SHRP" 100' }}
+        aria-label="HumanX home"
+        className="rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
       >
-        Human<span className="brand-x">X</span>
+        <Image
+          src="/logo.webp"
+          alt="HumanX"
+          width={140}
+          height={40}
+          priority
+          className="h-8 w-auto"
+        />
       </Link>
 
       <div className="hidden items-center gap-8 text-sm md:flex">

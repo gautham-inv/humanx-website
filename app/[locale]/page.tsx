@@ -11,6 +11,7 @@ import {
   loadHomepage,
   loadEventsPage,
   loadContactCta,
+  loadVideos,
 } from "@/lib/sanity/loaders";
 import { Hero } from "@/components/sections/Hero";
 import { WhoWeAre } from "@/components/sections/WhoWeAre";
@@ -65,6 +66,7 @@ export default async function Home({
     testimonials,
     events,
     partners,
+    videos,
     homepage,
     eventsPage,
     contactCta,
@@ -73,6 +75,7 @@ export default async function Home({
     loadTestimonials(locale),
     loadEvents(locale),
     loadPartners(),
+    loadVideos(locale),
     loadHomepage(locale),
     loadEventsPage(locale),
     loadContactCta(locale),
@@ -83,7 +86,7 @@ export default async function Home({
       <WhoWeAre dict={dict} content={homepage?.whoWeAre} />
       <Assessment dict={dict} content={homepage?.assessment} />
       <Events dict={dict} locale={locale} items={events} content={eventsPage} />
-      <OnStage dict={dict} items={events} content={homepage?.onStage} />
+      <OnStage dict={dict} items={videos} content={homepage?.onStage} />
       <PartnersTicker
         dict={dict}
         items={partners}
