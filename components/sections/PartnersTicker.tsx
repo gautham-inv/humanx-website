@@ -59,45 +59,25 @@ export function PartnersTicker({
   return (
     <section
       aria-label={heading}
-      className="relative overflow-hidden border-y border-line bg-bg py-10 md:py-14 lg:py-18"
+      // `.partners-band` (globals.css) paints the strip in
+      // `--color-accent` for dark theme so the yellow surface lets dark
+      // partner logos pop. In light theme that same class flattens to
+      // transparent, so the section inherits the cream page bg — no
+      // saturated band on cream, which would clash with the rest of the
+      // light-theme rhythm.
+      className="partners-band relative overflow-hidden border-y border-line py-10 md:py-14 lg:py-18"
     >
-      {/* Spectrum brand wash mirrors the section above the footer
-          (`GlobalCTA variant="home"`) — orange → violet → magenta diagonal
-          at 0.18 opacity, feathered with a bottom-left radial vignette so
-          the gradient hands off into the page bg without a hard edge.
-          Identical treatment so the partners block reads as part of the
-          same conversion-funnel rhythm as the contact CTA. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 opacity-[0.18]"
-        style={{
-          background:
-            "linear-gradient(135deg, var(--color-accent) 0%, var(--color-violet) 55%, var(--color-magenta) 100%)",
-        }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{
-          background:
-            "radial-gradient(ellipse at 0% 100%, transparent 30%, var(--color-bg) 75%)",
-        }}
-      />
-
       <div
         className="group relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]"
       >
-        <div className="ticker-track flex w-max items-center gap-10 md:gap-14 px-8 motion-reduce:animation-none">
+        <div className="ticker-track flex w-max items-center gap-12 md:gap-16 px-8 motion-reduce:animation-none">
           {loop.map((row, i) => {
-            // Each logo sits inside an amber tile (`.partner-tile-chip`).
-            // - Dark theme: amber bg (`var(--color-accent-bright)`) gives
-            //   dark partner logos a luminous card to sit on against the
-            //   spectrum gradient backdrop.
-            // - Light theme: chip flattens to transparent via the
-            //   `:root[data-theme="light"]` override in globals.css —
-            //   logos sit directly on the cream page bg, no chip needed.
-            const tileClass =
-              "partner-tile-chip shrink-0 inline-flex items-center justify-center rounded-2xl px-5 py-3 md:px-6 md:py-4 transition";
+            // No tile chip anymore — logos sit directly on the yellow band.
+            // Dark/colourful logos read against the bright surface; the
+            // hover lift gives interactive entries a tactile cue without
+            // adding chrome.
+            const itemClass =
+              "shrink-0 inline-flex items-center justify-center transition";
             const inner = row.logoUrl ? (
               /* Plain <img> — `next/image` fights the duplicated ticker
                * track's layout calc. The image is small + lazy-loaded so
@@ -113,8 +93,8 @@ export function PartnersTicker({
                 className="h-12 md:h-16 w-auto"
               />
             ) : (
-              // Text fallback uses the dark-ink colour. Reads on amber in
-              // dark theme; reads on cream page bg in light theme.
+              // Text fallback uses dark ink so it reads against the warm
+              // yellow strip regardless of theme.
               <span className="font-display text-2xl md:text-3xl tracking-tight text-[#1a1620]">
                 {row.name}
               </span>
@@ -127,14 +107,14 @@ export function PartnersTicker({
                 rel="noopener noreferrer"
                 title={row.name}
                 aria-label={row.name}
-                className={`${tileClass} hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-bright`}
+                className={`${itemClass} hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1a1620] rounded-sm`}
               >
                 {inner}
               </a>
             ) : (
               <div
                 key={`${row.key}-${i}`}
-                className={tileClass}
+                className={itemClass}
                 title={row.name}
                 aria-label={row.name}
               >

@@ -82,39 +82,42 @@
 }
 
 /* ---------------------------------------------------------------
- * Chip backgrounds — only render in dark theme.
- *
- *  .brand-tile-chip  — cream tile behind the navbar wordmark. Gives the
- *                      magenta + yellow + purple logo a warm card to sit on
- *                      against the dark indigo nav strip.
- *  .partner-tile-chip — amber tile behind each partner logo in the ticker.
- *                       Picks up the brand's bright-orange token so dark
- *                       partner logos read against the spectrum gradient.
- *
- * Both flatten to transparent in light theme — the cream page background is
- * already light enough for the multicolour wordmark and most partner logos
- * to read without any tile, so chips would just add visual noise.
+ * `.brand-tile-chip` — cream tile behind the navbar wordmark. Gives the
+ * magenta + yellow + purple logo a warm card to sit on against the dark
+ * indigo nav strip. Flattens to transparent in light theme — the cream
+ * page background is already light enough for the multicolour wordmark to
+ * read without any tile.
  * ------------------------------------------------------------- */
 .brand-tile-chip {
   background-color: #faf6ed;
-  box-shadow: 0 2px 12px -6px rgba(0,0,0,0.45);
-  /* `box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05)` mimics the Tailwind
-   * `ring-1 ring-black/5` so the tile edge stays defined against both
-   * dark indigo (where the soft shadow does the work) and any future
-   * variant where the bg shifts. */
+  /* The first shadow lifts the tile off the dark nav strip; the inset
+   * shadow mimics Tailwind's `ring-1 ring-black/5` so the tile edge stays
+   * defined against any future bg variant. */
   box-shadow:
     0 2px 12px -6px rgba(0,0,0,0.45),
     inset 0 0 0 1px rgba(0,0,0,0.05);
 }
-.partner-tile-chip {
-  background-color: var(--color-accent-bright);
-  box-shadow: 0 4px 24px -12px rgba(0,0,0,0.45);
-}
-:root[data-theme="light"] .brand-tile-chip,
-:root[data-theme="light"] .partner-tile-chip {
+:root[data-theme="light"] .brand-tile-chip {
   background-color: transparent;
   box-shadow: none;
 }
+
+/* ---------------------------------------------------------------
+ * `.partners-band` — warm yellow strip behind the partners ticker. In
+ * dark theme we paint the whole section in `--color-accent` (the same
+ * brand token the testimonial quote-mark uses) so dark partner logos
+ * pop without needing per-logo chips. In light theme the page bg is
+ * already cream and a saturated accent strip would feel out of place,
+ * so the band flattens to transparent and the section inherits the
+ * normal page bg.
+ * ------------------------------------------------------------- */
+.partners-band {
+  background-color: var(--color-accent);
+}
+:root[data-theme="light"] .partners-band {
+  background-color: transparent;
+}
+
 
 /* Hero portrait — swap sources with [data-theme] (no JS; matches theme-init first paint). */
 .hero-portrait-light {
