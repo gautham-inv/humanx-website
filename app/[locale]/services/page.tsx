@@ -9,9 +9,10 @@ import {
 } from "@/lib/sanity/loaders";
 import { Reveal } from "@/components/motion/Reveal";
 import { GlobalCTA } from "@/components/sections/GlobalCTA";
-import { ServicesHeroSolarSystem } from "@/components/sections/services/ServicesHeroSolarSystem";
+import { SolarSystemSlot } from "@/components/sections/services/SolarSystemSlot";
 import { SERVICE_ICONS } from "@/components/sections/services/ServiceIcons";
 import { HighlightedTitle } from "@/components/motion/HighlightedTitle";
+import { pageMetadata } from "@/lib/seo/metadata";
 
 const SLUG = "services";
 
@@ -25,17 +26,13 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return {
+  return pageMetadata({
+    locale,
+    path: `/${SLUG}`,
     title: "Services · HumanX",
-    alternates: {
-      canonical: `/${locale}/${SLUG}`,
-      languages: {
-        en: `/en/${SLUG}`,
-        es: `/es/${SLUG}`,
-        "x-default": `/en/${SLUG}`,
-      },
-    },
-  };
+    description:
+      "Three disciplines, one through-line: human experience as the operating principle. CX & EX strategy, insight-driven narratives, and operational playbooks for leadership teams.",
+  });
 }
 
 export default async function ServicesPage({
@@ -87,7 +84,7 @@ export default async function ServicesPage({
           </div>
           <div className="order-1 hidden lg:order-2 lg:block">
             <Reveal direction="up" delay={0.1}>
-              <ServicesHeroSolarSystem className="mx-auto aspect-square w-[28rem] max-w-full" />
+              <SolarSystemSlot className="mx-auto aspect-square w-[28rem] max-w-full" />
             </Reveal>
           </div>
         </div>

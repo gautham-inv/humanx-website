@@ -10,6 +10,7 @@ import { GlobalSpeaking } from "@/components/sections/about/GlobalSpeaking";
 import { VideoGrid } from "@/components/sections/on-stage/VideoGrid";
 import { WorldMap, type SpeakingPin } from "@/components/sections/on-stage/WorldMap";
 import { resolveVideos } from "@/components/sections/on-stage/resolve-videos";
+import { pageMetadata } from "@/lib/seo/metadata";
 
 const SLUG = "on-stage";
 
@@ -34,17 +35,13 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return {
+  return pageMetadata({
+    locale,
+    path: `/${SLUG}`,
     title: "On stage · HumanX",
-    alternates: {
-      canonical: `/${locale}/${SLUG}`,
-      languages: {
-        en: `/en/${SLUG}`,
-        es: `/es/${SLUG}`,
-        "x-default": `/en/${SLUG}`,
-      },
-    },
-  };
+    description:
+      "Book Ramon Portilla to speak — keynotes and talks that turn human-experience strategy into ideas audiences apply the next day, on stages across three continents.",
+  });
 }
 
 export default async function OnStagePage({

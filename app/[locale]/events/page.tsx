@@ -6,6 +6,7 @@ import { loadEvents, loadEventsPage } from "@/lib/sanity/loaders";
 import { Reveal } from "@/components/motion/Reveal";
 import { EventsList } from "./EventsList";
 import { EventsCTA } from "@/components/sections/EventsCTA";
+import { pageMetadata } from "@/lib/seo/metadata";
 
 const SLUG = "events";
 
@@ -19,17 +20,13 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return {
+  return pageMetadata({
+    locale,
+    path: `/${SLUG}`,
     title: "Events · HumanX",
-    alternates: {
-      canonical: `/${locale}/${SLUG}`,
-      languages: {
-        en: `/en/${SLUG}`,
-        es: `/es/${SLUG}`,
-        "x-default": `/en/${SLUG}`,
-      },
-    },
-  };
+    description:
+      "Where HumanX is on stage next — keynotes, forums and roundtables on human experience, CX/EX and AI for leadership audiences worldwide.",
+  });
 }
 
 export default async function EventsPage({

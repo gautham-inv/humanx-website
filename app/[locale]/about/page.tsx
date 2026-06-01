@@ -13,7 +13,7 @@ import { Reveal } from "@/components/motion/Reveal";
 import { CountUp } from "@/components/motion/CountUp";
 import { ContactCTAButton } from "@/components/layout/ContactCTAButton";
 import { GlobalCTA } from "@/components/sections/GlobalCTA";
-import { AboutHeroNetwork } from "@/components/sections/about/AboutHeroNetwork";
+import { NetworkSlot } from "@/components/sections/about/NetworkSlot";
 import {
   MissionTargetIcon,
   ValuesCompassIcon,
@@ -23,6 +23,7 @@ import { BackdropMesh } from "@/components/motion/Backdrops";
 import { HighlightedTitle } from "@/components/motion/HighlightedTitle";
 import { FeaturedVideo } from "@/components/sections/FeaturedVideo";
 import { Recommendations } from "@/components/sections/about/Recommendations";
+import { pageMetadata } from "@/lib/seo/metadata";
 
 const SLUG = "about";
 
@@ -36,17 +37,13 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return {
+  return pageMetadata({
+    locale,
+    path: `/${SLUG}`,
     title: "About · HumanX",
-    alternates: {
-      canonical: `/${locale}/${SLUG}`,
-      languages: {
-        en: `/en/${SLUG}`,
-        es: `/es/${SLUG}`,
-        "x-default": `/en/${SLUG}`,
-      },
-    },
-  };
+    description:
+      "Ramon Portilla — founder, speaker and advisor. 30+ years of CX/EX and analytics across Meta, Walmart, Nielsen and Sam's Club, turning strategy into systems teams can run.",
+  });
 }
 
 export default async function AboutPage({
@@ -120,7 +117,7 @@ export default async function AboutPage({
             </div>
             <div className="order-1 hidden lg:order-2 lg:block">
               <Reveal direction="up" delay={0.1}>
-                <AboutHeroNetwork className="mx-auto aspect-square w-[28rem] max-w-full" />
+                <NetworkSlot className="mx-auto aspect-square w-[28rem] max-w-full" />
               </Reveal>
             </div>
           </div>

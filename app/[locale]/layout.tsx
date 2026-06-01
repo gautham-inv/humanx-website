@@ -17,6 +17,13 @@ import {
   loadEvents,
 } from "@/lib/sanity/loaders";
 import { SummitBar } from "@/components/layout/SummitBar";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { pageMetadata, SITE_URL } from "@/lib/seo/metadata";
+import {
+  organizationSchema,
+  personSchema,
+  websiteSchema,
+} from "@/lib/seo/schema";
 import "../globals.css";
 
 const geologica = Geologica({
@@ -56,8 +63,6 @@ const dmSerifDisplay = DM_Serif_Display({
   style: ["normal", "italic"],
 });
 
-const SITE_URL = "https://humanxinsights.com";
-
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
@@ -70,16 +75,13 @@ export async function generateMetadata({
   const { locale } = await params;
   return {
     metadataBase: new URL(SITE_URL),
-    title: "HumanX · Human experience as the operating principle",
-    description: "Ramon's work on human-centered AI.",
-    alternates: {
-      canonical: `/${locale}`,
-      languages: {
-        en: `/en`,
-        es: `/es`,
-        "x-default": `/en`,
-      },
-    },
+    ...pageMetadata({
+      locale,
+      path: "",
+      title: "HumanX · Human experience as the operating principle",
+      description:
+        "CX & EX consultancy for boards and executives — turning three decades across Meta, Walmart and Nielsen into human-experience strategy your team can run on Monday.",
+    }),
   };
 }
 
@@ -140,6 +142,13 @@ export default async function LocaleLayout({
           Skip to content
         </a>
         <ThemeSync />
+        <JsonLd
+          data={[
+            organizationSchema(),
+            personSchema(locale as Locale),
+            websiteSchema(locale as Locale),
+          ]}
+        />
         <ContactModalProvider dict={dict} content={contactCta}>
           <SmoothScroll>
             {/* SummitBar sits above the nav as a thin "what's happening
