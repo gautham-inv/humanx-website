@@ -3,6 +3,7 @@ export const en = {
     about: "About",
     services: "Services",
     events: "Events",
+    "on-stage": "On stage",
     insights: "Insights",
     publications: "Publications",
     menu: "Menu",
@@ -144,6 +145,54 @@ export const en = {
     title: "On stage",
     body: "Recent keynotes, in full.",
     note: "Recorded talks, full takes",
+    // Homepage teaser → links to /on-stage
+    credentials: "Founder · CX & EX Advisor · Keynote Speaker · Author",
+    teaserTitle: "Keynotes that <<move the room>>",
+    teaserBody:
+      "From boardrooms to main stages across three continents, Ramon turns human-experience strategy into talks audiences act on the next morning.",
+    cta: "Watch me on stage",
+  },
+  // Full /on-stage page. The speaking map + region list reuse `about.speaking`.
+  onStagePage: {
+    eyebrow: "On stage",
+    title: "Every stage, <<every talk>>",
+    body: "Hundreds of leaders in the room, across three continents. Watch the keynotes in full, and see where Ramon has taken the stage.",
+    videosTitle: "Recorded keynotes",
+    videosBody: "Full talks, unedited.",
+  },
+  // PLACEHOLDER COPY — replace `badge.name`/`badge.note` with Ramon's
+  // actual recognition wording. The stats are pulled from his real bio.
+  credentials: {
+    eyebrow: "Recognition",
+    title: "A globally recognized voice in retail & human experience",
+    body: "A recognized voice in customer and employee experience — on the world's biggest stages and trusted by global brands across retail and banking.",
+    badge: {
+      name: "Top Retailer 50",
+      note: "Recognized among the world's most influential retail minds.",
+    },
+  },
+  // PLACEHOLDER QUOTE — synthesized from Ramon's stated values (empathy,
+  // gratitude, trust, care) + the hero promise. Replace with his own words.
+  pullQuote: {
+    quote:
+      "Treat the human experience as your operating principle, and loyalty stops being a target — it becomes the natural result of empathy, gratitude, trust, and care.",
+    author: "Ramon Portilla",
+    role: "Founder, HumanX Insights",
+    imageAlt: "Ramon Portilla on stage",
+  },
+  // Email gate for the Publications PDFs. Clicking a paper opens a modal that
+  // collects the visitor's email (into a dedicated HubSpot form) before the
+  // download unlocks. One email unlocks every paper for the session.
+  pdfGate: {
+    heading: "Download this paper",
+    body: "Enter your email to unlock the download — and we'll send you new papers as Ramon ships them.",
+    emailPlaceholder: "you@company.com",
+    consent: "I agree to receive emails from Ramon Portilla. Unsubscribe anytime.",
+    submit: "Unlock the download",
+    sending: "Unlocking…",
+    error: "Something went wrong. Please try again.",
+    cancel: "Cancel",
+    close: "Close",
   },
   values: {
     title: "Our Values",
@@ -181,6 +230,65 @@ export const en = {
       values: "Values",
       experience: "Experience",
       founder: "Founder",
+    },
+
+    // Featured-insight video on the About page (mirrors the video block on
+    // peer speaker sites). Default points to Ramon's Pacífico interview on
+    // leadership values; swap `youtubeId` for any of his talks.
+    featuredVideo: {
+      eyebrow: "Featured insight",
+      title: "Ramon on the human experience",
+      body: "A short conversation on how human-centered strategy turns customer and employee experience into loyalty and growth.",
+      youtubeId: "dZ-HM16fV10",
+    },
+
+    // Speaking list seeded from Ramon's real recent engagements (the same
+    // ones in the events dataset). Add more in Studio → About → Global
+    // Speaking as the portfolio grows.
+    speaking: {
+      eyebrow: "On stages worldwide",
+      title: "Where Ramon takes the stage",
+      body: "Keynotes and forums across three continents — for retailers, banks, business schools, and trade institutions.",
+      regions: [
+        {
+          region: "North America",
+          entries: [
+            { name: "Grand Retail Show", location: "Chantilly, VA, USA" },
+            { name: "The Empowerment Forum — Serve 2 Perform", location: "Bentonville, AR, USA" },
+            { name: "Women in International Trade (OWIT)", location: "Webinar" },
+            { name: "ESOMAR · MRII · CRIC", location: "Webinar" },
+          ],
+        },
+        {
+          region: "Europe",
+          entries: [
+            { name: "ExpoRetail Iberoamérica", location: "Madrid, Spain" },
+            { name: "Caixa Bank Consumer & Payments", location: "Madrid, Spain" },
+            { name: "Asociación Española de Retail — Horizons", location: "Madrid, Spain" },
+          ],
+        },
+        {
+          region: "Latin America",
+          entries: [
+            { name: "Summit CX", location: "Lima, Peru" },
+            { name: "Pacífico Business School — Intl. Retail Forum", location: "Lima, Peru" },
+            { name: "Góndola Conference", location: "Cartagena, Colombia" },
+          ],
+        },
+      ],
+    },
+
+    // LinkedIn recommendations wall (below the Featured Video on /about).
+    // Items come from Sanity (`recommendation` docs) with the bundled
+    // RECOMMENDATIONS list as fallback; only this header copy is localized.
+    recommendations: {
+      eyebrow: "In their words",
+      title: "What colleagues say about Ramon",
+      body: "Endorsements from the leaders Ramon has built teams with and reported to — at Walmart, Sam's Club, ARS, and beyond.",
+      showAll: "Show all {count} recommendations",
+      showLess: "Show fewer",
+      readMore: "Read more",
+      readLess: "Read less",
     },
   },
   whoWeAre: {
@@ -354,7 +462,7 @@ export const en = {
   publications: {
     eyebrow: "Publications",
     title: "Field notes from the human layer",
-    body: "Working papers, essays, and decision memos, published as Ramon ships them. Direct downloads, no gate.",
+    body: "Working papers, essays, and decision memos, published as Ramon ships them. Leave your email once and every download unlocks.",
     listTitle: "Recent",
     items: [
       {

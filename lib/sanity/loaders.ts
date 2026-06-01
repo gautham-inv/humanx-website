@@ -10,6 +10,7 @@
  * just call `await load*(locale)` alongside the dict fetch.
  */
 import type { Locale } from "@/lib/i18n/config";
+import type { Recommendation } from "@/lib/data/recommendations";
 import { sanityClient } from "./client";
 import {
   servicesQuery,
@@ -17,6 +18,8 @@ import {
   insightsQuery,
   partnersQuery,
   videosQuery,
+  recommendationsQuery,
+  publicationsQuery,
   homepageQuery,
   aboutPageQuery,
   servicesPageQuery,
@@ -31,6 +34,8 @@ import {
   type InsightDoc,
   type PartnerDoc,
   type VideoDoc,
+  type RecommendationDoc,
+  type PublicationDoc,
   type HomepageDoc,
   type AboutPageDoc,
   type ServicesPageDoc,
@@ -187,9 +192,15 @@ export type PartnerItem = {
   name: string;
   /** Empty string when no website set — ticker treats as non-link. */
   website: string;
+  /** Dark-theme logo URL. Empty when none uploaded. */
   logoUrl: string;
   logoWidth: number;
   logoHeight: number;
+  /** Light-theme logo URL. Empty when none uploaded — component then
+   * uses the dark logo in both themes. */
+  logoLightUrl: string;
+  logoLightWidth: number;
+  logoLightHeight: number;
 };
 
 /** Flat row shape used by the homepage `<OnStage>` video grid. */
@@ -216,6 +227,65 @@ export async function loadVideos(locale: Locale): Promise<VideoItem[]> {
   }
 }
 
+/**
+ * LinkedIn recommendations for the About page. `body` is localized (en/es with
+ * en fallback); the other fields are plain strings. Returns [] on failure so
+ * the page falls back to the bundled `RECOMMENDATIONS` list.
+ */
+export async function loadRecommendations(
+  locale: Locale
+): Promise<Recommendation[]> {
+  try {
+    const rows = await sanityClient.fetch<RecommendationDoc[]>(
+      recommendationsQuery
+    );
+    return rows
+      .map((row) => ({
+        id: row.id,
+        name: row.name ?? "",
+        headline: row.headline ?? "",
+        date: row.date ?? "",
+        relationship: row.relationship ?? "",
+        body: row.body?.[locale] ?? row.body?.en ?? "",
+        imageUrl: row.imageUrl,
+        imageAlt: row.imageAlt,
+        linkedinUrl: row.linkedinUrl,
+      }))
+      .filter((row) => row.name && row.body);
+  } catch (err) {
+    return fail("recommendations", err);
+  }
+}
+
+/** Flat row shape for the gated publications list. Matches the dict items. */
+export type PublicationItem = {
+  id: string;
+  title: string;
+  kind: string;
+  date: string;
+  /** Resolved Sanity CDN URL of the PDF; empty when none uploaded. */
+  file: string;
+};
+
+export async function loadPublications(
+  locale: Locale
+): Promise<PublicationItem[]> {
+  try {
+    const rows = await sanityClient.fetch<PublicationDoc[]>(publicationsQuery);
+    return rows
+      .map((row) => ({
+        id: row.id,
+        title: pickLoc(row.title, locale),
+        kind: pickLoc(row.kind, locale),
+        date: pickLoc(row.date, locale),
+        file: row.file ?? "",
+      }))
+      .filter((row) => row.title && row.file);
+  } catch (err) {
+    return fail("publications", err);
+  }
+}
+
 export async function loadPartners(): Promise<PartnerItem[]> {
   try {
     const rows = await sanityClient.fetch<PartnerDoc[]>(partnersQuery);
@@ -230,6 +300,9 @@ export async function loadPartners(): Promise<PartnerItem[]> {
         // the component treats 0 as "let CSS size it".
         logoWidth: row.logoWidth ?? 0,
         logoHeight: row.logoHeight ?? 0,
+        logoLightUrl: row.logoLightUrl ?? "",
+        logoLightWidth: row.logoLightWidth ?? 0,
+        logoLightHeight: row.logoLightHeight ?? 0,
       }))
       .filter((row) => row.name);
   } catch (err) {
@@ -436,6 +509,15 @@ export type AboutPageContent = {
     imageAlt?: string;
     stats?: { value: string; label: string }[];
   };
+  speaking: {
+    eyebrow?: string;
+    title?: string;
+    body?: string;
+    regions?: {
+      region: string;
+      entries: { name: string; location: string }[];
+    }[];
+  };
 };
 
 export async function loadAboutPage(
@@ -487,6 +569,19 @@ export async function loadAboutPage(
             label: pickOpt(s.label, locale) ?? "",
           }))
           .filter((s) => s.value && s.label),
+      },
+      speaking: {
+        eyebrow: pickOpt(doc.speakingEyebrow, locale),
+        title: pickOpt(doc.speakingTitle, locale),
+        body: pickOpt(doc.speakingBody, locale),
+        regions: doc.speakingRegions
+          ?.map((r) => ({
+            region: pickOpt(r.region, locale) ?? "",
+            entries: (r.entries ?? [])
+              .map((e) => ({ name: e.name ?? "", location: e.location ?? "" }))
+              .filter((e) => e.name),
+          }))
+          .filter((r) => r.region && r.entries.length > 0),
       },
     };
   } catch (err) {

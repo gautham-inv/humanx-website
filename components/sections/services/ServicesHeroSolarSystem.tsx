@@ -3,23 +3,25 @@
 /**
  * ServicesHeroSolarSystem
  * -----------------------
- * Top-down (aerial) solar system for the Services hero. 1 sun + 6 planets
- * on circular orbits, each at a different radius / speed / hue. Calm,
- * cinematic motion — inner planets rotate faster than outer ones (Kepler-
- * ish feel without the realism baggage).
+ * Flat "atom rosette" for the Services hero — a React-logo-style symbol.
+ * 1 nucleus + 6 eccentric elliptical orbits sharing a common center, each
+ * rotated in-plane by 30° (i × 180°/6) so they fan out into a symmetric
+ * rosette. One electron rides each orbit, evenly phase-offset so they form a
+ * balanced 6-point pattern, all revolving at one calm shared speed.
  *
- * Built to match the AboutHeroNetwork's complexity profile:
- *   - React Three Fiber, single Canvas, orthographic camera
- *   - Plane-meshes with a soft-circle fragment shader for each body
- *   - LineLoop with a shader for each orbital path
- *   - GSAP staggers entry (orbits fade in first, then planets + sun)
- *   - Cursor near a planet brightens it AND its orbit
+ * Built to match the AboutHeroNetwork's complexity profile and to keep the
+ * existing visual language intact:
+ *   - React Three Fiber, single Canvas, orthographic (front-on) camera
+ *   - Plane-meshes with a soft-circle fragment shader for nucleus + electrons
+ *   - LineLoop with a shader for each elliptical orbit (rotated about z)
+ *   - GSAP staggers entry (electrons pop in first, then orbits fan out)
+ *   - Cursor near an electron brightens it AND its orbit
  *   - Colors resolve from --color-* tokens so the visual flips with theme
  */
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import gsap from "gsap";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { prefersReducedMotion } from "@/lib/motion";
 
@@ -27,32 +29,51 @@ import { prefersReducedMotion } from "@/lib/motion";
 
 type Hue = "ink" | "accent" | "violet" | "magenta";
 
-type PlanetDef = {
+type OrbitDef = {
   readonly id: number;
-  readonly orbitRadius: number;
-  readonly size: number;
-  /** rad/sec — inner planets revolve faster, like Kepler's third law. */
-  readonly speed: number;
-  /** Initial angular offset on the orbit. */
+  /** In-plane rotation of this ellipse (radians) — i × 30°. */
+  readonly rotation: number;
+  /** Initial angular position of the electron on its ellipse. */
   readonly phase: number;
   readonly hue: Hue;
 };
 
-const PLANETS: readonly PlanetDef[] = [
-  { id: 0, orbitRadius: 11, size: 1.5, speed: 0.22,  phase: 0.0, hue: "accent" },
-  { id: 1, orbitRadius: 17, size: 1.1, speed: 0.16,  phase: 1.3, hue: "ink"    },
-  { id: 2, orbitRadius: 24, size: 1.9, speed: 0.11,  phase: 2.5, hue: "violet" },
-  { id: 3, orbitRadius: 31, size: 1.3, speed: 0.082, phase: 4.0, hue: "ink"    },
-  { id: 4, orbitRadius: 38, size: 1.7, speed: 0.062, phase: 5.2, hue: "magenta" },
-  { id: 5, orbitRadius: 45, size: 1.2, speed: 0.048, phase: 0.7, hue: "ink"    },
-] as const;
+const ORBIT_COUNT = 6;
+const ELLIPSE_A = 38; // semi-major axis (world units)
+const ELLIPSE_B = 13; // semi-minor axis — eccentric, React-logo-ish
+const ELECTRON_SPEED = 0.18; // rad/sec — one shared speed keeps it symmetric
+const ELECTRON_SIZE = 1.4;
+const NUCLEUS_SIZE = 2.8;
+const ORBIT_SEGMENTS = 128;
+const HOVER_RADIUS = 6; // world units within which the cursor brightens an electron
+const CURSOR_DRIFT_RADIUS = 14; // world units within which the cursor nudges electrons
 
-const SUN_SIZE = 2.8;
-const ORBIT_SEGMENTS = 96;
-const HOVER_RADIUS = 6;          // world units within which cursor brightens a planet
-const CURSOR_DRIFT_RADIUS = 14;  // world units within which cursor nudges nearby planets
-/** How close (in world units) the cursor needs to be to the orbit ring itself to light it up. */
-const ORBIT_HOVER_BAND = 3.2;
+// Electron colours cycle through the vivid tokens; orbit lines stay ink-dim.
+const ELECTRON_HUES: readonly Hue[] = [
+  "accent",
+  "violet",
+  "magenta",
+  "accent",
+  "violet",
+  "magenta",
+];
+
+const ORBITS: readonly OrbitDef[] = Array.from(
+  { length: ORBIT_COUNT },
+  (_, i): OrbitDef => ({
+    id: i,
+    rotation: (i * Math.PI) / ORBIT_COUNT, // 30° steps → spans the full rosette
+    phase: (i * Math.PI * 2) / ORBIT_COUNT, // evenly spread the electrons
+    hue: ELECTRON_HUES[i % ELECTRON_HUES.length],
+  })
+);
+
+/** Rotate a local ellipse point (lx, ly) into world space by `rot`. */
+function rotatePoint(lx: number, ly: number, rot: number): [number, number] {
+  const c = Math.cos(rot);
+  const s = Math.sin(rot);
+  return [lx * c - ly * s, lx * s + ly * c];
+}
 
 // ─── shaders ─────────────────────────────────────────────────────────────
 
@@ -102,16 +123,6 @@ const ORBIT_FRAG = /* glsl */ `
     // at ~0.68 alpha when at rest, gets brighter under cursor influence.
     float alpha = uOpacity * (0.85 + uEmphasis * 0.5);
     gl_FragColor = vec4(uColor, alpha);
-  }
-`;
-
-// Flat shader for the radar wavefront rings and the active-orbit halo band.
-// Opacity is the whole envelope; the host code modulates it each frame.
-const FLAT_FRAG = /* glsl */ `
-  uniform vec3 uColor;
-  uniform float uOpacity;
-  void main() {
-    gl_FragColor = vec4(uColor, uOpacity);
   }
 `;
 
@@ -167,9 +178,9 @@ function CameraSetup() {
   return null;
 }
 
-// ─── sun ─────────────────────────────────────────────────────────────────
+// ─── nucleus ───────────────────────────────────────────────────────────────
 
-function Sun({ state }: { state: SharedState }) {
+function Nucleus({ state }: { state: SharedState }) {
   const matRef = useRef<THREE.ShaderMaterial>(null);
 
   const uniforms = useMemo(
@@ -184,7 +195,7 @@ function Sun({ state }: { state: SharedState }) {
     []
   );
 
-  // Soft heartbeat — sun breathes very subtly so it doesn't feel inert.
+  // Soft heartbeat — nucleus breathes very subtly so it doesn't feel inert.
   useFrame(({ clock }) => {
     const mat = matRef.current;
     if (!mat) return;
@@ -199,8 +210,8 @@ function Sun({ state }: { state: SharedState }) {
   });
 
   return (
-    <mesh position={[0, 0, 0]}>
-      <planeGeometry args={[SUN_SIZE * 5, SUN_SIZE * 5]} />
+    <mesh position={[0, 0, 0]} renderOrder={1}>
+      <planeGeometry args={[NUCLEUS_SIZE * 5, NUCLEUS_SIZE * 5]} />
       <shaderMaterial
         ref={matRef}
         vertexShader={BODY_VERT}
@@ -215,41 +226,22 @@ function Sun({ state }: { state: SharedState }) {
 
 // ─── orbit line ──────────────────────────────────────────────────────────
 
-function Orbit({
-  radius,
+function OrbitLine({
+  geometry,
+  rotation,
   state,
   emphasisRef,
-  orbitIndex,
-  totalOrbits,
+  index,
 }: {
-  radius: number;
+  geometry: THREE.BufferGeometry;
+  rotation: number;
   state: SharedState;
-  /** Per-planet emphasis level (0..1) that this orbit should mirror. */
+  /** Per-electron emphasis level (0..1) that this orbit mirrors. */
   emphasisRef: { current: number };
-  /** Index of this orbit (0 = innermost). Drives the sequential pulse phase. */
-  orbitIndex: number;
-  /** Total orbit count so phases space evenly through the wave cycle. */
-  totalOrbits: number;
+  /** Index of this orbit — drives the entry stagger. */
+  index: number;
 }) {
   const matRef = useRef<THREE.ShaderMaterial>(null);
-  // Halo ring fades in beneath the thin orbit line when the planet on this
-  // orbit becomes active — makes the active orbit's stroke read as visibly
-  // wider without us needing thick-line geometry (WebGL line widths > 1px
-  // are unreliable cross-browser).
-  const haloMatRef = useRef<THREE.ShaderMaterial>(null);
-
-  const geometry = useMemo(() => {
-    const positions = new Float32Array(ORBIT_SEGMENTS * 3);
-    for (let i = 0; i < ORBIT_SEGMENTS; i++) {
-      const angle = (i / ORBIT_SEGMENTS) * Math.PI * 2;
-      positions[i * 3 + 0] = Math.cos(angle) * radius;
-      positions[i * 3 + 1] = Math.sin(angle) * radius;
-      positions[i * 3 + 2] = 0;
-    }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    return g;
-  }, [radius]);
 
   const uniforms = useMemo(
     () => ({
@@ -261,17 +253,8 @@ function Orbit({
     []
   );
 
-  const haloUniforms = useMemo(
-    () => ({
-      uColor: { value: state.palette.accent.clone() },
-      uOpacity: { value: 0 },
-    }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-
-  // GSAP entry — orbits fade in AFTER planets have popped in, staggered
-  // by their radius so the rings appear from the centre outward.
+  // GSAP entry — orbits fan out AFTER the electrons have popped in, staggered
+  // by index so the rosette unfurls petal by petal.
   useEffect(() => {
     if (!matRef.current) return;
     // Match the AboutHeroNetwork edge baseline opacity so the visual
@@ -285,112 +268,56 @@ function Orbit({
       value: targetOpacity,
       duration: 1.0,
       ease: "power2.out",
-      delay: 1.2 + radius * 0.012,
+      delay: 1.2 + index * 0.08,
     });
     return () => {
       tween.kill();
     };
-  }, [radius, state.reduced]);
+  }, [index, state.reduced]);
 
-  useFrame(({ clock }) => {
+  useFrame(() => {
     const mat = matRef.current;
     if (!mat) return;
     mat.uniforms.uColor.value.copy(state.palette.ink);
 
-    // ── Three emphasis sources, combined via Math.max ────────────────────
-    //   1. The planet on this orbit is being hovered (from emphasisRef)
-    //   2. The cursor is directly over this orbit ring (radial hit test)
-    //   3. The sequential inside-out pulse — a wave travels through orbits
-    //      from innermost to outermost, briefly emphasising each in turn.
-    let target = emphasisRef.current;
-
-    if (state.cursorActive) {
-      const distFromCenter = Math.hypot(state.cursor.x, state.cursor.y);
-      const distFromRing = Math.abs(distFromCenter - radius);
-      if (distFromRing < ORBIT_HOVER_BAND) {
-        const ringEmphasis = 1 - distFromRing / ORBIT_HOVER_BAND;
-        if (ringEmphasis > target) target = ringEmphasis;
-      }
-    }
-
-    // Sequential pulse — cycle every PULSE_CYCLE_SEC; each orbit is the wave
-    // crest for a narrow window of that cycle. Phase = (orbitIndex+1)/total
-    // so the wave starts AT the innermost ring rather than around the sun.
-    if (!state.reduced) {
-      const PULSE_CYCLE_SEC = 4.5;
-      const PULSE_WIDTH = 0.16; // fraction of the cycle each orbit is lit
-      const PULSE_MAX = 0.85;   // peak emphasis injected by the pulse
-      const cyclePhase = (clock.elapsedTime / PULSE_CYCLE_SEC) % 1;
-      const orbitPhase = (orbitIndex + 1) / (totalOrbits + 1);
-      const raw = Math.abs(cyclePhase - orbitPhase);
-      const wrapped = Math.min(raw, 1 - raw);
-      const pulseAmt =
-        wrapped < PULSE_WIDTH
-          ? Math.cos((wrapped / PULSE_WIDTH) * (Math.PI / 2)) * PULSE_MAX
-          : 0;
-      if (pulseAmt > target) target = pulseAmt;
-    }
-
+    // The only emphasis source now: the electron on this orbit is near the
+    // cursor. Smoothly chase that target so the ring brightens/eases off.
+    const target = emphasisRef.current;
     const curr = mat.uniforms.uEmphasis.value as number;
     mat.uniforms.uEmphasis.value = curr + (target - curr) * 0.12;
-
-    // Halo band: opacity drives both visibility and apparent width. When
-    // the orbit is inactive (target ≈ 0) the band disappears; when active
-    // (cursor OR pulse) it lifts so the orbit reads as a wider stroke.
-    const haloMat = haloMatRef.current;
-    if (haloMat) {
-      haloMat.uniforms.uColor.value.copy(state.palette.accent);
-      const haloTarget = Math.max(0, target - 0.05) * 0.55;
-      const haloCurr = haloMat.uniforms.uOpacity.value as number;
-      haloMat.uniforms.uOpacity.value = haloCurr + (haloTarget - haloCurr) * 0.1;
-    }
   });
 
   return (
-    <>
-      <mesh>
-        <ringGeometry args={[radius - 0.45, radius + 0.45, ORBIT_SEGMENTS]} />
-        <shaderMaterial
-          ref={haloMatRef}
-          vertexShader={ORBIT_VERT}
-          fragmentShader={FLAT_FRAG}
-          uniforms={haloUniforms}
-          transparent
-          depthWrite={false}
-        />
-      </mesh>
-      <lineLoop geometry={geometry}>
-        <shaderMaterial
-          ref={matRef}
-          vertexShader={ORBIT_VERT}
-          fragmentShader={ORBIT_FRAG}
-          uniforms={uniforms}
-          transparent
-          depthWrite={false}
-        />
-      </lineLoop>
-    </>
+    <lineLoop geometry={geometry} rotation={[0, 0, rotation]}>
+      <shaderMaterial
+        ref={matRef}
+        vertexShader={ORBIT_VERT}
+        fragmentShader={ORBIT_FRAG}
+        uniforms={uniforms}
+        transparent
+        depthWrite={false}
+      />
+    </lineLoop>
   );
 }
 
-// ─── planet ──────────────────────────────────────────────────────────────
+// ─── electron ──────────────────────────────────────────────────────────────
 
-function Planet({
-  planet,
+function Electron({
+  orbit,
   state,
+  emphasisRef,
 }: {
-  planet: PlanetDef;
+  orbit: OrbitDef;
   state: SharedState;
+  emphasisRef: { current: number };
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const matRef = useRef<THREE.ShaderMaterial>(null);
-  // Shared with the planet's <Orbit>; updated each frame from this planet's
-  // current hover proximity. Refs avoid React re-render churn.
-  const emphasisRef = useRef(0);
 
   const uniforms = useMemo(
     () => ({
-      uColor: { value: state.palette[planet.hue].clone() },
+      uColor: { value: state.palette[orbit.hue].clone() },
       uIntensity: { value: 0.0 }, // fades in via GSAP
       uCoreRadius: { value: 0.23 },
       uHaloFalloff: { value: 0.95 },
@@ -400,12 +327,17 @@ function Planet({
     []
   );
 
-  // GSAP entry — planets pop in FIRST, randomly across a window so they
-  // don't read as a sequenced reveal. Orbit lines fade in afterward.
-  const entryDelay = useMemo(
-    () => 0.15 + Math.random() * 0.9,
-    []
-  );
+  // Resting position at t=0, used for the initial mesh placement.
+  const initial = useMemo<[number, number, number]>(() => {
+    const lx = Math.cos(orbit.phase) * ELLIPSE_A;
+    const ly = Math.sin(orbit.phase) * ELLIPSE_B;
+    const [x, y] = rotatePoint(lx, ly, orbit.rotation);
+    return [x, y, 0.5];
+  }, [orbit.phase, orbit.rotation]);
+
+  // GSAP entry — electrons pop in FIRST, randomly across a window so they
+  // don't read as a sequenced reveal. Orbit lines fan out afterward.
+  const entryDelay = useMemo(() => 0.15 + Math.random() * 0.9, []);
 
   useEffect(() => {
     if (!matRef.current) return;
@@ -434,13 +366,14 @@ function Planet({
     const mat = matRef.current;
     if (!mesh || !mat) return;
 
-    // Orbital position.
+    // Position on the rotated ellipse.
     const t = clock.elapsedTime;
-    const angle = planet.phase + (state.reduced ? 0 : t * planet.speed);
-    let x = Math.cos(angle) * planet.orbitRadius;
-    let y = Math.sin(angle) * planet.orbitRadius;
+    const theta = orbit.phase + (state.reduced ? 0 : t * ELECTRON_SPEED);
+    const lx = Math.cos(theta) * ELLIPSE_A;
+    const ly = Math.sin(theta) * ELLIPSE_B;
+    let [x, y] = rotatePoint(lx, ly, orbit.rotation);
 
-    // Subtle cursor influence: pull planet toward cursor when close.
+    // Subtle cursor influence: pull the electron toward the cursor when close.
     if (state.cursorActive && !state.reduced) {
       const dx = state.cursor.x - x;
       const dy = state.cursor.y - y;
@@ -452,9 +385,10 @@ function Planet({
       }
     }
 
-    mesh.position.set(x, y, 0);
+    // Electrons ride slightly in front (z) so they read over rings + nucleus.
+    mesh.position.set(x, y, 0.5);
 
-    // Hover proximity — drives both planet intensity and orbit emphasis.
+    // Hover proximity — drives both electron intensity and orbit emphasis.
     let near = 0;
     if (state.cursorActive) {
       const d = Math.hypot(state.cursor.x - x, state.cursor.y - y);
@@ -469,40 +403,49 @@ function Planet({
     mat.uniforms.uIntensity.value = curr + (baseIntensity - curr) * lerp;
 
     // Re-sync palette colour each frame (cheap; handles theme flips).
-    mat.uniforms.uColor.value.copy(state.palette[planet.hue]);
+    mat.uniforms.uColor.value.copy(state.palette[orbit.hue]);
     mat.uniforms.uHaloMix.value = state.lightTheme ? 0 : 0.34;
   });
 
-  // The orbit sits next to the planet in the JSX tree so they share the
-  // emphasisRef — the orbit fades in proximity-emphasis whenever its planet
-  // is the nearest body to the cursor.
+  return (
+    <mesh ref={meshRef} position={initial} renderOrder={2}>
+      <planeGeometry args={[ELECTRON_SIZE * 5, ELECTRON_SIZE * 5]} />
+      <shaderMaterial
+        ref={matRef}
+        vertexShader={BODY_VERT}
+        fragmentShader={BODY_FRAG}
+        uniforms={uniforms}
+        transparent
+        depthWrite={false}
+      />
+    </mesh>
+  );
+}
+
+// ─── orbit + electron pair ─────────────────────────────────────────────────
+
+// One ellipse and its electron share an emphasisRef so the ring brightens
+// whenever the cursor nears that orbit's electron.
+function OrbitSystem({
+  orbit,
+  geometry,
+  state,
+}: {
+  orbit: OrbitDef;
+  geometry: THREE.BufferGeometry;
+  state: SharedState;
+}) {
+  const emphasisRef = useRef(0);
   return (
     <>
-      <Orbit
-        radius={planet.orbitRadius}
+      <OrbitLine
+        geometry={geometry}
+        rotation={orbit.rotation}
         state={state}
         emphasisRef={emphasisRef}
-        orbitIndex={planet.id}
-        totalOrbits={PLANETS.length}
+        index={orbit.id}
       />
-      <mesh
-        ref={meshRef}
-        position={[
-          Math.cos(planet.phase) * planet.orbitRadius,
-          Math.sin(planet.phase) * planet.orbitRadius,
-          0,
-        ]}
-      >
-        <planeGeometry args={[planet.size * 5, planet.size * 5]} />
-        <shaderMaterial
-          ref={matRef}
-          vertexShader={BODY_VERT}
-          fragmentShader={BODY_FRAG}
-          uniforms={uniforms}
-          transparent
-          depthWrite={false}
-        />
-      </mesh>
+      <Electron orbit={orbit} state={state} emphasisRef={emphasisRef} />
     </>
   );
 }
@@ -525,9 +468,11 @@ function CursorPicker({ state }: { state: SharedState }) {
       );
       // For ortho camera: world = ndc * 0.5 * (right-left), centred.
       if (camera instanceof THREE.OrthographicCamera) {
-        const wx = (camera.left + camera.right) / 2 +
+        const wx =
+          (camera.left + camera.right) / 2 +
           ((camera.right - camera.left) / 2) * ndc.x;
-        const wy = (camera.top + camera.bottom) / 2 +
+        const wy =
+          (camera.top + camera.bottom) / 2 +
           ((camera.top - camera.bottom) / 2) * ndc.y;
         state.cursor.set(wx, wy, 0);
         state.cursorActive = true;
@@ -552,13 +497,35 @@ function CursorPicker({ state }: { state: SharedState }) {
 // ─── scene root ──────────────────────────────────────────────────────────
 
 function Scene({ state }: { state: SharedState }) {
+  // One ellipse geometry, shared by all six orbits — each <OrbitLine> just
+  // rotates it about z. Cheap and keeps the rings perfectly congruent.
+  const ellipseGeometry = useMemo(() => {
+    const positions = new Float32Array(ORBIT_SEGMENTS * 3);
+    for (let i = 0; i < ORBIT_SEGMENTS; i++) {
+      const angle = (i / ORBIT_SEGMENTS) * Math.PI * 2;
+      positions[i * 3 + 0] = Math.cos(angle) * ELLIPSE_A;
+      positions[i * 3 + 1] = Math.sin(angle) * ELLIPSE_B;
+      positions[i * 3 + 2] = 0;
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    return g;
+  }, []);
+
+  useEffect(() => () => ellipseGeometry.dispose(), [ellipseGeometry]);
+
   return (
     <>
       <CameraSetup />
       <CursorPicker state={state} />
-      <Sun state={state} />
-      {PLANETS.map((p) => (
-        <Planet key={p.id} planet={p} state={state} />
+      <Nucleus state={state} />
+      {ORBITS.map((o) => (
+        <OrbitSystem
+          key={o.id}
+          orbit={o}
+          geometry={ellipseGeometry}
+          state={state}
+        />
       ))}
     </>
   );

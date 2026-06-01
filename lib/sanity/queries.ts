@@ -37,6 +37,34 @@ export type TestimonialDoc = {
   linkedinUrl?: string;
 };
 
+/** LinkedIn recommendations shown on the About page. */
+export const recommendationsQuery = /* groq */ `
+  *[_type == "recommendation"] | order(order asc, _createdAt asc) {
+    "id": _id,
+    name,
+    headline,
+    date,
+    relationship,
+    body,
+    "imageUrl": image.asset->url,
+    "imageAlt": image.alt,
+    linkedinUrl
+  }
+`;
+
+/** Shape of a single recommendation row returned by `recommendationsQuery`. */
+export type RecommendationDoc = {
+  id: string;
+  name?: string;
+  headline?: string;
+  date?: string;
+  relationship?: string;
+  body?: { en?: string; es?: string };
+  imageUrl?: string;
+  imageAlt?: string;
+  linkedinUrl?: string;
+};
+
 /* ─────────────────────────────────────────────────────────────────────────────
  * The rest of the list queries below all follow the same recipe: project a
  * stable `id` (Sanity's `_id`) plus whatever localized fields the page needs,
@@ -118,6 +146,26 @@ export type InsightDoc = {
   imageAlt?: string;
 };
 
+/** Downloadable publications (gated PDFs) for the Publications page. */
+export const publicationsQuery = /* groq */ `
+  *[_type == "publication"] | order(publishedAt desc, _createdAt desc) {
+    "id": _id,
+    title,
+    kind,
+    date,
+    "file": file.asset->url
+  }
+`;
+
+export type PublicationDoc = {
+  id: string;
+  title: { en?: string; es?: string };
+  kind?: { en?: string; es?: string };
+  date?: { en?: string; es?: string };
+  /** Resolved Sanity CDN URL of the uploaded PDF, or undefined. */
+  file?: string;
+};
+
 /**
  * Standalone homepage "On stage" videos. Ordered by the manual `order` field
  * first, then `publishedAt` newest-first as a tiebreaker. Decoupled from
@@ -150,7 +198,10 @@ export const partnersQuery = /* groq */ `
     website,
     "logoUrl": logo.asset->url,
     "logoWidth": logo.asset->metadata.dimensions.width,
-    "logoHeight": logo.asset->metadata.dimensions.height
+    "logoHeight": logo.asset->metadata.dimensions.height,
+    "logoLightUrl": logoLight.asset->url,
+    "logoLightWidth": logoLight.asset->metadata.dimensions.width,
+    "logoLightHeight": logoLight.asset->metadata.dimensions.height
   }
 `;
 
@@ -159,10 +210,15 @@ export type PartnerDoc = {
   name: string;
   /** External URL — when set, ticker entry becomes a link. */
   website?: string;
-  /** Resolved CDN URL of the uploaded logo asset, or undefined. */
+  /** Dark-theme logo. Resolved Sanity CDN URL. */
   logoUrl?: string;
   logoWidth?: number;
   logoHeight?: number;
+  /** Light-theme logo. Empty if the author hasn't uploaded a variant —
+   * frontend then falls back to the dark logo for both themes. */
+  logoLightUrl?: string;
+  logoLightWidth?: number;
+  logoLightHeight?: number;
 };
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -247,7 +303,9 @@ export const aboutPageQuery = /* groq */ `
     experienceTitle, experienceBody,
     experienceStatValue, experienceStatLabel, experienceStatNote,
     founderEyebrow, founderName, founderBio, founderImageAlt,
-    founderStats[]{ value, label }
+    founderStats[]{ value, label },
+    speakingEyebrow, speakingTitle, speakingBody,
+    speakingRegions[]{ region, entries[]{ name, location } }
   }
 `;
 
@@ -272,6 +330,13 @@ export type AboutPageDoc = {
   founderBio?: LocText;
   founderImageAlt?: LocStr;
   founderStats?: { value: string; label: LocStr }[];
+  speakingEyebrow?: LocStr;
+  speakingTitle?: LocStr;
+  speakingBody?: LocText;
+  speakingRegions?: {
+    region?: LocStr;
+    entries?: { name?: string; location?: string }[];
+  }[];
 };
 
 export const servicesPageQuery = /* groq */ `

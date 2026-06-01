@@ -11,6 +11,7 @@ type AssessmentProps = {
 export function Assessment({ dict, content }: AssessmentProps) {
   const t = dict.assessment;
   const f = t.featured;
+  const eyebrow = t.eyebrow;
   const title = content?.title ?? t.title;
   const body = content?.body ?? t.body;
   const cta = content?.cta ?? t.cta;
@@ -30,6 +31,10 @@ export function Assessment({ dict, content }: AssessmentProps) {
         <Reveal direction="up">
           <div className="grid gap-10 lg:grid-cols-12 lg:items-end">
             <div className="lg:col-span-7">
+              <div className="mb-6 text-xs uppercase tracking-[0.3em] text-ink-dim">
+                <span className="mr-3 inline-block h-px w-8 bg-accent align-middle" />
+                {eyebrow}
+              </div>
               <div className="flex items-start gap-5 md:gap-7">
                 <span
                   aria-hidden

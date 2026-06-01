@@ -3,7 +3,7 @@ import { Fragment } from "react";
 /**
  * Renders an h1/h2 heading where one or more words are wrapped in `<<…>>`
  * markers in the source string, rendering those words in the brand
- * highlight font (DM Serif Display italic) and the accent colour.
+ * highlight font (serif italic) — same colour as the surrounding text.
  *
  *   <HighlightedTitle as="h1" className="font-display text-6xl">
  *     {"Six practices, <<one>> through-line."}
@@ -36,7 +36,7 @@ export function HighlightedTitle({
         i % 2 === 1 ? (
           <span
             key={i}
-            className="font-highlight italic text-accent"
+            className="font-highlight italic"
             style={{ fontFamily: "var(--font-highlight)" }}
           >
             {part}

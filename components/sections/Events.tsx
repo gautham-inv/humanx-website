@@ -114,31 +114,37 @@ export function Events({
               const internalHref = ev.slug ? `/${locale}/events/${ev.slug}` : "";
               const inner = (
                 <>
-                  <div className="flex-shrink-0 flex flex-col items-center justify-center w-16 h-16 rounded-xl border border-line bg-bg">
-                    <span className="font-display text-2xl leading-none text-accent">{day}</span>
-                    <span className="mt-1 text-[10px] tracking-[0.2em] text-ink-dim">{month}</span>
+                  {/* Image-led header: the event image (or a branded
+                      placeholder) fills the top of the card on every
+                      breakpoint, with the date badge overlaid. */}
+                  <div className="relative aspect-[3/2] w-full overflow-hidden bg-bg-elev">
+                    {ev.imageUrl ? (
+                      <Image
+                        src={ev.imageUrl}
+                        alt={ev.imageAlt || ev.title}
+                        fill
+                        sizes="(min-width: 768px) 32rem, 100vw"
+                        className="object-cover transition duration-700 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-violet/30 via-bg-elev to-magenta/20" />
+                    )}
+                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/55 to-transparent" />
+                    <div className="absolute left-4 top-4 flex flex-col items-center justify-center rounded-xl border border-white/15 bg-black/45 px-3 py-2 backdrop-blur-sm">
+                      <span className="font-display text-2xl leading-none text-white">{day}</span>
+                      <span className="mt-1 text-[10px] tracking-[0.2em] text-white/70">{month}</span>
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
+                  <div className="p-6">
                     <h3 className="font-display text-xl">{ev.title}</h3>
                     <p className="mt-1 text-sm text-ink-dim">
                       {ev.venue} · {ev.date}
                     </p>
                   </div>
-                  {ev.imageUrl ? (
-                    <div className="relative hidden h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg sm:block">
-                      <Image
-                        src={ev.imageUrl}
-                        alt={ev.imageAlt || ev.title}
-                        fill
-                        sizes="64px"
-                        className="object-cover"
-                      />
-                    </div>
-                  ) : null}
                 </>
               );
               const cardClass =
-                "flex items-start gap-6 p-6 rounded-2xl border border-line bg-bg-elev/30 backdrop-blur-sm transition hover:border-accent/60";
+                "group flex flex-col overflow-hidden rounded-2xl border border-line bg-bg-elev/30 backdrop-blur-sm transition hover:border-accent/60";
               if (internalHref) {
                 return (
                   <Link

@@ -5,10 +5,8 @@ import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import Image from "next/image";
 
-const HERO_SRC = {
-  light: "/person.webp",
-  dark: "/hero-image.webp",
-} as const;
+// Single portrait shown in both light and dark themes.
+const HERO_SRC = "/person.webp";
 
 type HeroImageProps = {
   /** When true, fills the parent (parent must have a defined height). */
@@ -75,22 +73,13 @@ export function HeroImage({ fill = false, alt = "Ramon Portilla, founder of Huma
         className="absolute inset-0 h-full w-full"
       >
         <Image
-          src={HERO_SRC.light}
+          src={HERO_SRC}
           alt=""
           aria-hidden
           fill
           priority
           sizes={sizes}
-          className={`hero-portrait-light ${imageClass}`}
-        />
-        <Image
-          src={HERO_SRC.dark}
-          alt=""
-          aria-hidden
-          fill
-          priority
-          sizes={sizes}
-          className={`hero-portrait-dark ${imageClass}`}
+          className={imageClass}
         />
       </div>
     </div>

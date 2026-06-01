@@ -27,54 +27,47 @@
  */
 const PORTAL_ID = process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID;
 const FORM_GUID = process.env.NEXT_PUBLIC_HUBSPOT_FORM_GUID;
+// Separate HubSpot form for the gated PDF download — a different form GUID
+// in the same portal. Keeps download leads on their own form so HubSpot
+// follow-up email / list membership can differ from the contact form.
+const DOWNLOAD_FORM_GUID = process.env.NEXT_PUBLIC_HUBSPOT_DOWNLOAD_FORM_GUID;
 
 export function isHubspotConfigured(): boolean {
   return Boolean(PORTAL_ID && FORM_GUID);
 }
 
-/** Shape of the four fields `HumanForm` collects today. */
-export type ContactSubmission = {
-  name: string;
-  email: string;
-  topic: string;
-  message: string;
-};
+export function isDownloadConfigured(): boolean {
+  return Boolean(PORTAL_ID && DOWNLOAD_FORM_GUID);
+}
+
+type HubspotField = { name: string; value: string };
 
 /**
- * POSTs a submission to HubSpot. Throws on non-2xx so the caller can show
- * an error state — HubSpot does return useful error JSON, but for the UI
- * we only need success/failure, not the specific reason.
+ * Low-level POST to a HubSpot form. `fields` names must match the *internal
+ * property name* of each field in the target form (not the display label),
+ * or HubSpot rejects the payload with FORM_FIELDS_NOT_VALID. Throws on
+ * non-2xx so callers can show an error state.
  */
-export async function submitToHubspot(input: ContactSubmission): Promise<void> {
-  if (!PORTAL_ID || !FORM_GUID) {
+async function postToHubspot(
+  formGuid: string,
+  fields: HubspotField[]
+): Promise<void> {
+  if (!PORTAL_ID) {
     throw new Error(
-      "HubSpot is not configured. Set NEXT_PUBLIC_HUBSPOT_PORTAL_ID and " +
-        "NEXT_PUBLIC_HUBSPOT_FORM_GUID."
+      "HubSpot portal ID is not configured (NEXT_PUBLIC_HUBSPOT_PORTAL_ID)."
     );
   }
-
-  // HubSpot's Forms API wants `fields: [{ name, value }, …]` with the names
-  // matching the form schema in their UI. `context.pageUri` lets HubSpot
-  // record which page the lead converted from — useful for attribution
-  // once you have several CTAs across the site.
+  // `context.pageUri` lets HubSpot record which page the lead converted from.
   const payload = {
-    fields: [
-      { name: "firstname", value: input.name },
-      { name: "email", value: input.email },
-      { name: "topic", value: input.topic },
-      { name: "message", value: input.message },
-    ],
+    fields,
     context:
       typeof window !== "undefined"
-        ? {
-            pageUri: window.location.href,
-            pageName: document.title,
-          }
+        ? { pageUri: window.location.href, pageName: document.title }
         : undefined,
   };
 
   const res = await fetch(
-    `https://api.hsforms.com/submissions/v3/integration/submit/${PORTAL_ID}/${FORM_GUID}`,
+    `https://api.hsforms.com/submissions/v3/integration/submit/${PORTAL_ID}/${formGuid}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -83,8 +76,6 @@ export async function submitToHubspot(input: ContactSubmission): Promise<void> {
   );
 
   if (!res.ok) {
-    // Surface the status in the dev console so debugging is possible without
-    // exposing the JSON to end users.
     let detail = "";
     try {
       detail = JSON.stringify(await res.json());
@@ -95,4 +86,46 @@ export async function submitToHubspot(input: ContactSubmission): Promise<void> {
       `HubSpot submission failed: ${res.status} ${res.statusText} ${detail}`
     );
   }
+}
+
+/** Shape of the four fields `HumanForm` collects today. */
+export type ContactSubmission = {
+  name: string;
+  email: string;
+  topic: string;
+  message: string;
+};
+
+/** POSTs a contact-form submission to the main HubSpot form. */
+export async function submitToHubspot(input: ContactSubmission): Promise<void> {
+  if (!FORM_GUID) {
+    throw new Error(
+      "HubSpot contact form is not configured. Set NEXT_PUBLIC_HUBSPOT_PORTAL_ID and NEXT_PUBLIC_HUBSPOT_FORM_GUID."
+    );
+  }
+  await postToHubspot(FORM_GUID, [
+    { name: "firstname", value: input.name },
+    { name: "email", value: input.email },
+    { name: "topic", value: input.topic },
+    { name: "message", value: input.message },
+  ]);
+}
+
+/** Email captured by the gated PDF download. */
+export type DownloadSubmission = { email: string };
+
+/**
+ * POSTs the gated-download email to the dedicated HubSpot download form.
+ * Only `email` is sent — the form is email-only — so the HubSpot form needs
+ * just the standard `email` property.
+ */
+export async function submitGatedDownload(
+  input: DownloadSubmission
+): Promise<void> {
+  if (!DOWNLOAD_FORM_GUID) {
+    throw new Error(
+      "HubSpot download form is not configured. Set NEXT_PUBLIC_HUBSPOT_DOWNLOAD_FORM_GUID."
+    );
+  }
+  await postToHubspot(DOWNLOAD_FORM_GUID, [{ name: "email", value: input.email }]);
 }

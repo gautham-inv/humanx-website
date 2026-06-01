@@ -55,7 +55,7 @@ export function HeroHeadline({
               data-word
               className={
                 isEmphasis
-                  ? "inline-block italic text-accent font-highlight"
+                  ? "inline-block italic font-highlight"
                   : "inline-block"
               }
               style={isEmphasis ? { fontFamily: "var(--font-highlight)" } : undefined}

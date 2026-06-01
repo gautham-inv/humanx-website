@@ -42,12 +42,24 @@ export function Footer({ dict, locale, content }: FooterProps) {
               aria-label="HumanX home"
               className="inline-block rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
             >
+              {/* Theme-swapped wordmark — same dual-image pattern as the
+                  nav. Both render; CSS `display` swap (.brand-logo-dark /
+                  .brand-logo-light in globals.css) picks the variant for
+                  the active theme. Dark variant bumped one size step to
+                  offset its extra internal padding (see Nav for detail). */}
+              <Image
+                src="/human-logo-dark.webp"
+                alt="HumanX"
+                width={140}
+                height={40}
+                className="brand-logo-dark h-9 w-auto"
+              />
               <Image
                 src="/logo.webp"
                 alt="HumanX"
                 width={140}
                 height={40}
-                className="h-8 w-auto"
+                className="brand-logo-light h-8 w-auto"
               />
             </Link>
             <p className="max-w-xs leading-relaxed">{brandTagline}</p>

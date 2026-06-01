@@ -9,9 +9,22 @@ import type { Dictionary } from "@/lib/i18n/dictionaries/en";
 import { LangSwitcher } from "./LangSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
 
-type NavKey = "about" | "services" | "events" | "insights" | "publications";
+type NavKey =
+  | "about"
+  | "services"
+  | "events"
+  | "on-stage"
+  | "insights"
+  | "publications";
 
-const NAV_ITEMS: NavKey[] = ["about", "services", "events", "insights", "publications"];
+const NAV_ITEMS: NavKey[] = [
+  "about",
+  "services",
+  "events",
+  "on-stage",
+  "insights",
+  "publications",
+];
 
 function isActive(pathname: string, locale: Locale, key: NavKey): boolean {
   return pathname === `/${locale}/${key}` || pathname.startsWith(`/${locale}/${key}/`);
@@ -61,24 +74,34 @@ export function Nav({ locale, dict }: { locale: Locale; dict: Dictionary }) {
       <Link
         href={`/${locale}`}
         aria-label="HumanX home"
-        // `.brand-tile-chip` is a CSS class in globals.css that paints a
-        // cream tile + soft shadow + 1px inset stroke in dark theme, and
-        // automatically flattens to a transparent no-chip presentation in
-        // light theme via the `:root[data-theme="light"]` override. Means
-        // we don't need conditional render logic — the same JSX serves
-        // both themes and the chip simply disappears when not needed.
-        // Slimmer chip padding (`px-3 py-1.5`) now that the nav itself is
-        // tighter — keeps the logo from feeling cramped without bloating
-        // the chrome.
-        className="brand-tile-chip inline-flex items-center rounded-xl px-3 py-1.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-bright"
+        // No more cream tile — we now have a dedicated dark-theme logo
+        // (`/human-logo-dark.webp`) that reads on the dark indigo nav strip
+        // directly. Both variants render in the DOM; CSS `display` swap
+        // (see `.brand-logo-dark` / `.brand-logo-light` in globals.css)
+        // picks whichever matches `[data-theme]` so a theme flip is
+        // instant with no network round-trip.
+        className="inline-flex items-center rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-bright"
       >
+        {/* The dark logo file (681×286) carries ~14% more vertical padding
+            than the light file (676×250), so at an identical CSS height its
+            glyph looks smaller. Bumping the dark variant one size step
+            (h-9/h-10 vs h-8/h-9) makes the two read at the same visual size.
+            Robust long-term fix: re-export both with matched padding. */}
+        <Image
+          src="/human-logo-dark.webp"
+          alt="HumanX"
+          width={180}
+          height={52}
+          priority
+          className="brand-logo-dark h-9 w-auto md:h-10"
+        />
         <Image
           src="/logo.webp"
           alt="HumanX"
           width={180}
           height={52}
           priority
-          className="h-8 w-auto md:h-9"
+          className="brand-logo-light h-8 w-auto md:h-9"
         />
       </Link>
 

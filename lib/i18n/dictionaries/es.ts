@@ -5,6 +5,7 @@ export const es: Dictionary = {
     about: "Sobre nosotros",
     services: "Servicios",
     events: "Eventos",
+    "on-stage": "En escenario",
     insights: "Insights",
     publications: "Publicaciones",
     menu: "Menú",
@@ -146,6 +147,47 @@ export const es: Dictionary = {
     title: "En escenario",
     body: "Keynotes recientes, completas.",
     note: "Charlas grabadas, en su totalidad",
+    // Teaser de la home → enlaza a /on-stage
+    credentials: "Fundador · Asesor CX & EX · Conferencista · Autor",
+    teaserTitle: "Keynotes que <<mueven la sala>>",
+    teaserBody:
+      "De salas de juntas a los grandes escenarios en tres continentes, Ramon convierte la estrategia de experiencia humana en charlas que la audiencia aplica al día siguiente.",
+    cta: "Verme en escenario",
+  },
+  // Página completa /on-stage. El mapa + lista de regiones reutilizan `about.speaking`.
+  onStagePage: {
+    eyebrow: "En escenario",
+    title: "Cada escenario, <<cada charla>>",
+    body: "Cientos de líderes en la sala, en tres continentes. Mira las keynotes completas y descubre dónde Ramon ha subido al escenario.",
+    videosTitle: "Keynotes grabadas",
+    videosBody: "Charlas completas, sin editar.",
+  },
+  credentials: {
+    eyebrow: "Reconocimiento",
+    title: "Una voz reconocida en retail y experiencia humana",
+    body: "Una voz reconocida en experiencia de cliente y empleado — en los escenarios más importantes del mundo y de la confianza de marcas globales en retail y banca.",
+    badge: {
+      name: "Top Retailer 50",
+      note: "Reconocido entre las mentes más influyentes del retail mundial.",
+    },
+  },
+  pullQuote: {
+    quote:
+      "Trata la experiencia humana como tu principio operativo, y la lealtad deja de ser una meta — se vuelve el resultado natural de la empatía, la gratitud, la confianza y el cuidado.",
+    author: "Ramon Portilla",
+    role: "Fundador, HumanX Insights",
+    imageAlt: "Ramon Portilla en escenario",
+  },
+  pdfGate: {
+    heading: "Descarga este documento",
+    body: "Deja tu email para desbloquear la descarga — y te enviaremos los nuevos documentos a medida que Ramon los publique.",
+    emailPlaceholder: "tu@empresa.com",
+    consent: "Acepto recibir correos de Ramon Portilla. Puedes darte de baja cuando quieras.",
+    submit: "Desbloquear la descarga",
+    sending: "Desbloqueando…",
+    error: "Algo salió mal. Inténtalo de nuevo.",
+    cancel: "Cancelar",
+    close: "Cerrar",
   },
   values: {
     title: "Nuestros Valores",
@@ -183,6 +225,56 @@ export const es: Dictionary = {
       values: "Valores",
       experience: "Experiencia",
       founder: "Fundador",
+    },
+
+    featuredVideo: {
+      eyebrow: "Insight destacado",
+      title: "Ramon sobre la experiencia humana",
+      body: "Una breve conversación sobre cómo la estrategia centrada en las personas convierte la experiencia del cliente y del empleado en lealtad y crecimiento.",
+      youtubeId: "dZ-HM16fV10",
+    },
+
+    speaking: {
+      eyebrow: "En escenarios de todo el mundo",
+      title: "Dónde Ramon sube al escenario",
+      body: "Keynotes y foros en tres continentes — para retailers, bancos, escuelas de negocio e instituciones de comercio.",
+      regions: [
+        {
+          region: "Norteamérica",
+          entries: [
+            { name: "Grand Retail Show", location: "Chantilly, VA, EE.UU." },
+            { name: "The Empowerment Forum — Serve 2 Perform", location: "Bentonville, AR, EE.UU." },
+            { name: "Women in International Trade (OWIT)", location: "Webinar" },
+            { name: "ESOMAR · MRII · CRIC", location: "Webinar" },
+          ],
+        },
+        {
+          region: "Europa",
+          entries: [
+            { name: "ExpoRetail Iberoamérica", location: "Madrid, España" },
+            { name: "Caixa Bank Consumer & Payments", location: "Madrid, España" },
+            { name: "Asociación Española de Retail — Horizons", location: "Madrid, España" },
+          ],
+        },
+        {
+          region: "Latinoamérica",
+          entries: [
+            { name: "Summit CX", location: "Lima, Perú" },
+            { name: "Pacífico Business School — Foro Intl. de Retail", location: "Lima, Perú" },
+            { name: "Conferencia Góndola", location: "Cartagena, Colombia" },
+          ],
+        },
+      ],
+    },
+
+    recommendations: {
+      eyebrow: "En sus palabras",
+      title: "Lo que dicen los colegas de Ramon",
+      body: "Recomendaciones de los líderes con quienes Ramon ha formado equipos y a quienes ha reportado — en Walmart, Sam's Club, ARS y más.",
+      showAll: "Ver las {count} recomendaciones",
+      showLess: "Ver menos",
+      readMore: "Leer más",
+      readLess: "Leer menos",
     },
   },
   whoWeAre: {
@@ -356,7 +448,7 @@ export const es: Dictionary = {
   publications: {
     eyebrow: "Publicaciones",
     title: "Notas de campo de la capa humana",
-    body: "Documentos de trabajo, ensayos y memos de decisión, publicados a medida que Ramon los envía. Descargas directas, sin formulario.",
+    body: "Documentos de trabajo, ensayos y memos de decisión, publicados a medida que Ramon los envía. Deja tu email una vez y se desbloquean todas las descargas.",
     listTitle: "Recientes",
     items: [
       {

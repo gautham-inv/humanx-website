@@ -1,19 +1,12 @@
-"use client";
-
-import { useCallback, useEffect, useRef, useState } from "react";
-import { gsap } from "gsap";
-import { useGSAP } from "@gsap/react";
+import { Reveal } from "@/components/motion/Reveal";
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
 import type { HomepageContent } from "@/lib/sanity/loaders";
-import { prefersReducedMotion } from "@/lib/motion";
 import { BackdropMesh } from "@/components/motion/Backdrops";
 
-const AUTO_MS = 6500;
-
 /**
- * Carousel item shape after the page component has picked a locale from the
- * Sanity-localized fields. Matches the legacy `dict.testimonials.items` rows
- * exactly so the markup below doesn't care where the data came from.
+ * Row shape after the page component has picked a locale from the Sanity
+ * localized fields. Matches the legacy `dict.testimonials.items` rows so the
+ * markup doesn't care where the data came from.
  */
 export type TestimonialItem = {
   id: string;
@@ -23,89 +16,47 @@ export type TestimonialItem = {
   /** Sanity CDN URL of the author headshot. Empty / undefined → no avatar. */
   imageUrl?: string;
   imageAlt?: string;
-  /**
-   * LinkedIn profile URL. When set, the avatar + author block becomes a
-   * link that opens LinkedIn in a new tab.
-   */
+  /** LinkedIn profile URL. When set, the author block becomes a link. */
   linkedinUrl?: string;
 };
 
 type TestimonialsProps = {
   dict: Dictionary;
   /**
-   * Sanity-sourced items (already localized for the current page locale).
-   * When the array is empty (Sanity returned nothing, or the env was
-   * misconfigured during build) we fall back to the dict items so the
-   * section never renders blank.
+   * Sanity-sourced items (already localized). Falls back to dict items when
+   * empty so the section never renders blank.
    */
   items?: TestimonialItem[];
-  /**
-   * Section header copy from the homepage singleton — eyebrow/heading/etc.
-   * Falls back to dict on each field independently.
-   */
+  /** Section header copy from the homepage singleton; dict fallback per field. */
   content?: HomepageContent["testimonials"];
 };
 
-export function Testimonials({
-  dict,
-  items: itemsProp,
-  content,
-}: TestimonialsProps) {
+/**
+ * Static masonry wall of testimonials. Replaced the auto-advancing carousel
+ * because a single visible quote buries the rest of the social proof — and
+ * with names like Paco Underhill on the list, every quote earns its place on
+ * screen. CSS multi-column layout (`columns-*` + `break-inside-avoid`) packs
+ * the varying-height cards into a true masonry flow with no JS.
+ */
+export function Testimonials({ dict, items: itemsProp, content }: TestimonialsProps) {
   const items: readonly TestimonialItem[] =
     itemsProp && itemsProp.length > 0 ? itemsProp : dict.testimonials.items;
+  const eyebrow = content?.eyebrow ?? dict.testimonials.eyebrow;
   const heading = content?.heading ?? dict.testimonials.heading;
-  const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const ref = useRef<HTMLDivElement | null>(null);
-  const quoteRef = useRef<HTMLDivElement | null>(null);
 
-  const go = useCallback(
-    (next: number) => {
-      const n = ((next % items.length) + items.length) % items.length;
-      setIndex(n);
-    },
-    [items.length]
-  );
-
-  // Auto-advance (paused on hover/focus + reduced-motion).
-  useEffect(() => {
-    if (paused) return;
-    if (prefersReducedMotion()) return;
-    const id = window.setInterval(() => {
-      setIndex((i) => (i + 1) % items.length);
-    }, AUTO_MS);
-    return () => window.clearInterval(id);
-  }, [paused, items.length]);
-
-  // Cross-fade when index changes.
-  useGSAP(
-    () => {
-      if (!quoteRef.current) return;
-      if (prefersReducedMotion()) return;
-      gsap.fromTo(
-        quoteRef.current,
-        { opacity: 0, y: 12 },
-        { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }
-      );
-    },
-    { scope: ref, dependencies: [index] }
-  );
-
-  const current = items[index];
+  // Cap the column count at the number of items so a short list never leaves a
+  // trailing column empty (e.g. 2 quotes under `lg:columns-3` left col 3 blank).
+  const columnsClass =
+    items.length <= 1
+      ? ""
+      : items.length === 2
+        ? "sm:columns-2"
+        : "sm:columns-2 lg:columns-3";
 
   return (
     <section
-      ref={ref}
       aria-label={heading}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocus={() => setPaused(true)}
-      onBlur={() => setPaused(false)}
-      onKeyDown={(e) => {
-        if (e.key === "ArrowLeft") go(index - 1);
-        if (e.key === "ArrowRight") go(index + 1);
-      }}
-      className="relative overflow-hidden border-t border-line px-6 py-12 md:py-20 lg:py-24"
+      className="relative overflow-hidden border-t border-line px-6 py-16 md:py-24 lg:py-28"
     >
       <BackdropMesh
         cell={30}
@@ -114,117 +65,83 @@ export function Testimonials({
         fade="radial"
         feather="center"
       />
-      <div className="relative mx-auto max-w-4xl">
-        <span
-          aria-hidden
-          className="block font-serif text-[clamp(5rem,12vw,9rem)] leading-[0.7] text-accent/40 select-none"
-        >
-          &ldquo;
-        </span>
+      <div className="relative mx-auto max-w-6xl">
+        <Reveal direction="up">
+          <div className="mb-4 text-xs uppercase tracking-[0.3em] text-ink-dim">
+            <span className="mr-3 inline-block h-px w-8 bg-accent align-middle" />
+            {eyebrow}
+          </div>
+        </Reveal>
+        <Reveal direction="up" delay={0.05}>
+          <h2 className="max-w-2xl font-display text-4xl leading-[1.05] tracking-tight md:text-5xl">
+            {heading}
+          </h2>
+        </Reveal>
 
-        <div
-          ref={quoteRef}
-          aria-live="polite"
-          aria-atomic="true"
-          className="mt-2 min-h-[14rem] md:min-h-[12rem]"
-        >
-          <blockquote className="font-serif text-2xl md:text-4xl leading-[1.25] text-ink italic">
-            {current.quote}
-          </blockquote>
-          <figcaption className="mt-6 text-sm text-ink-dim">
-            {/* The avatar + author block is one clickable unit when the
-                author has a LinkedIn URL set in Sanity — opens the profile
-                in a new tab. Without a URL the same content renders as a
-                non-interactive block (no anchor wrapper) so the carousel
-                still reads correctly. */}
-            {(() => {
-              const inner = (
-                <>
-                  {current.imageUrl ? (
-                    /* Native <img> rather than next/image — the URL is
-                     * cross-origin (Sanity CDN) and we already have
-                     * `images.unoptimized: true`, so next/image would
-                     * just hand off without optimization. The avatar is
-                     * tiny (48px) and lazy-loaded; no LCP concern. */
-                    <img
-                      src={current.imageUrl}
-                      alt={current.imageAlt || current.author}
-                      width={48}
-                      height={48}
-                      loading="lazy"
-                      decoding="async"
-                      className="h-12 w-12 flex-shrink-0 rounded-full object-cover border border-line"
-                    />
-                  ) : null}
-                  <div className="min-w-0">
-                    <div className="text-ink group-hover:text-accent transition-colors">
-                      {current.author}
-                    </div>
-                    {current.org ? (
-                      <div className="text-ink-dim/80">{current.org}</div>
-                    ) : null}
+        {/* Masonry: CSS columns flow cards top-to-bottom then wrap, packing
+            by height. `break-inside-avoid` keeps each card whole. `gap` is
+            emulated with column-gap + per-card bottom margin (CSS columns
+            don't honour flex/grid gap). */}
+        <div className={`mt-12 [column-gap:1.5rem] ${columnsClass}`}>
+          {items.map((item, i) => {
+            const attribution = (
+              <>
+                {item.imageUrl ? (
+                  <img
+                    src={item.imageUrl}
+                    alt={item.imageAlt || item.author}
+                    width={56}
+                    height={56}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-14 w-14 flex-shrink-0 rounded-full object-cover border border-line"
+                  />
+                ) : null}
+                <div className="min-w-0">
+                  <div className="text-base font-medium text-ink group-hover:text-accent transition-colors md:text-lg">
+                    {item.author}
                   </div>
-                </>
-              );
-              return current.linkedinUrl ? (
-                <a
-                  href={current.linkedinUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`${current.author} on LinkedIn`}
-                  className="group inline-flex items-center gap-4 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
-                >
-                  {inner}
-                </a>
-              ) : (
-                <div className="flex items-center gap-4">{inner}</div>
-              );
-            })()}
-          </figcaption>
-        </div>
-
-        <div className="mt-10 flex items-center justify-between">
-          <div className="flex gap-2">
-            {items.map((it, i) => (
-              <button
-                key={it.id}
-                type="button"
-                onClick={() => go(i)}
-                aria-label={`Show testimonial ${i + 1} of ${items.length}`}
-                aria-current={i === index ? "true" : undefined}
-                className="inline-flex h-11 w-11 items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-              >
-                <span
-                  className={`block h-1.5 rounded-full transition-all ${
-                    i === index ? "w-8 bg-accent" : "w-1.5 bg-line"
-                  }`}
-                />
-              </button>
-            ))}
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => go(index - 1)}
-              aria-label={dict.testimonials.prev}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line text-ink-dim transition-colors hover:text-ink hover:border-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <path d="M15 18l-6-6 6-6" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              onClick={() => go(index + 1)}
-              aria-label={dict.testimonials.next}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line text-ink-dim transition-colors hover:text-ink hover:border-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <path d="M9 6l6 6-6 6" />
-              </svg>
-            </button>
-          </div>
+                  {item.org ? (
+                    <div className="text-sm text-ink-dim/80 leading-snug">
+                      {item.org}
+                    </div>
+                  ) : null}
+                </div>
+              </>
+            );
+            return (
+              <div key={item.id} className="mb-6 break-inside-avoid">
+                <Reveal direction="up" delay={Math.min(i * 0.04, 0.25)}>
+                  <figure className="rounded-2xl border border-line bg-bg-elev/30 p-6 backdrop-blur-sm transition hover:border-accent/50">
+                    <span
+                      aria-hidden
+                      className="block font-serif text-4xl leading-[0.6] text-accent/40 select-none"
+                    >
+                      &ldquo;
+                    </span>
+                    <blockquote className="mt-3 font-serif text-base leading-relaxed text-ink md:text-lg">
+                      {item.quote}
+                    </blockquote>
+                    <figcaption className="mt-5 border-t border-line/70 pt-4 text-sm text-ink-dim">
+                      {item.linkedinUrl ? (
+                        <a
+                          href={item.linkedinUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`${item.author} on LinkedIn`}
+                          className="group flex items-center gap-3 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+                        >
+                          {attribution}
+                        </a>
+                      ) : (
+                        <div className="flex items-center gap-3">{attribution}</div>
+                      )}
+                    </figcaption>
+                  </figure>
+                </Reveal>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

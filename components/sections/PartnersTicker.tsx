@@ -24,9 +24,14 @@ type TickerRow = {
   key: string;
   name: string;
   website: string;
+  /** Dark-theme logo URL (empty if none uploaded). */
   logoUrl: string;
   logoWidth: number;
   logoHeight: number;
+  /** Light-theme logo URL. Falls back to `logoUrl` when not uploaded. */
+  logoLightUrl: string;
+  logoLightWidth: number;
+  logoLightHeight: number;
 };
 
 export function PartnersTicker({
@@ -43,6 +48,12 @@ export function PartnersTicker({
           logoUrl: p.logoUrl,
           logoWidth: p.logoWidth,
           logoHeight: p.logoHeight,
+          // Fall back to the dark logo when no light variant was uploaded
+          // — partners with only one logo then show the same image in both
+          // themes, which is the safer default than rendering nothing.
+          logoLightUrl: p.logoLightUrl || p.logoUrl,
+          logoLightWidth: p.logoLightWidth || p.logoWidth,
+          logoLightHeight: p.logoLightHeight || p.logoHeight,
         }))
       : dict.partnersTicker.items.map((name, i) => ({
           key: `dict-${i}`,
@@ -51,6 +62,9 @@ export function PartnersTicker({
           logoUrl: "",
           logoWidth: 0,
           logoHeight: 0,
+          logoLightUrl: "",
+          logoLightWidth: 0,
+          logoLightHeight: 0,
         }));
   const heading = content?.heading ?? dict.partnersTicker.heading;
   // Duplicate the set so the translate animation loops seamlessly.
@@ -59,43 +73,55 @@ export function PartnersTicker({
   return (
     <section
       aria-label={heading}
-      // `.partners-band` (globals.css) paints the strip in
-      // `--color-accent` for dark theme so the yellow surface lets dark
-      // partner logos pop. In light theme that same class flattens to
-      // transparent, so the section inherits the cream page bg — no
-      // saturated band on cream, which would clash with the rest of the
-      // light-theme rhythm.
-      className="partners-band relative overflow-hidden border-y border-line py-10 md:py-14 lg:py-18"
+      // Bare strip — inherits the normal page bg (`bg-bg`) so it blends
+      // with the sections above and below in both themes. Visibility for
+      // dark logos is handled per-partner via the `logoLight` Sanity
+      // field: authors upload a dark variant for the dark theme and a
+      // light variant for the cream-bg light theme. Falls back to the
+      // single uploaded logo when only one variant exists.
+      className="relative overflow-hidden border-y border-line bg-bg py-8 md:py-12 lg:py-16"
     >
       <div
         className="group relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]"
       >
         <div className="ticker-track flex w-max items-center gap-12 md:gap-16 px-8 motion-reduce:animation-none">
           {loop.map((row, i) => {
-            // No tile chip anymore — logos sit directly on the yellow band.
-            // Dark/colourful logos read against the bright surface; the
-            // hover lift gives interactive entries a tactile cue without
-            // adding chrome.
+            // No tile chips — logos sit directly on the page bg in both
+            // themes, with theme-appropriate variants supplied by Sanity.
             const itemClass =
               "shrink-0 inline-flex items-center justify-center transition";
-            const inner = row.logoUrl ? (
-              /* Plain <img> — `next/image` fights the duplicated ticker
-               * track's layout calc. The image is small + lazy-loaded so
-               * CLS isn't a concern, and `images.unoptimized: true` means
-               * next/image wouldn't optimize anyway under static export. */
-              <img
-                src={row.logoUrl}
-                alt={row.name}
-                width={row.logoWidth || undefined}
-                height={row.logoHeight || undefined}
-                loading="lazy"
-                decoding="async"
-                className="h-12 md:h-16 w-auto"
-              />
+            const inner = row.logoUrl || row.logoLightUrl ? (
+              /* Both <img> tags render in DOM; CSS `display` swap (in
+               * globals.css under `.partner-logo-light` / `.partner-logo-dark`)
+               * picks whichever matches `[data-theme]`. Plain <img>
+               * rather than `next/image` — `next/image` fights the
+               * duplicated ticker track's layout calc, and we have
+               * `images.unoptimized: true` (static export) so there's
+               * nothing to gain from the wrapper. */
+              <>
+                <img
+                  src={row.logoUrl}
+                  alt={row.name}
+                  width={row.logoWidth || undefined}
+                  height={row.logoHeight || undefined}
+                  loading="lazy"
+                  decoding="async"
+                  className="partner-logo-dark h-10 md:h-12 w-auto"
+                />
+                <img
+                  src={row.logoLightUrl}
+                  alt={row.name}
+                  width={row.logoLightWidth || undefined}
+                  height={row.logoLightHeight || undefined}
+                  loading="lazy"
+                  decoding="async"
+                  className="partner-logo-light h-10 md:h-12 w-auto"
+                />
+              </>
             ) : (
-              // Text fallback uses dark ink so it reads against the warm
-              // yellow strip regardless of theme.
-              <span className="font-display text-2xl md:text-3xl tracking-tight text-[#1a1620]">
+              // Text fallback — uses the ink token so it reads in both
+              // themes (light text on dark bg, dark text on cream bg).
+              <span className="font-display text-2xl md:text-3xl tracking-tight text-ink-dim/90 hover:text-ink transition-colors">
                 {row.name}
               </span>
             );
@@ -107,7 +133,7 @@ export function PartnersTicker({
                 rel="noopener noreferrer"
                 title={row.name}
                 aria-label={row.name}
-                className={`${itemClass} hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1a1620] rounded-sm`}
+                className={`${itemClass} hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-bright rounded-sm`}
               >
                 {inner}
               </a>

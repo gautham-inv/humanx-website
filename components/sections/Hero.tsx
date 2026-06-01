@@ -43,7 +43,7 @@ export function Hero({ dict, locale, content }: HeroProps) {
         <HeroImage fill alt={portraitAlt} />
       </div>
 
-      <div className="relative z-10 mx-auto flex w-full max-w-[1300px] flex-col lg:pb-12">
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col lg:pb-12">
         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-16">
           {/* Mobile portrait removed — on small screens the hero is text-only;
               the absolute desktop image kicks in at lg+ via the wrapper above. */}

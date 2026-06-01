@@ -19,7 +19,7 @@ export function WhoWeAre({ dict, content }: WhoWeAreProps) {
 
   return (
     <section className="relative border-t border-line px-6 py-16 md:py-24 lg:py-32">
-      <div className="mx-auto max-w-[1300px]">
+      <div className="mx-auto max-w-6xl">
         <div className="grid grid-cols-1 gap-16 lg:grid-cols-[1fr_1.4fr] lg:gap-24">
           {/* Left column — intro + CTA, sticky on desktop */}
           <div className="lg:sticky lg:top-24 lg:self-start">

@@ -15,9 +15,11 @@ import {
 } from "@/lib/sanity/loaders";
 import { Hero } from "@/components/sections/Hero";
 import { WhoWeAre } from "@/components/sections/WhoWeAre";
+import { Credentials } from "@/components/sections/Credentials";
 import { Assessment } from "@/components/sections/Assessment";
+import { PullQuote } from "@/components/sections/PullQuote";
 import { Events } from "@/components/sections/Events";
-import { OnStage } from "@/components/sections/OnStage";
+import { OnStageTeaser } from "@/components/sections/OnStageTeaser";
 import { PartnersTicker } from "@/components/sections/PartnersTicker";
 import {
   Testimonials,
@@ -86,15 +88,17 @@ export default async function Home({
   return (
     <main id="main">
       <Hero dict={dict} locale={locale} content={homepage?.hero} />
-      <WhoWeAre dict={dict} content={homepage?.whoWeAre} />
-      <Assessment dict={dict} content={homepage?.assessment} />
-      <Events dict={dict} locale={locale} items={events} content={eventsPage} />
-      <OnStage dict={dict} items={videos} content={homepage?.onStage} />
+      <OnStageTeaser dict={dict} locale={locale} items={videos} />
       <PartnersTicker
         dict={dict}
         items={partners}
         content={homepage?.partners}
       />
+      <WhoWeAre dict={dict} content={homepage?.whoWeAre} />
+      <Credentials dict={dict} />
+      <Assessment dict={dict} content={homepage?.assessment} />
+      <PullQuote dict={dict} />
+      <Events dict={dict} locale={locale} items={events} content={eventsPage} />
       <Testimonials
         dict={dict}
         items={testimonials}

@@ -18,10 +18,6 @@
   --color-magenta: #c2186a;       /* X gradient end */
   --color-line: rgba(245,241,236,0.09);
   --color-on-accent: #0c0a16;     /* stable dark text on the orange button */
-  /* Cream tile used behind the brand wordmark in the navbar. Only meant to
-   * appear in dark theme — see `.brand-tile-chip` below, which flips to
-   * transparent under `[data-theme="light"]`. */
-  --color-brand-tile: #faf6ed;
 
   --font-sans: var(--font-geologica), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-geologica), ui-sans-serif, system-ui, sans-serif;
@@ -88,50 +84,31 @@
  * page background is already light enough for the multicolour wordmark to
  * read without any tile.
  * ------------------------------------------------------------- */
-.brand-tile-chip {
-  background-color: #faf6ed;
-  /* The first shadow lifts the tile off the dark nav strip; the inset
-   * shadow mimics Tailwind's `ring-1 ring-black/5` so the tile edge stays
-   * defined against any future bg variant. */
-  box-shadow:
-    0 2px 12px -6px rgba(0,0,0,0.45),
-    inset 0 0 0 1px rgba(0,0,0,0.05);
-}
-:root[data-theme="light"] .brand-tile-chip {
-  background-color: transparent;
-  box-shadow: none;
-}
+/* ---------------------------------------------------------------
+ * Navbar wordmark theme swap. Two logo files render in the DOM:
+ *   /human-logo-dark.webp  (designed for dark indigo bg)
+ *   /logo.webp             (the multicolour mark, designed for cream bg)
+ * CSS picks whichever matches the active theme by toggling `display`.
+ * Both <img> tags load so a runtime theme flip is instant.
+ * ------------------------------------------------------------- */
+.brand-logo-light { display: none; }
+.brand-logo-dark  { display: inline-block; }
+:root[data-theme="light"] .brand-logo-light { display: inline-block; }
+:root[data-theme="light"] .brand-logo-dark  { display: none; }
 
 /* ---------------------------------------------------------------
- * `.partners-band` — warm yellow strip behind the partners ticker. In
- * dark theme we paint the whole section in `--color-accent` (the same
- * brand token the testimonial quote-mark uses) so dark partner logos
- * pop without needing per-logo chips. In light theme the page bg is
- * already cream and a saturated accent strip would feel out of place,
- * so the band flattens to transparent and the section inherits the
- * normal page bg.
+ * Partner logo theme swap. The ticker renders both logo variants
+ * stacked; CSS picks whichever matches the active theme by toggling
+ * `display`. Both <img> tags load — that's intentional, so a runtime
+ * theme flip is instant without a network round-trip. The `none` branch
+ * still occupies zero box space, so the visible logo flows in its
+ * natural inline position.
  * ------------------------------------------------------------- */
-.partners-band {
-  background-color: var(--color-accent);
-}
-:root[data-theme="light"] .partners-band {
-  background-color: transparent;
-}
+.partner-logo-light { display: none; }
+.partner-logo-dark  { display: inline-block; }
+:root[data-theme="light"] .partner-logo-light { display: inline-block; }
+:root[data-theme="light"] .partner-logo-dark  { display: none; }
 
-
-/* Hero portrait — swap sources with [data-theme] (no JS; matches theme-init first paint). */
-.hero-portrait-light {
-  opacity: 0;
-}
-.hero-portrait-dark {
-  opacity: 1;
-}
-:root[data-theme="light"] .hero-portrait-light {
-  opacity: 1;
-}
-:root[data-theme="light"] .hero-portrait-dark {
-  opacity: 0;
-}
 
 @layer base {
   html, body {

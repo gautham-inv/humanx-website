@@ -33,6 +33,7 @@ import { createClient } from "@sanity/client";
 import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import path from "node:path";
+import { RECOMMENDATIONS } from "../lib/data/recommendations";
 
 const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "r3bmhb31";
 const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || "production";
@@ -208,6 +209,28 @@ async function buildTestimonials(): Promise<Doc[]> {
   }
 
   return docs;
+}
+
+// ---------- recommendations (LinkedIn endorsements, About page) -------------
+//
+// Pulled from the shared `lib/data/recommendations.ts` so the seeded docs and
+// the website fallback never drift. Avatars are NOT seeded — authors upload a
+// photo per recommendation in Studio (the card falls back to initials until
+// then). `body` is stored as localizedText with the same English text in both
+// locales (recommendations are kept in their original language).
+
+function buildRecommendations(): Doc[] {
+  return RECOMMENDATIONS.map((rec, i) => ({
+    _id: `recommendation-${rec.id}`,
+    _type: "recommendation",
+    name: rec.name,
+    headline: rec.headline,
+    date: rec.date,
+    relationship: rec.relationship,
+    body: locText(rec.body, rec.body),
+    linkedinUrl: rec.linkedinUrl,
+    order: i + 1,
+  }));
 }
 
 // ---------- events ----------------------------------------------------------
@@ -441,6 +464,63 @@ function buildEvents(): Doc[] {
           "Larcomar, Lima — 21 de octubre, 2025.",
       },
     },
+    // 8 — Expo Retail Iberoamérica · Madrid 2026 (UPCOMING)
+    {
+      slug: "expo-retail-iberoamerica-2026",
+      title: {
+        en: "HumanX Insights × ExpoRetail Iberoamérica",
+        es: "HumanX Insights × ExpoRetail Iberoamérica",
+      },
+      venue: { en: "Madrid, Spain", es: "Madrid, España" },
+      dateDisplay: { en: "June 18, 2026 · 10:00", es: "18 de junio, 2026 · 10:00" },
+      // 10:00 Madrid (CEST = UTC+2 in June) → 08:00 UTC.
+      startsAt: "2026-06-18T08:00:00.000Z",
+      summary: {
+        en: 'Keynote: "The blind spot of Retail."',
+        es: 'Conferencia: "El punto ciego del Retail."',
+      },
+      body: {
+        en:
+          "Join me in Madrid on June 18, 2026 at 10:00am for our keynote " +
+          "speaking participation:\n\n" +
+          "\"The blind spot of Retail\" — \"El punto ciego del Retail\".",
+        es:
+          "Únete a nosotros en Madrid el 18 de junio de 2026 a las 10:00 para " +
+          "nuestra ponencia magistral:\n\n" +
+          "\"El punto ciego del Retail\" — \"The blind spot of Retail\".",
+      },
+    },
+    // 9 — Retail Safari Madrid 2026 (UPCOMING — guest tour, day after Expo)
+    {
+      slug: "retail-safari-madrid-2026",
+      title: {
+        en: "HumanX Insights × Madrid Retail Experience",
+        es: "HumanX Insights × Experiencia de Retail Madrid",
+      },
+      venue: { en: "Madrid, Spain · Retail Safari", es: "Madrid, España · Retail Safari" },
+      // Date wasn't specified — slotted the day after the Expo keynote so
+      // the two reads as a paired Madrid trip. Author can refine in Studio.
+      dateDisplay: { en: "June 19, 2026", es: "19 de junio, 2026" },
+      startsAt: "2026-06-19T08:00:00.000Z",
+      summary: {
+        en: "A curated day across Madrid's most iconic and innovative stores, led by retail experts.",
+        es: "Un día curado por las tiendas más icónicas e innovadoras de Madrid, guiado por expertos del retail.",
+      },
+      body: {
+        en:
+          "Retail Safari Madrid — Iconic & Innovative Stores · Curated Experience · Led by Retail Experts.\n\n" +
+          "While in Madrid, join me for a one-day visiting the best of Madrid's " +
+          "retail ecosystem. Domingos Esteves and Mar Melero, retail experts, " +
+          "will take us across multiple innovating and iconic stores, allowing " +
+          "you to round a perfect trip to Spain.",
+        es:
+          "Retail Safari Madrid — Tiendas Icónicas e Innovadoras · Experiencia Curada · Guiada por Expertos del Retail.\n\n" +
+          "Mientras estés en Madrid, únete a un día visitando lo mejor del " +
+          "ecosistema retail de la ciudad. Domingos Esteves y Mar Melero, " +
+          "expertos del retail, nos llevarán por múltiples tiendas innovadoras " +
+          "e icónicas, para redondear un viaje perfecto a España.",
+      },
+    },
   ];
 
   return events.map((ev, i) => ({
@@ -653,6 +733,7 @@ async function seed() {
 
   const groups: { label: string; docs: Doc[] }[] = [
     { label: "testimonials", docs: await buildTestimonials() },
+    { label: "recommendations", docs: buildRecommendations() },
     { label: "events", docs: buildEvents() },
     { label: "videos", docs: buildVideos() },
     { label: "insights (LinkedIn)", docs: buildInsights() },
