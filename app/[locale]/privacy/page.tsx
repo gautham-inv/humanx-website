@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { locales, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { Reveal } from "@/components/motion/Reveal";
+import { pageMetadata } from "@/lib/seo/metadata";
 
 const SLUG = "privacy";
 
@@ -16,17 +17,13 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return {
+  return pageMetadata({
+    locale,
+    path: `/${SLUG}`,
     title: "Privacy · HumanX",
-    alternates: {
-      canonical: `/${locale}/${SLUG}`,
-      languages: {
-        en: `/en/${SLUG}`,
-        es: `/es/${SLUG}`,
-        "x-default": `/en/${SLUG}`,
-      },
-    },
-  };
+    description:
+      "How HumanX Insights collects, uses, and protects your personal data.",
+  });
 }
 
 export default async function PrivacyPage({

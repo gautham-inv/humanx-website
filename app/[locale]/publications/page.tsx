@@ -5,6 +5,7 @@ import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { loadPublicationsPage, loadPublications } from "@/lib/sanity/loaders";
 import { Reveal } from "@/components/motion/Reveal";
 import { GatedPublications } from "@/components/sections/GatedPublications";
+import { pageMetadata } from "@/lib/seo/metadata";
 
 const SLUG = "publications";
 
@@ -18,17 +19,13 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return {
+  return pageMetadata({
+    locale,
+    path: `/${SLUG}`,
     title: "Publications · HumanX",
-    alternates: {
-      canonical: `/${locale}/${SLUG}`,
-      languages: {
-        en: `/en/${SLUG}`,
-        es: `/es/${SLUG}`,
-        "x-default": `/en/${SLUG}`,
-      },
-    },
-  };
+    description:
+      "Published writing, research and features from HumanX on customer and employee experience, AI, and human-centered strategy for leaders.",
+  });
 }
 
 export default async function PublicationsPage({

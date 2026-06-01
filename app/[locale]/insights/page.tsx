@@ -5,6 +5,7 @@ import { locales, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { loadInsights, loadInsightsPage } from "@/lib/sanity/loaders";
 import { Reveal } from "@/components/motion/Reveal";
+import { pageMetadata } from "@/lib/seo/metadata";
 
 const SLUG = "insights";
 
@@ -18,17 +19,13 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return {
+  return pageMetadata({
+    locale,
+    path: `/${SLUG}`,
     title: "Insights · HumanX",
-    alternates: {
-      canonical: `/${locale}/${SLUG}`,
-      languages: {
-        en: `/en/${SLUG}`,
-        es: `/es/${SLUG}`,
-        "x-default": `/en/${SLUG}`,
-      },
-    },
-  };
+    description:
+      "Field notes and frameworks on customer and employee experience — practical thinking on making human experience the operating principle of your organization.",
+  });
 }
 
 // Decorative fallback when an item has no image yet. Each card pulls a brand

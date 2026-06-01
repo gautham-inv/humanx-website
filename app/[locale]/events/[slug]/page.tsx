@@ -6,6 +6,8 @@ import { locales, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { loadEvents, loadEventsPage } from "@/lib/sanity/loaders";
 import { Reveal } from "@/components/motion/Reveal";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { eventSchema } from "@/lib/seo/schema";
 
 /**
  * Dedicated event page at /[locale]/events/[slug].
@@ -133,6 +135,7 @@ export default async function EventDetailPage({
 
   return (
     <main id="main" className="relative">
+      <JsonLd data={eventSchema(event, locale as Locale)} />
       {/* HERO IMAGE — centered, contained "poster" presentation. Event
           posters often carry QR codes, dates, venue text — anything we'd
           crop with `object-cover` is information the visitor came for. So
