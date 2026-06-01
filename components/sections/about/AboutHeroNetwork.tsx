@@ -96,6 +96,9 @@ const DRIFT_AMPLITUDE = 1.6;
 const CURSOR_RADIUS = 22;
 const CURSOR_PULL_MAX = 3.4;
 const HOVER_RADIUS = 7;
+// World-unit width of each connection ribbon. Drawn as a thin filled quad
+// rather than a 1px WebGL line so edges stay visible in both themes.
+const LINE_THICKNESS = 0.5;
 
 // ---------- shaders -----------------------------------------------------
 
@@ -362,20 +365,24 @@ function ConnectionLine({
   state: NetworkState;
   onDissolved: (id: number) => void;
 }) {
-  const lineRef = useRef<THREE.Line>(null);
+  const meshRef = useRef<THREE.Mesh>(null);
   const matRef = useRef<THREE.ShaderMaterial>(null);
 
-  // Geometry — two vertices + a lineT attribute.
+  // Geometry — a 4-vertex quad (thin ribbon) + a lineT attribute. Vertices:
+  //   0 = from +perp   1 = from -perp   2 = to +perp   3 = to -perp
+  // lineT runs 0 at the "from" end → 1 at the "to" end, so the progressive
+  // draw shader (discard vT > uProgress) still reveals it end-to-end.
   const geometry = useMemo(() => {
     const g = new THREE.BufferGeometry();
     g.setAttribute(
       "position",
-      new THREE.BufferAttribute(new Float32Array([0, 0, 0, 0, 0, 0]), 3)
+      new THREE.BufferAttribute(new Float32Array(12), 3)
     );
     g.setAttribute(
       "lineT",
-      new THREE.BufferAttribute(new Float32Array([0, 1]), 1)
+      new THREE.BufferAttribute(new Float32Array([0, 0, 1, 1]), 1)
     );
+    g.setIndex([0, 1, 2, 2, 1, 3]);
     return g;
   }, []);
 
@@ -426,21 +433,33 @@ function ConnectionLine({
 
   // Update endpoint positions every frame to follow drifting nodes.
   useFrame(() => {
-    const line = lineRef.current;
+    const mesh = meshRef.current;
     const mat = matRef.current;
-    if (!line || !mat) return;
+    if (!mesh || !mat) return;
 
     const from = state.positions[conn.from];
     const to = state.positions[conn.to];
-    const arr = (line.geometry.attributes.position as THREE.BufferAttribute)
+    // Unit perpendicular to the segment, scaled to half the ribbon width.
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const px = (-dy / len) * (LINE_THICKNESS / 2);
+    const py = (dx / len) * (LINE_THICKNESS / 2);
+    const arr = (mesh.geometry.attributes.position as THREE.BufferAttribute)
       .array as Float32Array;
-    arr[0] = from.x;
-    arr[1] = from.y;
+    arr[0] = from.x + px; // 0: from +perp
+    arr[1] = from.y + py;
     arr[2] = 0;
-    arr[3] = to.x;
-    arr[4] = to.y;
+    arr[3] = from.x - px; // 1: from -perp
+    arr[4] = from.y - py;
     arr[5] = 0;
-    (line.geometry.attributes.position as THREE.BufferAttribute).needsUpdate =
+    arr[6] = to.x + px; // 2: to +perp
+    arr[7] = to.y + py;
+    arr[8] = 0;
+    arr[9] = to.x - px; // 3: to -perp
+    arr[10] = to.y - py;
+    arr[11] = 0;
+    (mesh.geometry.attributes.position as THREE.BufferAttribute).needsUpdate =
       true;
 
     // Hover emphasis: if the cursor is near either endpoint, boost.
@@ -464,11 +483,11 @@ function ConnectionLine({
     }
   });
 
-  // R3F: <line> primitive. JSX intrinsic 'line' collides with SVG <line>
-  // typing, so we use the lowercase primitive form and cast via attach.
+  // Thin ribbon quad (mesh) rather than a 1px <line> so the edge has a
+  // visible, theme-independent stroke width. frustumCulled off because the
+  // bounding sphere is computed from the initial (zeroed) vertices.
   return (
-    // @ts-expect-error - R3F intrinsic <line> primitive clashes with SVG <line>
-    <line ref={lineRef} geometry={geometry}>
+    <mesh ref={meshRef} geometry={geometry} frustumCulled={false}>
       <shaderMaterial
         ref={matRef}
         vertexShader={LINE_VERT}
@@ -476,8 +495,9 @@ function ConnectionLine({
         uniforms={uniforms}
         transparent
         depthWrite={false}
+        side={THREE.DoubleSide}
       />
-    </line>
+    </mesh>
   );
 }
 

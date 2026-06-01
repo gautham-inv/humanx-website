@@ -45,6 +45,10 @@ const ELECTRON_SPEED = 0.18; // rad/sec — one shared speed keeps it symmetric
 const ELECTRON_SIZE = 1.4;
 const NUCLEUS_SIZE = 2.8;
 const ORBIT_SEGMENTS = 128;
+// World-unit stroke width of each orbit ribbon. WebGL 1px lines render too
+// faint (especially on the cream light theme), so orbits are drawn as thin
+// filled bands instead — this thickness reads as a subtle, visible stroke.
+const ORBIT_THICKNESS = 0.7;
 const HOVER_RADIUS = 6; // world units within which the cursor brightens an electron
 const CURSOR_DRIFT_RADIUS = 14; // world units within which the cursor nudges electrons
 
@@ -73,6 +77,53 @@ function rotatePoint(lx: number, ly: number, rot: number): [number, number] {
   const c = Math.cos(rot);
   const s = Math.sin(rot);
   return [lx * c - ly * s, lx * s + ly * c];
+}
+
+/**
+ * Build a closed elliptical "ribbon" — a filled band of constant world-unit
+ * thickness following the ellipse curve. Used instead of a 1px lineLoop so the
+ * orbit stroke stays visible in both themes. Vertices are offset along the
+ * ellipse's outward normal (∝ (cosθ/a, sinθ/b)) by ±thickness/2.
+ */
+function makeEllipseRibbon(
+  a: number,
+  b: number,
+  thickness: number,
+  segments: number
+): THREE.BufferGeometry {
+  const half = thickness / 2;
+  const positions = new Float32Array((segments + 1) * 2 * 3);
+  const indices: number[] = [];
+  for (let i = 0; i <= segments; i++) {
+    const ang = (i / segments) * Math.PI * 2;
+    const cx = Math.cos(ang);
+    const sy = Math.sin(ang);
+    const px = a * cx;
+    const py = b * sy;
+    let nx = cx / a;
+    let ny = sy / b;
+    const nl = Math.hypot(nx, ny) || 1;
+    nx /= nl;
+    ny /= nl;
+    const o = i * 6;
+    positions[o + 0] = px - nx * half; // inner
+    positions[o + 1] = py - ny * half;
+    positions[o + 2] = 0;
+    positions[o + 3] = px + nx * half; // outer
+    positions[o + 4] = py + ny * half;
+    positions[o + 5] = 0;
+    if (i < segments) {
+      const inner = i * 2;
+      const outer = i * 2 + 1;
+      const innerNext = (i + 1) * 2;
+      const outerNext = (i + 1) * 2 + 1;
+      indices.push(inner, outer, innerNext, outer, outerNext, innerNext);
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  g.setIndex(indices);
+  return g;
 }
 
 // ─── shaders ─────────────────────────────────────────────────────────────
@@ -259,7 +310,7 @@ function OrbitLine({
     if (!matRef.current) return;
     // Match the AboutHeroNetwork edge baseline opacity so the visual
     // language is consistent across the two heroes.
-    const targetOpacity = 0.8;
+    const targetOpacity = 0.9;
     if (state.reduced) {
       matRef.current.uniforms.uOpacity.value = targetOpacity;
       return;
@@ -288,7 +339,7 @@ function OrbitLine({
   });
 
   return (
-    <lineLoop geometry={geometry} rotation={[0, 0, rotation]}>
+    <mesh geometry={geometry} rotation={[0, 0, rotation]}>
       <shaderMaterial
         ref={matRef}
         vertexShader={ORBIT_VERT}
@@ -296,8 +347,9 @@ function OrbitLine({
         uniforms={uniforms}
         transparent
         depthWrite={false}
+        side={THREE.DoubleSide}
       />
-    </lineLoop>
+    </mesh>
   );
 }
 
@@ -497,20 +549,12 @@ function CursorPicker({ state }: { state: SharedState }) {
 // ─── scene root ──────────────────────────────────────────────────────────
 
 function Scene({ state }: { state: SharedState }) {
-  // One ellipse geometry, shared by all six orbits — each <OrbitLine> just
-  // rotates it about z. Cheap and keeps the rings perfectly congruent.
-  const ellipseGeometry = useMemo(() => {
-    const positions = new Float32Array(ORBIT_SEGMENTS * 3);
-    for (let i = 0; i < ORBIT_SEGMENTS; i++) {
-      const angle = (i / ORBIT_SEGMENTS) * Math.PI * 2;
-      positions[i * 3 + 0] = Math.cos(angle) * ELLIPSE_A;
-      positions[i * 3 + 1] = Math.sin(angle) * ELLIPSE_B;
-      positions[i * 3 + 2] = 0;
-    }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    return g;
-  }, []);
+  // One ellipse ribbon geometry, shared by all six orbits — each <OrbitLine>
+  // just rotates it about z. Cheap and keeps the rings perfectly congruent.
+  const ellipseGeometry = useMemo(
+    () => makeEllipseRibbon(ELLIPSE_A, ELLIPSE_B, ORBIT_THICKNESS, ORBIT_SEGMENTS),
+    []
+  );
 
   useEffect(() => () => ellipseGeometry.dispose(), [ellipseGeometry]);
 
