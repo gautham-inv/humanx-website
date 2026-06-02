@@ -177,6 +177,7 @@ export const videosQuery = /* groq */ `
     "id": _id,
     title,
     caption,
+    summary,
     youtubeId,
     publishedAt
   }
@@ -186,6 +187,7 @@ export type VideoDoc = {
   id: string;
   title: { en?: string; es?: string };
   caption?: { en?: string; es?: string };
+  summary?: { en?: string; es?: string };
   youtubeId: string;
   publishedAt?: string;
 };

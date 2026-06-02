@@ -10,6 +10,8 @@ import { GlobalSpeaking } from "@/components/sections/about/GlobalSpeaking";
 import { VideoGrid } from "@/components/sections/on-stage/VideoGrid";
 import { WorldMap, type SpeakingPin } from "@/components/sections/on-stage/WorldMap";
 import { resolveVideos } from "@/components/sections/on-stage/resolve-videos";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { videoObjectSchema } from "@/lib/seo/schema";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 const SLUG = "on-stage";
@@ -75,6 +77,9 @@ export default async function OnStagePage({
 
   return (
     <main id="main">
+      {resolved.length > 0 ? (
+        <JsonLd data={resolved.map((v) => videoObjectSchema(v))} />
+      ) : null}
       {/* HERO */}
       <section className="relative px-6 pt-14 pb-10 md:pt-24 md:pb-14 lg:pt-28 lg:pb-16">
         <div className="mx-auto max-w-3xl text-center">

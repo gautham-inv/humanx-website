@@ -208,7 +208,14 @@ export type VideoItem = {
   id: string;
   title: string;
   caption: string;
+  /** One-sentence talk summary — maps to VideoObject `description`.
+   * Empty when the author hasn't written one; schema then falls back to
+   * the caption. */
+  summary: string;
   youtubeId: string;
+  /** ISO date the talk was published — maps to VideoObject `uploadDate`.
+   * Empty when the author hasn't set it on the Sanity `video` doc. */
+  publishedAt: string;
 };
 
 export async function loadVideos(locale: Locale): Promise<VideoItem[]> {
@@ -219,7 +226,9 @@ export async function loadVideos(locale: Locale): Promise<VideoItem[]> {
         id: row.id,
         title: pickLoc(row.title, locale),
         caption: pickLoc(row.caption, locale),
+        summary: pickLoc(row.summary, locale),
         youtubeId: row.youtubeId,
+        publishedAt: row.publishedAt ?? "",
       }))
       .filter((row) => row.title && row.youtubeId);
   } catch (err) {

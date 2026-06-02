@@ -1,5 +1,5 @@
 import { SITE_URL, SITE_NAME } from "@/lib/seo/metadata";
-import type { EventItem } from "@/lib/sanity/loaders";
+import type { EventItem, VideoItem } from "@/lib/sanity/loaders";
 
 /**
  * Schema.org JSON-LD builders. Rendered via <JsonLd> as
@@ -71,5 +71,45 @@ export function eventSchema(event: EventItem, locale: string) {
     url: `${SITE_URL}/${locale}/events/${event.slug}`,
     organizer: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
     performer: { "@type": "Person", name: "Ramon Portilla" },
+  };
+}
+
+/**
+ * One `Service` node per practice on /services. Accepts the same flat
+ * `{ title, body }` rows the page already renders, so it works whether the
+ * list came from Sanity or the dict fallback.
+ */
+export function servicesSchema(
+  items: ReadonlyArray<{ title: string; body: string }>,
+  locale: string
+) {
+  return items.map((item) => ({
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: item.title,
+    description: item.body,
+    serviceType: item.title,
+    provider: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+    areaServed: "Worldwide",
+    url: `${SITE_URL}/${locale}/services`,
+  }));
+}
+
+/**
+ * `VideoObject` for a YouTube-hosted talk. Thumbnail + embed/content URLs are
+ * derived from the YouTube id. `uploadDate` is only emitted when the video doc
+ * carries `publishedAt` — it's the one field Google requires for video rich
+ * results, so authors should set it in Sanity to unlock eligibility.
+ */
+export function videoObjectSchema(video: VideoItem) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    name: video.title,
+    description: video.summary || video.caption || video.title,
+    thumbnailUrl: `https://i.ytimg.com/vi/${video.youtubeId}/hqdefault.jpg`,
+    embedUrl: `https://www.youtube.com/embed/${video.youtubeId}`,
+    contentUrl: `https://www.youtube.com/watch?v=${video.youtubeId}`,
+    ...(video.publishedAt ? { uploadDate: video.publishedAt } : {}),
   };
 }

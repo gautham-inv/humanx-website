@@ -29,7 +29,7 @@ export function Assessment({ dict, content }: AssessmentProps) {
     >
       <div className="mx-auto max-w-6xl">
         <Reveal direction="up">
-          <div className="grid gap-10 lg:grid-cols-12 lg:items-end">
+          <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
             <div className="lg:col-span-7">
               <div className="mb-6 text-xs uppercase tracking-[0.3em] text-ink-dim">
                 <span className="mr-3 inline-block h-px w-8 bg-accent align-middle" />
