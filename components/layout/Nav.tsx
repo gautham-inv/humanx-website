@@ -17,11 +17,15 @@ type NavKey =
   | "insights"
   | "publications";
 
+// Order reflects the intended hierarchy: lead with who/what, then the thought
+// leadership (insights), the speaking platform (on-stage), the dated calendar
+// (events), and finally publications. On-stage sits before events because it's
+// the broader speaking/consulting story; events is the dated subset.
 const NAV_ITEMS: NavKey[] = [
   "about",
   "services",
-  "events",
   "on-stage",
+  "events",
   "insights",
   "publications",
 ];
@@ -88,7 +92,7 @@ export function Nav({ locale, dict }: { locale: Locale; dict: Dictionary }) {
             (h-9/h-10 vs h-8/h-9) makes the two read at the same visual size.
             Robust long-term fix: re-export both with matched padding. */}
         <Image
-          src="/human-logo-dark.webp"
+          src="/logo-dark.webp"
           alt="HumanX"
           width={180}
           height={52}

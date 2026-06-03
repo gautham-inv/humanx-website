@@ -1,7 +1,12 @@
 import type { ReactNode } from "react";
 import { Reveal } from "@/components/motion/Reveal";
 
-type Entry = { readonly name: string; readonly location: string };
+type Entry = {
+  readonly name: string;
+  readonly location: string;
+  /** Optional month/year the talk took place, shown beneath the location. */
+  readonly date?: string;
+};
 type Region = { readonly region: string; readonly entries: readonly Entry[] };
 
 type GlobalSpeakingProps = {
@@ -72,6 +77,11 @@ export function GlobalSpeaking({ eyebrow, title, body, regions, map }: GlobalSpe
                       </p>
                       {e.location ? (
                         <p className="mt-0.5 text-sm text-ink-dim">{e.location}</p>
+                      ) : null}
+                      {e.date ? (
+                        <p className="mt-1 text-xs uppercase tracking-[0.18em] text-accent/80">
+                          {e.date}
+                        </p>
                       ) : null}
                     </li>
                   ))}

@@ -74,9 +74,17 @@ export const en = {
       "Show me the Caixa Bank talk",
     ],
   },
-  partnersTicker: {
+  clientsTicker: {
     eyebrow: "Trusted by",
-    heading: "Operators we've shipped with",
+    heading: "Trusted by",
+    // Client brand names live in Sanity (the `client` document type). This
+    // fallback stays empty so the homepage clients strip only renders once
+    // real clients are seeded — no placeholder brands ever ship.
+    items: [] as string[],
+  },
+  partnersTicker: {
+    eyebrow: "In good company",
+    heading: "Our partners",
     items: [
       "Goji",
       "HubEngage",
@@ -159,6 +167,27 @@ export const en = {
     body: "Hundreds of leaders in the room, across three continents. Watch the keynotes in full, and see where Ramon has taken the stage.",
     videosTitle: "Recorded keynotes",
     videosBody: "Full talks, unedited.",
+    conferencesTitle: "Major conferences",
+    conferencesBody: "The summits and congresses where Ramon has shared the HumanX perspective.",
+    areasTitle: "Areas of expertise",
+    areasItems: [
+      { iconKey: "cx", label: "Customer Experience" },
+      { iconKey: "ex", label: "Employee Experience" },
+      { iconKey: "human-experience", label: "Human Experience Strategy" },
+      { iconKey: "retail", label: "Retail Strategy" },
+      { iconKey: "data", label: "Data & Insight Storytelling" },
+      { iconKey: "leadership", label: "Leadership & Talent" },
+    ],
+    speakingExpEyebrow: "Global speaking experience",
+    speakingExpTitle: "Stages across three continents",
+    speakingExpBody:
+      "Ramon has delivered keynotes and led forums for retailers, banks, business schools, and trade institutions across North America, Europe, and Latin America — turning human-experience strategy into ideas audiences apply the next day.",
+    cta: {
+      eyebrow: "Work with HumanX",
+      title: "Bring Ramon to your stage",
+      body: "Keynotes, consulting, workshops, and partnerships. One inbox for all of it — tell us what you're planning and we'll reply within two working days.",
+      label: "Start a conversation",
+    },
   },
   // PLACEHOLDER COPY — replace `badge.name`/`badge.note` with Ramon's
   // actual recognition wording. The stats are pulled from his real bio.
@@ -239,40 +268,43 @@ export const en = {
       eyebrow: "Featured insight",
       title: "Ramon on the human experience",
       body: "A short conversation on how human-centered strategy turns customer and employee experience into loyalty and growth.",
-      youtubeId: "dZ-HM16fV10",
+      youtubeId: "C4hOP-oZbp0",
+      blogUrl:
+        "https://www.startupdials.com/blog/from-walmart-to-your-startup-insider-customer-research-tactics-for-startup?utm_source=chatgpt.com",
+      blogLabel:
+        "From Walmart to Your Startup: Insider Customer Research Tactics for Startup",
     },
 
     // Speaking list seeded from Ramon's real recent engagements (the same
     // ones in the events dataset). Add more in Studio → About → Global
     // Speaking as the portfolio grows.
     speaking: {
-      eyebrow: "On stages worldwide",
       title: "Where Ramon takes the stage",
       body: "Keynotes and forums across three continents — for retailers, banks, business schools, and trade institutions.",
       regions: [
         {
           region: "North America",
           entries: [
-            { name: "Grand Retail Show", location: "Chantilly, VA, USA" },
-            { name: "The Empowerment Forum — Serve 2 Perform", location: "Bentonville, AR, USA" },
-            { name: "Women in International Trade (OWIT)", location: "Webinar" },
-            { name: "ESOMAR · MRII · CRIC", location: "Webinar" },
+            { name: "Grand Retail Show", location: "Chantilly, VA, USA", date: "May 2025" },
+            { name: "The Empowerment Forum — Serve 2 Perform", location: "Bentonville, AR, USA", date: "Oct 2025" },
+            { name: "Women in International Trade (OWIT)", location: "Webinar", date: "Aug 2024" },
+            { name: "ESOMAR · MRII · CRIC", location: "Webinar", date: "Jul 2024" },
           ],
         },
         {
           region: "Europe",
           entries: [
-            { name: "ExpoRetail Iberoamérica", location: "Madrid, Spain" },
-            { name: "Caixa Bank Consumer & Payments", location: "Madrid, Spain" },
-            { name: "Asociación Española de Retail — Horizons", location: "Madrid, Spain" },
+            { name: "ExpoRetail Iberoamérica", location: "Madrid, Spain", date: "Jun 2026" },
+            { name: "Caixa Bank Consumer & Payments", location: "Madrid, Spain", date: "Oct 2024" },
+            { name: "Asociación Española de Retail — Horizons", location: "Madrid, Spain", date: "Jun 2024" },
           ],
         },
         {
           region: "Latin America",
           entries: [
-            { name: "Summit CX", location: "Lima, Peru" },
-            { name: "Pacífico Business School — Intl. Retail Forum", location: "Lima, Peru" },
-            { name: "Góndola Conference", location: "Cartagena, Colombia" },
+            { name: "Summit CX", location: "Lima, Peru", date: "Oct 2025" },
+            { name: "Pacífico Business School — Intl. Retail Forum", location: "Lima, Peru", date: "Oct 2024" },
+            { name: "Góndola Conference", location: "Cartagena, Colombia", date: "Nov 2023" },
           ],
         },
       ],
@@ -370,6 +402,8 @@ export const en = {
     title: "Notes from the field",
     body: "Short writes, talks, and data points pulled from active engagements. New entries land roughly every other week.",
     listTitle: "Latest",
+    linkedinLabel: "Follow Ramon on LinkedIn",
+    linkedinUrl: "https://www.linkedin.com/in/ramon-portilla-627b064/",
     items: [
       {
         id: "i1",

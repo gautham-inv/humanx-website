@@ -19,6 +19,8 @@ export function resolveVideos(
       id: ev.id,
       title: ev.title,
       caption: `${ev.venue} · ${ev.date}`,
+      summary: "",
       youtubeId: ev.youtubeId,
+      publishedAt: ev.startsAt ?? "",
     }));
 }

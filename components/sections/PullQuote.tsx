@@ -1,9 +1,13 @@
 import Image from "next/image";
 import { Reveal } from "@/components/motion/Reveal";
-import type { Dictionary } from "@/lib/i18n/dictionaries/en";
 
 type PullQuoteProps = {
-  dict: Dictionary;
+  quote: string;
+  author: string;
+  role: string;
+  /** Portrait image URL — a Sanity CDN url or a local /public path. */
+  imageSrc: string;
+  imageAlt: string;
 };
 
 /**
@@ -14,13 +18,11 @@ type PullQuoteProps = {
  * orange → violet → magenta diagonal gradient as the homepage contact CTA,
  * faded into the page background, so it reads consistently in either theme.
  *
- * Content is dict-driven (`dict.pullQuote`). The quote is placeholder copy
- * synthesized from Ramon's stated values — see the note in en.ts — and
- * should be swapped for his own words.
+ * Presentational: content is passed in by the host page (homepage uses the
+ * dict's `pullQuote`; /services pulls from the servicesPage Sanity singleton),
+ * so the same design renders on multiple pages with different copy.
  */
-export function PullQuote({ dict }: PullQuoteProps) {
-  const t = dict.pullQuote;
-
+export function PullQuote({ quote, author, role, imageSrc, imageAlt }: PullQuoteProps) {
   return (
     <section
       aria-label="Quote"
@@ -47,28 +49,29 @@ export function PullQuote({ dict }: PullQuoteProps) {
         }}
       />
 
-      <div className="mx-auto grid w-full max-w-6xl items-center gap-12 lg:grid-cols-[1fr_1fr] lg:gap-16">
-        {/* Quote */}
-        <figure className="relative order-2 lg:order-1">
+      <div className="mx-auto grid w-full max-w-6xl items-center gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20">
+        {/* Quote — kept to a compact column so the words read as a tight
+            editorial block rather than sprawling across the half. */}
+        <figure className="relative order-2 max-w-md lg:order-1 lg:self-start lg:pt-6">
           <span
             aria-hidden
-            className="pointer-events-none absolute -left-2 -top-14 select-none font-serif text-[9rem] leading-none text-accent/25 md:-top-20 md:text-[15rem]"
+            className="pointer-events-none absolute -left-2 -top-10 select-none font-serif text-[6rem] leading-none text-accent/25 md:-top-14 md:text-[9rem]"
           >
             &ldquo;
           </span>
           <Reveal direction="up">
-            <blockquote className="relative font-highlight text-[clamp(1.9rem,4.2vw,3.6rem)] italic leading-[1.15] tracking-tight">
-              {t.quote}
+            <blockquote className="relative font-highlight text-[clamp(1.5rem,2.6vw,2.4rem)] italic leading-[1.2] tracking-tight">
+              {quote}
             </blockquote>
           </Reveal>
           <Reveal direction="up" delay={0.1}>
-            <figcaption className="mt-10 flex flex-col gap-3">
+            <figcaption className="mt-8 flex flex-col gap-3">
               <span className="h-px w-12 bg-accent" />
               <span className="font-display text-sm uppercase tracking-[0.25em]">
-                {t.author}
+                {author}
               </span>
               <span className="text-xs uppercase tracking-[0.2em] opacity-60">
-                {t.role}
+                {role}
               </span>
             </figcaption>
           </Reveal>
@@ -76,12 +79,12 @@ export function PullQuote({ dict }: PullQuoteProps) {
 
         {/* Portrait */}
         <Reveal direction="up" delay={0.05} className="order-1 lg:order-2">
-          <div className="relative mx-auto aspect-[4/5] w-full max-w-md overflow-hidden rounded-[var(--radius-card)] border border-line shadow-2xl lg:max-w-xl">
+          <div className="relative mx-auto aspect-[4/5] w-full max-w-md overflow-hidden rounded-[var(--radius-card)] border border-line shadow-2xl lg:aspect-[5/6] lg:max-w-2xl">
             <Image
-              src="/quote-image.jpg"
-              alt={t.imageAlt}
+              src={imageSrc}
+              alt={imageAlt}
               fill
-              sizes="(min-width: 1024px) 28rem, (min-width: 768px) 24rem, 100vw"
+              sizes="(min-width: 1024px) 42rem, (min-width: 768px) 24rem, 100vw"
               className="object-cover"
             />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />

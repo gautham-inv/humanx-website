@@ -33,6 +33,7 @@ import { createClient } from "@sanity/client";
 import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { RECOMMENDATIONS } from "../lib/data/recommendations";
 
 const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "r3bmhb31";
@@ -241,7 +242,7 @@ function buildRecommendations(): Doc[] {
 // registrationUrl. Images are NOT seeded — authors upload them per event
 // via Studio because we don't have the source files on disk.
 
-function buildEvents(): Doc[] {
+export function buildEvents(): Doc[] {
   type EventSeed = {
     slug: string;
     title: { en: string; es: string };
@@ -519,6 +520,166 @@ function buildEvents(): Doc[] {
           "ecosistema retail de la ciudad. Domingos Esteves y Mar Melero, " +
           "expertos del retail, nos llevarán por múltiples tiendas innovadoras " +
           "e icónicas, para redondear un viaje perfecto a España.",
+      },
+    },
+    // 10 — 3rd Retail Media Summit · Chile 2026 (UPCOMING)
+    {
+      slug: "retail-media-summit-2026",
+      title: {
+        en: "HumanX Insights on Retail Media and Customer Engagement",
+        es: "HumanX Insights sobre Retail Media y Compromiso del Cliente",
+      },
+      venue: {
+        en: "Chile · 3rd Retail Media Summit",
+        es: "Chile · 3er Retail Media Summit",
+      },
+      dateDisplay: { en: "July 28, 2026", es: "28 de julio de 2026" },
+      startsAt: "2026-07-28T14:00:00.000Z",
+      summary: {
+        en: "Retail leaders gathered to explore the growing impact of retail media networks and customer-centric engagement strategies.",
+        es: "Líderes del retail se reunieron para analizar el impacto creciente de las redes de retail media y las estrategias centradas en el cliente.",
+      },
+      body: {
+        en:
+          "At the 3rd Retail Media Summit in Santiago, HumanX Insights shared " +
+          "perspectives on the evolution of retail media and its role in shaping " +
+          "customer relationships.\n\nThe session highlighted how organizations can " +
+          "combine customer understanding, employee engagement, and data-driven " +
+          "decision-making to create sustainable competitive advantages in an " +
+          "increasingly connected retail ecosystem.",
+        es:
+          "En el 3er Retail Media Summit de Santiago, HumanX Insights compartió " +
+          "perspectivas sobre la evolución del retail media y su papel en la " +
+          "construcción de relaciones con los clientes.\n\nLa sesión destacó cómo " +
+          "las organizaciones pueden combinar conocimiento del cliente, compromiso " +
+          "de los empleados y decisiones basadas en datos para crear ventajas " +
+          "competitivas sostenibles en un ecosistema retail cada vez más conectado.",
+      },
+    },
+    // 11 — 4th Congreso AECOC Empleo y Talento · Spain 2026 (UPCOMING)
+    {
+      slug: "aecoc-empleo-talento-2026",
+      title: {
+        en: "HumanX Insights on Talent as a Competitive Advantage",
+        es: "HumanX Insights sobre el Talento como Ventaja Competitiva",
+      },
+      venue: {
+        en: "Spain · 4th AECOC Employment & Talent Congress",
+        es: "España · 4º Congreso AECOC Empleo y Talento",
+      },
+      dateDisplay: { en: "November 5, 2026", es: "5 de noviembre de 2026" },
+      startsAt: "2026-11-05T09:00:00.000Z",
+      summary: {
+        en: "HumanX Insights examined how organizations can strengthen business performance through employee development and workplace culture.",
+        es: "HumanX Insights analizó cómo las organizaciones pueden fortalecer su desempeño mediante el desarrollo del talento y una cultura laboral sólida.",
+      },
+      body: {
+        en:
+          "The future of retail depends not only on technology and innovation but " +
+          "also on people. During the AECOC Employment & Talent Congress, HumanX " +
+          "Insights explored the connection between employee experience and business " +
+          "outcomes.\n\nThe discussion emphasized leadership practices that foster " +
+          "engagement, retention, and organizational resilience in rapidly changing " +
+          "markets.",
+        es:
+          "El futuro del retail depende no solo de la tecnología y la innovación, " +
+          "sino también de las personas. Durante el Congreso AECOC Empleo y Talento, " +
+          "HumanX Insights exploró la relación entre la experiencia del empleado y " +
+          "los resultados del negocio.\n\nLa presentación destacó prácticas de " +
+          "liderazgo que impulsan el compromiso, la retención y la resiliencia " +
+          "organizacional en mercados en constante transformación.",
+      },
+    },
+    // 12 — 2nd Congreso i-Seg · Peru 2026 (UPCOMING)
+    {
+      slug: "congreso-i-seg-2026",
+      title: {
+        en: "HumanX Insights on Building High-Performance Teams",
+        es: "HumanX Insights sobre la Construcción de Equipos de Alto Desempeño",
+      },
+      venue: { en: "Peru · 2nd Congreso i-Seg", es: "Perú · 2º Congreso i-Seg" },
+      dateDisplay: { en: "February 2026", es: "Febrero de 2026" },
+      startsAt: "2026-02-01T14:00:00.000Z",
+      summary: {
+        en: "Industry professionals explored the role of people, leadership, and organizational culture in driving long-term business success.",
+        es: "Profesionales de la industria analizaron el papel de las personas, el liderazgo y la cultura organizacional en el éxito empresarial sostenible.",
+      },
+      body: {
+        en:
+          "At the 2nd Congreso i-Seg, HumanX Insights shared research and " +
+          "observations on the factors that enable teams to perform at their highest " +
+          "potential.\n\nThe session focused on the importance of trust, leadership " +
+          "effectiveness, and employee empowerment in creating organizations prepared " +
+          "for future challenges.",
+        es:
+          "En el 2º Congreso i-Seg, HumanX Insights compartió investigaciones y " +
+          "observaciones sobre los factores que permiten a los equipos alcanzar su " +
+          "máximo potencial.\n\nLa sesión se centró en la importancia de la confianza, " +
+          "la efectividad del liderazgo y el empoderamiento de los empleados para " +
+          "construir organizaciones preparadas para los desafíos del futuro.",
+      },
+    },
+    // 13 — 1st Customer Experience Congress Parque Arauco · Peru 2025
+    {
+      slug: "customer-experience-congress-parque-arauco-2025",
+      title: {
+        en: "HumanX Insights on Customer Experience Through People",
+        es: "HumanX Insights sobre la Experiencia del Cliente a través de las Personas",
+      },
+      venue: {
+        en: "Peru · Customer Experience Congress Parque Arauco",
+        es: "Perú · Congreso de Experiencia del Cliente Parque Arauco",
+      },
+      dateDisplay: { en: "October 2025", es: "Octubre de 2025" },
+      startsAt: "2025-10-01T14:00:00.000Z",
+      summary: {
+        en: "HumanX Insights explored how employee engagement directly influences customer satisfaction and loyalty.",
+        es: "HumanX Insights exploró cómo el compromiso de los empleados influye directamente en la satisfacción y fidelidad de los clientes.",
+      },
+      body: {
+        en:
+          "Customer experience begins with employee experience. At the Customer " +
+          "Experience Congress Parque Arauco, HumanX Insights presented findings on " +
+          "the connection between engaged employees and stronger customer " +
+          "outcomes.\n\nThe discussion highlighted practical strategies that " +
+          "organizations can adopt to align culture, service quality, and business " +
+          "performance.",
+        es:
+          "La experiencia del cliente comienza con la experiencia del empleado. En " +
+          "el Congreso de Experiencia del Cliente Parque Arauco, HumanX Insights " +
+          "presentó hallazgos sobre la relación entre empleados comprometidos y " +
+          "mejores resultados para los clientes.\n\nLa presentación destacó " +
+          "estrategias prácticas para alinear cultura, calidad de servicio y " +
+          "desempeño empresarial.",
+      },
+    },
+    // 14 — eShow Madrid · Spain 2024
+    {
+      slug: "eshow-madrid-2024",
+      title: {
+        en: "HumanX Insights on the Future of Retail Transformation",
+        es: "HumanX Insights sobre el Futuro de la Transformación del Retail",
+      },
+      venue: { en: "Spain · eShow Madrid", es: "España · eShow Madrid" },
+      dateDisplay: { en: "October 2024", es: "Octubre de 2024" },
+      startsAt: "2024-10-01T09:00:00.000Z",
+      summary: {
+        en: "Retail professionals gathered to discuss innovation, digital transformation, and the human factors that drive business success.",
+        es: "Profesionales del retail se reunieron para debatir innovación, transformación digital y los factores humanos que impulsan el éxito empresarial.",
+      },
+      body: {
+        en:
+          "At eShow Madrid, HumanX Insights shared perspectives on the evolving " +
+          "retail landscape and the growing importance of balancing technology with " +
+          "human-centered leadership.\n\nThe session emphasized how organizations can " +
+          "navigate transformation while maintaining strong employee engagement and " +
+          "customer trust.",
+        es:
+          "En eShow Madrid, HumanX Insights compartió perspectivas sobre la " +
+          "evolución del retail y la creciente importancia de equilibrar la " +
+          "tecnología con un liderazgo centrado en las personas.\n\nLa sesión destacó " +
+          "cómo las organizaciones pueden gestionar la transformación manteniendo un " +
+          "fuerte compromiso de los empleados y la confianza de los clientes.",
       },
     },
   ];
@@ -807,7 +968,13 @@ async function seed() {
   );
 }
 
-seed().catch((err) => {
-  console.error("\n✗ Seed failed:", err);
-  process.exit(1);
-});
+// Only auto-run the full content seed when this file is executed directly
+// (npm run seed:content) — not when another script imports a builder such as
+// `buildEvents` (see scripts/seed-events-only.ts), which would otherwise
+// trigger an unwanted full re-seed.
+if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
+  seed().catch((err) => {
+    console.error("\n✗ Seed failed:", err);
+    process.exit(1);
+  });
+}

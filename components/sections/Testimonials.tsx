@@ -45,13 +45,13 @@ export function Testimonials({ dict, items: itemsProp, content }: TestimonialsPr
   const heading = content?.heading ?? dict.testimonials.heading;
 
   // Cap the column count at the number of items so a short list never leaves a
-  // trailing column empty (e.g. 2 quotes under `lg:columns-3` left col 3 blank).
+  // trailing column empty (e.g. 2 quotes under `lg:grid-cols-3` left col 3 blank).
   const columnsClass =
     items.length <= 1
-      ? ""
+      ? "grid-cols-1"
       : items.length === 2
-        ? "sm:columns-2"
-        : "sm:columns-2 lg:columns-3";
+        ? "grid-cols-1 sm:grid-cols-2"
+        : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
 
   return (
     <section
@@ -78,11 +78,11 @@ export function Testimonials({ dict, items: itemsProp, content }: TestimonialsPr
           </h2>
         </Reveal>
 
-        {/* Masonry: CSS columns flow cards top-to-bottom then wrap, packing
-            by height. `break-inside-avoid` keeps each card whole. `gap` is
-            emulated with column-gap + per-card bottom margin (CSS columns
-            don't honour flex/grid gap). */}
-        <div className={`mt-12 [column-gap:1.5rem] ${columnsClass}`}>
+        {/* Grid of cards. Each card fills its grid cell, so cards in the same
+            row share a height (tallest in the row wins) while rows size to
+            their own content — full quotes stay visible, never truncated. The
+            attribution pins to the bottom of each card via `mt-auto`. */}
+        <div className={`mt-12 grid gap-6 ${columnsClass}`}>
           {items.map((item, i) => {
             const attribution = (
               <>
@@ -110,9 +110,9 @@ export function Testimonials({ dict, items: itemsProp, content }: TestimonialsPr
               </>
             );
             return (
-              <div key={item.id} className="mb-6 break-inside-avoid">
-                <Reveal direction="up" delay={Math.min(i * 0.04, 0.25)}>
-                  <figure className="rounded-2xl border border-line bg-bg-elev/30 p-6 backdrop-blur-sm transition hover:border-accent/50">
+              <div key={item.id} className="h-full">
+                <Reveal direction="up" delay={Math.min(i * 0.04, 0.25)} className="h-full">
+                  <figure className="flex h-full flex-col rounded-2xl border border-line bg-bg-elev/30 p-6 backdrop-blur-sm transition hover:border-accent/50">
                     <span
                       aria-hidden
                       className="block font-serif text-4xl leading-[0.6] text-accent/40 select-none"
@@ -122,7 +122,7 @@ export function Testimonials({ dict, items: itemsProp, content }: TestimonialsPr
                     <blockquote className="mt-3 font-serif text-base leading-relaxed text-ink md:text-lg">
                       {item.quote}
                     </blockquote>
-                    <figcaption className="mt-5 border-t border-line/70 pt-4 text-sm text-ink-dim">
+                    <figcaption className="mt-auto border-t border-line/70 pt-4 text-sm text-ink-dim">
                       {item.linkedinUrl ? (
                         <a
                           href={item.linkedinUrl}

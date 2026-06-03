@@ -177,6 +177,7 @@ export const videosQuery = /* groq */ `
     "id": _id,
     title,
     caption,
+    summary,
     youtubeId,
     publishedAt
   }
@@ -186,6 +187,7 @@ export type VideoDoc = {
   id: string;
   title: { en?: string; es?: string };
   caption?: { en?: string; es?: string };
+  summary?: { en?: string; es?: string };
   youtubeId: string;
   publishedAt?: string;
 };
@@ -221,6 +223,58 @@ export type PartnerDoc = {
   logoLightHeight?: number;
 };
 
+/** Clients ordered by manual `order`. Same shape as partners. */
+export const clientsQuery = /* groq */ `
+  *[_type == "client"] | order(order asc, _createdAt asc) {
+    "id": _id,
+    name,
+    website,
+    "logoUrl": logo.asset->url,
+    "logoWidth": logo.asset->metadata.dimensions.width,
+    "logoHeight": logo.asset->metadata.dimensions.height,
+    "logoLightUrl": logoLight.asset->url,
+    "logoLightWidth": logoLight.asset->metadata.dimensions.width,
+    "logoLightHeight": logoLight.asset->metadata.dimensions.height
+  }
+`;
+
+/** A client row is structurally identical to a partner row. */
+export type ClientDoc = PartnerDoc;
+
+/** Major conferences for the /on-stage wall, ordered by `featuredOrder`. */
+export const conferencesQuery = /* groq */ `
+  *[_type == "conference"] | order(coalesce(featuredOrder, 9999) asc, _createdAt asc) {
+    "id": _id,
+    name,
+    organization,
+    region,
+    website,
+    "logoUrl": logo.asset->url,
+    "logoWidth": logo.asset->metadata.dimensions.width,
+    "logoHeight": logo.asset->metadata.dimensions.height,
+    "logoLightUrl": logoLight.asset->url,
+    "logoLightWidth": logoLight.asset->metadata.dimensions.width,
+    "logoLightHeight": logoLight.asset->metadata.dimensions.height
+  }
+`;
+
+export type ConferenceDoc = {
+  id: string;
+  name: string;
+  /** Organising body, e.g. "AECOC". */
+  organization?: string;
+  /** Country or region label, e.g. "Spain". */
+  region?: string;
+  /** External URL — when set, the card becomes a link. */
+  website?: string;
+  logoUrl?: string;
+  logoWidth?: number;
+  logoHeight?: number;
+  logoLightUrl?: string;
+  logoLightWidth?: number;
+  logoLightHeight?: number;
+};
+
 /* ─────────────────────────────────────────────────────────────────────────────
  * Singletons. Each singleton is pinned in the studio to a deterministic _id,
  * so the queries fetch by id directly — no array, no ordering.
@@ -243,7 +297,10 @@ export const homepageQuery = /* groq */ `
     },
     onStageEyebrow, onStageTitle, onStageBody,
     partnersEyebrow, partnersHeading,
-    testimonialsEyebrow, testimonialsHeading
+    testimonialsEyebrow, testimonialsHeading,
+    pullQuoteText, pullQuoteAuthor, pullQuoteRole,
+    "pullQuoteImageUrl": pullQuoteImage.asset->url,
+    "pullQuoteImageAlt": pullQuoteImage.alt
   }
 `;
 
@@ -286,6 +343,12 @@ export type HomepageDoc = {
 
   testimonialsEyebrow?: LocStr;
   testimonialsHeading?: LocStr;
+
+  pullQuoteText?: LocText;
+  pullQuoteAuthor?: LocStr;
+  pullQuoteRole?: LocStr;
+  pullQuoteImageUrl?: string;
+  pullQuoteImageAlt?: string;
 };
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -304,8 +367,10 @@ export const aboutPageQuery = /* groq */ `
     experienceStatValue, experienceStatLabel, experienceStatNote,
     founderEyebrow, founderName, founderBio, founderImageAlt,
     founderStats[]{ value, label },
+    featuredVideoEyebrow, featuredVideoTitle, featuredVideoBody,
+    featuredVideoYoutubeId, featuredVideoBlogUrl, featuredVideoBlogLabel,
     speakingEyebrow, speakingTitle, speakingBody,
-    speakingRegions[]{ region, entries[]{ name, location } }
+    speakingRegions[]{ region, entries[]{ name, location, date } }
   }
 `;
 
@@ -330,18 +395,27 @@ export type AboutPageDoc = {
   founderBio?: LocText;
   founderImageAlt?: LocStr;
   founderStats?: { value: string; label: LocStr }[];
+  featuredVideoEyebrow?: LocStr;
+  featuredVideoTitle?: LocStr;
+  featuredVideoBody?: LocText;
+  featuredVideoYoutubeId?: string;
+  featuredVideoBlogUrl?: string;
+  featuredVideoBlogLabel?: LocStr;
   speakingEyebrow?: LocStr;
   speakingTitle?: LocStr;
   speakingBody?: LocText;
   speakingRegions?: {
     region?: LocStr;
-    entries?: { name?: string; location?: string }[];
+    entries?: { name?: string; location?: string; date?: string }[];
   }[];
 };
 
 export const servicesPageQuery = /* groq */ `
   *[_type == "servicesPage" && _id == "servicesPage"][0] {
-    eyebrow, title, body
+    eyebrow, title, body,
+    quote, quoteAuthor, quoteRole,
+    "quoteImageUrl": quoteImage.asset->url,
+    "quoteImageAlt": quoteImage.alt
   }
 `;
 
@@ -349,6 +423,11 @@ export type ServicesPageDoc = {
   eyebrow?: LocStr;
   title?: LocStr;
   body?: LocText;
+  quote?: LocText;
+  quoteAuthor?: LocStr;
+  quoteRole?: LocStr;
+  quoteImageUrl?: string;
+  quoteImageAlt?: string;
 };
 
 export const eventsPageQuery = /* groq */ `
@@ -382,7 +461,8 @@ export type EventsPageDoc = {
 
 export const insightsPageQuery = /* groq */ `
   *[_type == "insightsPage" && _id == "insightsPage"][0] {
-    eyebrow, title, body, listTitle, readLabel
+    eyebrow, title, body, listTitle, readLabel,
+    linkedinUrl, linkedinLabel
   }
 `;
 
@@ -392,6 +472,31 @@ export type InsightsPageDoc = {
   body?: LocText;
   listTitle?: LocStr;
   readLabel?: LocStr;
+  /** LinkedIn profile URL — when set, the hero shows a follow button. */
+  linkedinUrl?: string;
+  linkedinLabel?: LocStr;
+};
+
+export const onStagePageQuery = /* groq */ `
+  *[_type == "onStagePage" && _id == "onStagePage"][0] {
+    areasEyebrow, areasTitle,
+    areasItems[]{ label, iconKey },
+    speakingExpEyebrow, speakingExpTitle, speakingExpBody,
+    ctaEyebrow, ctaTitle, ctaBody, ctaLabel
+  }
+`;
+
+export type OnStagePageDoc = {
+  areasEyebrow?: LocStr;
+  areasTitle?: LocStr;
+  areasItems?: { label?: LocStr; iconKey?: string }[];
+  speakingExpEyebrow?: LocStr;
+  speakingExpTitle?: LocStr;
+  speakingExpBody?: LocText;
+  ctaEyebrow?: LocStr;
+  ctaTitle?: LocStr;
+  ctaBody?: LocText;
+  ctaLabel?: LocStr;
 };
 
 export const publicationsPageQuery = /* groq */ `

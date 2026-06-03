@@ -9,7 +9,10 @@
     "lint": "eslint",
     "deploy": "npm run build && wrangler pages deploy out --project-name=$CLOUDFLARE_PROJECT_NAME --branch=main",
     "seed": "tsx --env-file=.env.local scripts/sanity-seed.ts",
-    "seed:content": "tsx --env-file=.env.local scripts/sanity-seed-content.ts"
+    "seed:content": "tsx --env-file=.env.local scripts/sanity-seed-content.ts",
+    "seed:events": "tsx --env-file=.env.local scripts/seed-events-only.ts",
+    "seed:clients": "tsx --env-file=.env.local scripts/seed-clients.ts",
+    "seed:conferences": "tsx --env-file=.env.local scripts/seed-conferences.ts"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

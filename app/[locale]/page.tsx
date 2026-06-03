@@ -8,10 +8,10 @@ import {
 import {
   loadEvents,
   loadPartners,
+  loadClients,
   loadHomepage,
   loadEventsPage,
   loadContactCta,
-  loadVideos,
 } from "@/lib/sanity/loaders";
 import { Hero } from "@/components/sections/Hero";
 import { WhoWeAre } from "@/components/sections/WhoWeAre";
@@ -20,7 +20,7 @@ import { Assessment } from "@/components/sections/Assessment";
 import { PullQuote } from "@/components/sections/PullQuote";
 import { Events } from "@/components/sections/Events";
 import { OnStageTeaser } from "@/components/sections/OnStageTeaser";
-import { PartnersTicker } from "@/components/sections/PartnersTicker";
+import { LogoTicker } from "@/components/sections/LogoTicker";
 import {
   Testimonials,
   type TestimonialItem,
@@ -71,7 +71,7 @@ export default async function Home({
     testimonials,
     events,
     partners,
-    videos,
+    clients,
     homepage,
     eventsPage,
     contactCta,
@@ -80,7 +80,7 @@ export default async function Home({
     loadTestimonials(locale),
     loadEvents(locale),
     loadPartners(),
-    loadVideos(locale),
+    loadClients(),
     loadHomepage(locale),
     loadEventsPage(locale),
     loadContactCta(locale),
@@ -88,21 +88,38 @@ export default async function Home({
   return (
     <main id="main">
       <Hero dict={dict} locale={locale} content={homepage?.hero} />
-      <OnStageTeaser dict={dict} locale={locale} items={videos} />
-      <PartnersTicker
-        dict={dict}
-        items={partners}
-        content={homepage?.partners}
+      <OnStageTeaser dict={dict} locale={locale} />
+      {/* Clients lead the homepage social proof — the more credible wall of
+          brands HumanX has served. Renders only once clients are seeded. */}
+      <LogoTicker
+        heading={dict.clientsTicker.heading}
+        ariaLabel="Clients"
+        items={clients}
+        fallbackNames={dict.clientsTicker.items}
       />
       <WhoWeAre dict={dict} content={homepage?.whoWeAre} />
       <Credentials dict={dict} />
       <Assessment dict={dict} content={homepage?.assessment} />
-      <PullQuote dict={dict} />
+      <PullQuote
+        quote={homepage?.pullQuote.text ?? dict.pullQuote.quote}
+        author={homepage?.pullQuote.author ?? dict.pullQuote.author}
+        role={homepage?.pullQuote.role ?? dict.pullQuote.role}
+        imageSrc={homepage?.pullQuote.imageUrl ?? "/quote-image.jpg"}
+        imageAlt={homepage?.pullQuote.imageAlt ?? dict.pullQuote.imageAlt}
+      />
       <Events dict={dict} locale={locale} items={events} content={eventsPage} />
       <Testimonials
         dict={dict}
         items={testimonials}
         content={homepage?.testimonials}
+      />
+      {/* Partners — relocated here from the top, clearly labelled so it reads
+          as partners (distinct from the clients wall above the fold). */}
+      <LogoTicker
+        heading={dict.partnersTicker.heading}
+        ariaLabel="Partners"
+        items={partners}
+        fallbackNames={dict.partnersTicker.items}
       />
       <GlobalCTA dict={dict} variant="home" content={contactCta} />
     </main>

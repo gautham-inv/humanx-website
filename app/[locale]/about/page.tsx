@@ -22,7 +22,7 @@ import {
 import { BackdropMesh } from "@/components/motion/Backdrops";
 import { HighlightedTitle } from "@/components/motion/HighlightedTitle";
 import { FeaturedVideo } from "@/components/sections/FeaturedVideo";
-import { Recommendations } from "@/components/sections/about/Recommendations";
+import { FeaturedRecommendation } from "@/components/sections/about/FeaturedRecommendation";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 const SLUG = "about";
@@ -62,6 +62,13 @@ export default async function AboutPage({
   const t = dict.about;
   // Recommendations: live Sanity docs when present, else the bundled list.
   const recommendations = recs.length > 0 ? recs : RECOMMENDATIONS;
+  // Only one endorsement is featured on /about — Alejandra's. Match by id or
+  // name across both the Sanity (`recommendation-alejandra-h`) and the bundled
+  // (`alejandra-h`) sources; fall back to the first item if she's missing.
+  const featuredRec =
+    recommendations.find(
+      (r) => /alejandra/i.test(r.id) || /^alejandra/i.test(r.name)
+    ) ?? recommendations[0];
   // Resolve every editable string once at the top. Each leaf falls back to
   // the dict value if Sanity hasn't supplied it; the section markup below
   // stays the same shape it has today.
@@ -279,29 +286,39 @@ export default async function AboutPage({
         </section>
 
 
-        {/* 5. FEATURED VIDEO — dict-driven (dict.about.featuredVideo).
-            Not yet wired to the aboutPage Sanity singleton; swap to a
-            singleton field if Ramon wants to change the video without a
-            deploy. */}
+        {/* 5. FEATURED VIDEO — Sanity-driven (aboutPage.featuredVideo) with
+            the dict as fallback, so Ramon can swap the video + related-article
+            link from Studio without a deploy. */}
         <FeaturedVideo
-          eyebrow={dict.about.featuredVideo.eyebrow}
-          title={dict.about.featuredVideo.title}
-          body={dict.about.featuredVideo.body}
-          youtubeId={dict.about.featuredVideo.youtubeId}
+          eyebrow={about?.featuredVideo.eyebrow ?? dict.about.featuredVideo.eyebrow}
+          title={about?.featuredVideo.title ?? dict.about.featuredVideo.title}
+          body={about?.featuredVideo.body ?? dict.about.featuredVideo.body}
+          youtubeId={
+            about?.featuredVideo.youtubeId ?? dict.about.featuredVideo.youtubeId
+          }
+          blogUrl={about?.featuredVideo.blogUrl ?? dict.about.featuredVideo.blogUrl}
+          blogLabel={
+            about?.featuredVideo.blogLabel ?? dict.about.featuredVideo.blogLabel
+          }
         />
 
-        {/* 6. RECOMMENDATIONS — LinkedIn endorsements. Sanity-sourced with
-            the bundled RECOMMENDATIONS list as fallback. */}
-        <Recommendations
-          items={recommendations}
-          eyebrow={t.recommendations.eyebrow}
-          title={t.recommendations.title}
-          body={t.recommendations.body}
-          showAllLabel={t.recommendations.showAll}
-          showLessLabel={t.recommendations.showLess}
-          readMoreLabel={t.recommendations.readMore}
-          readLessLabel={t.recommendations.readLess}
-        />
+        {/* 6. RECOMMENDATION — a single featured LinkedIn endorsement
+            (Alejandra's) in the editorial two-column spread. Sanity-sourced
+            with the bundled RECOMMENDATIONS list as fallback; her portrait
+            comes from the recommendation's image in Studio (monogram until
+            uploaded). */}
+        {featuredRec ? (
+          <FeaturedRecommendation
+            name={featuredRec.name}
+            headline={featuredRec.headline}
+            relationship={featuredRec.relationship}
+            date={featuredRec.date}
+            body={featuredRec.body}
+            imageUrl={featuredRec.imageUrl}
+            imageAlt={featuredRec.imageAlt}
+            linkedinUrl={featuredRec.linkedinUrl}
+          />
+        ) : null}
 
         <GlobalCTA dict={dict} variant="centered" content={contactCta} />
       </main>

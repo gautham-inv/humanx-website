@@ -17,6 +17,8 @@ import {
   eventsQuery,
   insightsQuery,
   partnersQuery,
+  clientsQuery,
+  conferencesQuery,
   videosQuery,
   recommendationsQuery,
   publicationsQuery,
@@ -24,6 +26,7 @@ import {
   aboutPageQuery,
   servicesPageQuery,
   eventsPageQuery,
+  onStagePageQuery,
   insightsPageQuery,
   publicationsPageQuery,
   summitBarQuery,
@@ -33,6 +36,8 @@ import {
   type EventDoc,
   type InsightDoc,
   type PartnerDoc,
+  type ClientDoc,
+  type ConferenceDoc,
   type VideoDoc,
   type RecommendationDoc,
   type PublicationDoc,
@@ -40,6 +45,7 @@ import {
   type AboutPageDoc,
   type ServicesPageDoc,
   type EventsPageDoc,
+  type OnStagePageDoc,
   type InsightsPageDoc,
   type PublicationsPageDoc,
   type SummitBarDoc,
@@ -183,7 +189,7 @@ export async function loadInsights(locale: Locale): Promise<InsightItem[]> {
 }
 
 /**
- * Flat row shape used by `<PartnersTicker>`. The component renders the logo
+ * Flat row shape used by `<LogoTicker>`. The component renders the logo
  * `<img>` when `logoUrl` is set, falling back to the brand name as text so
  * partners without uploaded logos still appear in the ticker.
  */
@@ -208,7 +214,14 @@ export type VideoItem = {
   id: string;
   title: string;
   caption: string;
+  /** One-sentence talk summary — maps to VideoObject `description`.
+   * Empty when the author hasn't written one; schema then falls back to
+   * the caption. */
+  summary: string;
   youtubeId: string;
+  /** ISO date the talk was published — maps to VideoObject `uploadDate`.
+   * Empty when the author hasn't set it on the Sanity `video` doc. */
+  publishedAt: string;
 };
 
 export async function loadVideos(locale: Locale): Promise<VideoItem[]> {
@@ -219,7 +232,9 @@ export async function loadVideos(locale: Locale): Promise<VideoItem[]> {
         id: row.id,
         title: pickLoc(row.title, locale),
         caption: pickLoc(row.caption, locale),
+        summary: pickLoc(row.summary, locale),
         youtubeId: row.youtubeId,
+        publishedAt: row.publishedAt ?? "",
       }))
       .filter((row) => row.title && row.youtubeId);
   } catch (err) {
@@ -310,6 +325,68 @@ export async function loadPartners(): Promise<PartnerItem[]> {
   }
 }
 
+/** A client row is structurally identical to a partner row. */
+export type ClientItem = PartnerItem;
+
+export async function loadClients(): Promise<ClientItem[]> {
+  try {
+    const rows = await sanityClient.fetch<ClientDoc[]>(clientsQuery);
+    return rows
+      .map((row) => ({
+        id: row.id,
+        name: row.name,
+        website: row.website ?? "",
+        logoUrl: row.logoUrl ?? "",
+        logoWidth: row.logoWidth ?? 0,
+        logoHeight: row.logoHeight ?? 0,
+        logoLightUrl: row.logoLightUrl ?? "",
+        logoLightWidth: row.logoLightWidth ?? 0,
+        logoLightHeight: row.logoLightHeight ?? 0,
+      }))
+      .filter((row) => row.name);
+  } catch (err) {
+    return fail("clients", err);
+  }
+}
+
+/** Flat row shape used by the `<MajorConferences>` wall on /on-stage. */
+export type ConferenceItem = {
+  id: string;
+  name: string;
+  organization: string;
+  region: string;
+  website: string;
+  logoUrl: string;
+  logoWidth: number;
+  logoHeight: number;
+  logoLightUrl: string;
+  logoLightWidth: number;
+  logoLightHeight: number;
+};
+
+export async function loadConferences(): Promise<ConferenceItem[]> {
+  try {
+    const rows = await sanityClient.fetch<ConferenceDoc[]>(conferencesQuery);
+    return rows
+      .map((row) => ({
+        id: row.id,
+        name: row.name,
+        organization: row.organization ?? "",
+        region: row.region ?? "",
+        website: row.website ?? "",
+        logoUrl: row.logoUrl ?? "",
+        logoWidth: row.logoWidth ?? 0,
+        logoHeight: row.logoHeight ?? 0,
+        logoLightUrl: row.logoLightUrl ?? "",
+        logoLightWidth: row.logoLightWidth ?? 0,
+        logoLightHeight: row.logoLightHeight ?? 0,
+      }))
+      .filter((row) => row.name);
+  } catch (err) {
+    return fail("conferences", err);
+  }
+}
+
 /* ─────────────────────────────────────────────────────────────────────────────
  * Homepage singleton
  * ────────────────────────────────────────────────────────────────────────── */
@@ -354,6 +431,13 @@ export type HomepageContent = {
   onStage: { eyebrow?: string; title?: string; body?: string };
   partners: { eyebrow?: string; heading?: string };
   testimonials: { eyebrow?: string; heading?: string };
+  pullQuote: {
+    text?: string;
+    author?: string;
+    role?: string;
+    imageUrl?: string;
+    imageAlt?: string;
+  };
 };
 
 /**
@@ -469,6 +553,13 @@ export async function loadHomepage(
         eyebrow: pickOpt(doc.testimonialsEyebrow, locale),
         heading: pickOpt(doc.testimonialsHeading, locale),
       },
+      pullQuote: {
+        text: pickOpt(doc.pullQuoteText, locale),
+        author: pickOpt(doc.pullQuoteAuthor, locale),
+        role: pickOpt(doc.pullQuoteRole, locale),
+        imageUrl: doc.pullQuoteImageUrl,
+        imageAlt: doc.pullQuoteImageAlt,
+      },
     };
   } catch (err) {
     console.warn("Sanity homepage fetch failed; using dict fallback.", err);
@@ -509,13 +600,21 @@ export type AboutPageContent = {
     imageAlt?: string;
     stats?: { value: string; label: string }[];
   };
+  featuredVideo: {
+    eyebrow?: string;
+    title?: string;
+    body?: string;
+    youtubeId?: string;
+    blogUrl?: string;
+    blogLabel?: string;
+  };
   speaking: {
     eyebrow?: string;
     title?: string;
     body?: string;
     regions?: {
       region: string;
-      entries: { name: string; location: string }[];
+      entries: { name: string; location: string; date?: string }[];
     }[];
   };
 };
@@ -570,6 +669,14 @@ export async function loadAboutPage(
           }))
           .filter((s) => s.value && s.label),
       },
+      featuredVideo: {
+        eyebrow: pickOpt(doc.featuredVideoEyebrow, locale),
+        title: pickOpt(doc.featuredVideoTitle, locale),
+        body: pickOpt(doc.featuredVideoBody, locale),
+        youtubeId: doc.featuredVideoYoutubeId,
+        blogUrl: doc.featuredVideoBlogUrl,
+        blogLabel: pickOpt(doc.featuredVideoBlogLabel, locale),
+      },
       speaking: {
         eyebrow: pickOpt(doc.speakingEyebrow, locale),
         title: pickOpt(doc.speakingTitle, locale),
@@ -578,7 +685,11 @@ export async function loadAboutPage(
           ?.map((r) => ({
             region: pickOpt(r.region, locale) ?? "",
             entries: (r.entries ?? [])
-              .map((e) => ({ name: e.name ?? "", location: e.location ?? "" }))
+              .map((e) => ({
+                name: e.name ?? "",
+                location: e.location ?? "",
+                date: e.date,
+              }))
               .filter((e) => e.name),
           }))
           .filter((r) => r.region && r.entries.length > 0),
@@ -599,6 +710,12 @@ export type ServicesPageContent = {
   /** Raw marker string for HighlightedTitle. */
   title?: string;
   body?: string;
+  /** Closing pull-quote (PullQuote design). Empty fields → dict fallback. */
+  quote?: string;
+  quoteAuthor?: string;
+  quoteRole?: string;
+  quoteImageUrl?: string;
+  quoteImageAlt?: string;
 };
 
 export async function loadServicesPage(
@@ -613,6 +730,11 @@ export async function loadServicesPage(
       eyebrow: pickOpt(doc.eyebrow, locale),
       title: pickOpt(doc.title, locale),
       body: pickOpt(doc.body, locale),
+      quote: pickOpt(doc.quote, locale),
+      quoteAuthor: pickOpt(doc.quoteAuthor, locale),
+      quoteRole: pickOpt(doc.quoteRole, locale),
+      quoteImageUrl: doc.quoteImageUrl,
+      quoteImageAlt: doc.quoteImageAlt,
     };
   } catch (err) {
     console.warn("Sanity servicesPage fetch failed; using dict fallback.", err);
@@ -674,12 +796,62 @@ export async function loadEventsPage(
   }
 }
 
+export type OnStagePageContent = {
+  areas: {
+    eyebrow?: string;
+    title?: string;
+    items?: { label: string; iconKey: string }[];
+  };
+  speakingExp: { eyebrow?: string; title?: string; body?: string };
+  cta: { eyebrow?: string; title?: string; body?: string; label?: string };
+};
+
+export async function loadOnStagePage(
+  locale: Locale
+): Promise<OnStagePageContent | null> {
+  try {
+    const doc = await sanityClient.fetch<OnStagePageDoc | null>(
+      onStagePageQuery
+    );
+    if (!doc) return null;
+    return {
+      areas: {
+        eyebrow: pickOpt(doc.areasEyebrow, locale),
+        title: pickOpt(doc.areasTitle, locale),
+        items: doc.areasItems
+          ?.map((it) => ({
+            label: pickOpt(it.label, locale) ?? "",
+            iconKey: it.iconKey ?? "",
+          }))
+          .filter((it) => it.label),
+      },
+      speakingExp: {
+        eyebrow: pickOpt(doc.speakingExpEyebrow, locale),
+        title: pickOpt(doc.speakingExpTitle, locale),
+        body: pickOpt(doc.speakingExpBody, locale),
+      },
+      cta: {
+        eyebrow: pickOpt(doc.ctaEyebrow, locale),
+        title: pickOpt(doc.ctaTitle, locale),
+        body: pickOpt(doc.ctaBody, locale),
+        label: pickOpt(doc.ctaLabel, locale),
+      },
+    };
+  } catch (err) {
+    console.warn("Sanity onStagePage fetch failed; using dict fallback.", err);
+    return null;
+  }
+}
+
 export type InsightsPageContent = {
   eyebrow?: string;
   title?: string;
   body?: string;
   listTitle?: string;
   readLabel?: string;
+  /** LinkedIn profile URL for the hero follow button; empty hides it. */
+  linkedinUrl?: string;
+  linkedinLabel?: string;
 };
 
 export async function loadInsightsPage(
@@ -696,6 +868,8 @@ export async function loadInsightsPage(
       body: pickOpt(doc.body, locale),
       listTitle: pickOpt(doc.listTitle, locale),
       readLabel: pickOpt(doc.readLabel, locale),
+      linkedinUrl: doc.linkedinUrl,
+      linkedinLabel: pickOpt(doc.linkedinLabel, locale),
     };
   } catch (err) {
     console.warn("Sanity insightsPage fetch failed; using dict fallback.", err);

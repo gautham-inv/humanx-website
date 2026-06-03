@@ -9,9 +9,12 @@ import {
 } from "@/lib/sanity/loaders";
 import { Reveal } from "@/components/motion/Reveal";
 import { GlobalCTA } from "@/components/sections/GlobalCTA";
+import { PullQuote } from "@/components/sections/PullQuote";
 import { SolarSystemSlot } from "@/components/sections/services/SolarSystemSlot";
 import { SERVICE_ICONS } from "@/components/sections/services/ServiceIcons";
 import { HighlightedTitle } from "@/components/motion/HighlightedTitle";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { servicesSchema } from "@/lib/seo/schema";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 const SLUG = "services";
@@ -58,6 +61,7 @@ export default async function ServicesPage({
 
   return (
     <main id="main">
+      <JsonLd data={servicesSchema(items, locale)} />
       {/* HERO — text left / solar system right */}
       <section className="relative overflow-hidden px-6 pt-14 pb-10 md:pt-24 md:pb-16 lg:pt-32 lg:pb-24">
         <div className="mx-auto grid max-w-6xl items-start gap-12 lg:grid-cols-[1.2fr_auto]">
@@ -82,7 +86,7 @@ export default async function ServicesPage({
               </p>
             </Reveal>
           </div>
-          <div className="order-1 hidden lg:order-2 lg:block">
+          <div className="order-1 hidden lg:order-2 lg:block lg:-mt-16">
             <Reveal direction="up" delay={0.1}>
               <SolarSystemSlot className="mx-auto aspect-square w-[28rem] max-w-full" />
             </Reveal>
@@ -145,6 +149,17 @@ export default async function ServicesPage({
           })}
         </div>
       </section>
+
+      {/* Closing pull-quote — same design as the homepage quote. Content is
+          editable via the servicesPage Sanity singleton, with the dict's
+          homepage quote as the fallback. */}
+      <PullQuote
+        quote={servicesPage?.quote ?? dict.pullQuote.quote}
+        author={servicesPage?.quoteAuthor ?? dict.pullQuote.author}
+        role={servicesPage?.quoteRole ?? dict.pullQuote.role}
+        imageSrc={servicesPage?.quoteImageUrl ?? "/quote-image.jpg"}
+        imageAlt={servicesPage?.quoteImageAlt ?? dict.pullQuote.imageAlt}
+      />
 
       <GlobalCTA dict={dict} variant="centered" content={contactCta} />
     </main>
