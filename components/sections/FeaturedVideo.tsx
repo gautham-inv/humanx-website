@@ -8,6 +8,9 @@ type FeaturedVideoProps = {
   title: string;
   body: string;
   youtubeId: string;
+  /** Optional outbound link (e.g. a related blog post) shown below the video. */
+  blogUrl?: string;
+  blogLabel?: string;
 };
 
 /**
@@ -17,7 +20,14 @@ type FeaturedVideoProps = {
  * cost of loading YouTube's player on every visit. Text sits left, video
  * right on desktop; stacked on mobile.
  */
-export function FeaturedVideo({ eyebrow, title, body, youtubeId }: FeaturedVideoProps) {
+export function FeaturedVideo({
+  eyebrow,
+  title,
+  body,
+  youtubeId,
+  blogUrl,
+  blogLabel,
+}: FeaturedVideoProps) {
   const [active, setActive] = useState(false);
   const thumb = `https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg`;
 
@@ -27,8 +37,8 @@ export function FeaturedVideo({ eyebrow, title, body, youtubeId }: FeaturedVideo
       aria-label={title}
       className="relative border-t border-line px-6 py-14 md:py-24 lg:py-28"
     >
-      <div className="mx-auto grid max-w-6xl items-center gap-12 md:grid-cols-2 md:gap-16">
-        <div>
+      <div className="mx-auto max-w-6xl">
+        <div className="mx-auto max-w-2xl text-center">
           <Reveal direction="up">
             <div className="mb-6 text-xs uppercase tracking-[0.3em] text-ink-dim">
               <span className="mr-3 inline-block h-px w-8 bg-accent align-middle" />
@@ -41,13 +51,14 @@ export function FeaturedVideo({ eyebrow, title, body, youtubeId }: FeaturedVideo
             </h2>
           </Reveal>
           <Reveal direction="up" delay={0.1}>
-            <p className="mt-6 max-w-md font-serif text-lg leading-relaxed text-ink-dim">
+            <p className="mx-auto mt-6 max-w-xl font-serif text-lg leading-relaxed text-ink-dim">
               {body}
             </p>
           </Reveal>
         </div>
 
-        <Reveal direction="up" delay={0.1}>
+        <Reveal direction="up" delay={0.15} className="mt-10 block md:mt-14">
+          <div className="mx-auto w-full">
           {active ? (
             <iframe
               src={`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&rel=0`}
@@ -77,7 +88,24 @@ export function FeaturedVideo({ eyebrow, title, body, youtubeId }: FeaturedVideo
               </span>
             </button>
           )}
+          </div>
         </Reveal>
+
+        {blogUrl ? (
+          <Reveal direction="up" delay={0.2} className="mt-8 block text-center">
+            <a
+              href={blogUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-2 text-sm font-medium text-accent underline underline-offset-4 transition hover:text-accent-bright"
+            >
+              {blogLabel || "Read the related article"}
+              <span aria-hidden className="transition group-hover:translate-x-0.5">
+                →
+              </span>
+            </a>
+          </Reveal>
+        ) : null}
       </div>
     </section>
   );

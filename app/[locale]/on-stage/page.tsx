@@ -2,11 +2,20 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { locales, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
-import { loadVideos, loadAboutPage, loadContactCta } from "@/lib/sanity/loaders";
+import {
+  loadVideos,
+  loadAboutPage,
+  loadContactCta,
+  loadConferences,
+  loadOnStagePage,
+  type ContactCtaContent,
+} from "@/lib/sanity/loaders";
 import { Reveal } from "@/components/motion/Reveal";
 import { HighlightedTitle } from "@/components/motion/HighlightedTitle";
 import { GlobalCTA } from "@/components/sections/GlobalCTA";
 import { GlobalSpeaking } from "@/components/sections/about/GlobalSpeaking";
+import { MajorConferences } from "@/components/sections/on-stage/MajorConferences";
+import { AreasOfExpertise } from "@/components/sections/on-stage/AreasOfExpertise";
 import { VideoGrid } from "@/components/sections/on-stage/VideoGrid";
 import { WorldMap, type SpeakingPin } from "@/components/sections/on-stage/WorldMap";
 import { resolveVideos } from "@/components/sections/on-stage/resolve-videos";
@@ -53,20 +62,52 @@ export default async function OnStagePage({
 }) {
   const { locale } = await params;
   if (!locales.includes(locale as Locale)) notFound();
-  const [dict, videos, about, contactCta] = await Promise.all([
-    getDictionary(locale as Locale),
-    loadVideos(locale as Locale),
-    loadAboutPage(locale as Locale),
-    loadContactCta(locale as Locale),
-  ]);
+  const [dict, videos, about, contactCta, conferences, onStage] =
+    await Promise.all([
+      getDictionary(locale as Locale),
+      loadVideos(locale as Locale),
+      loadAboutPage(locale as Locale),
+      loadContactCta(locale as Locale),
+      loadConferences(),
+      loadOnStagePage(locale as Locale),
+    ]);
 
   const t = dict.onStagePage;
   const resolved = resolveVideos(videos, dict);
 
+  // Areas of expertise + speaking-experience intro: onStagePage Sanity
+  // singleton with dict fallback.
+  const areas = {
+    // Eyebrow intentionally has no dict fallback (removed by the client);
+    // shows only if set on the onStagePage Sanity singleton.
+    eyebrow: onStage?.areas.eyebrow,
+    title: onStage?.areas.title ?? t.areasTitle,
+    items:
+      onStage?.areas.items && onStage.areas.items.length > 0
+        ? onStage.areas.items
+        : t.areasItems,
+  };
+  const speakingExp = {
+    eyebrow: onStage?.speakingExp.eyebrow ?? t.speakingExpEyebrow,
+    title: onStage?.speakingExp.title ?? t.speakingExpTitle,
+    body: onStage?.speakingExp.body ?? t.speakingExpBody,
+  };
+  // On-stage CTA copy overrides the generic contact CTA so it speaks to
+  // speaking + consulting + workshops + partnerships, not just bookings.
+  const ctaContent: ContactCtaContent = {
+    ...(contactCta ?? {}),
+    eyebrow: onStage?.cta.eyebrow ?? t.cta.eyebrow,
+    title: onStage?.cta.title ?? t.cta.title,
+    body: onStage?.cta.body ?? t.cta.body,
+    openModalLabel: onStage?.cta.label ?? t.cta.label,
+  };
+
   // Speaking copy + regions: Sanity override (lives on the aboutPage
   // singleton) with dict fallback. Relocated here from /about.
   const speaking = {
-    eyebrow: about?.speaking.eyebrow ?? dict.about.speaking.eyebrow,
+    // Eyebrow intentionally has no dict fallback (removed by the client);
+    // shows only if set on the aboutPage Sanity singleton.
+    eyebrow: about?.speaking.eyebrow,
     title: about?.speaking.title ?? dict.about.speaking.title,
     body: about?.speaking.body ?? dict.about.speaking.body,
     regions:
@@ -105,6 +146,45 @@ export default async function OnStagePage({
         </div>
       </section>
 
+      {/* AREAS OF EXPERTISE — icon grid, editable via onStagePage singleton. */}
+      <AreasOfExpertise
+        eyebrow={areas.eyebrow}
+        title={areas.title}
+        items={areas.items}
+      />
+
+      {/* GLOBAL SPEAKING EXPERIENCE — narrative lead-in to the conferences +
+          map below. Editable via the onStagePage singleton. */}
+      <section className="relative border-t border-line px-6 py-14 md:py-24 lg:py-28">
+        <div className="mx-auto max-w-3xl text-center">
+          <Reveal direction="up">
+            <div className="mb-4 text-xs uppercase tracking-[0.3em] text-ink-dim">
+              <span className="mr-3 inline-block h-px w-8 bg-accent align-middle" />
+              {speakingExp.eyebrow}
+            </div>
+          </Reveal>
+          <Reveal direction="up" delay={0.05}>
+            <h2 className="font-display text-3xl leading-[1.1] tracking-tight md:text-4xl lg:text-5xl">
+              {speakingExp.title}
+            </h2>
+          </Reveal>
+          <Reveal direction="up" delay={0.1}>
+            <p className="mx-auto mt-6 max-w-2xl font-serif text-lg leading-relaxed text-ink-dim">
+              {speakingExp.body}
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* MAJOR CONFERENCES — logo wall of marquee summits, above the speaking
+          list. Sanity-driven (`conference` docs); renders nothing until any
+          are added. */}
+      <MajorConferences
+        title={t.conferencesTitle}
+        body={t.conferencesBody}
+        items={conferences}
+      />
+
       {/* SPEAKING MAP + REGION LIST (relocated from /about) — leads the page
           so the global reach reads before the talks themselves. */}
       <GlobalSpeaking
@@ -127,7 +207,7 @@ export default async function OnStagePage({
         </div>
       </section>
 
-      <GlobalCTA dict={dict} variant="centered" content={contactCta} />
+      <GlobalCTA dict={dict} variant="centered" content={ctaContent} />
     </main>
   );
 }

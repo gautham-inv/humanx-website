@@ -9,6 +9,7 @@ import {
 } from "@/lib/sanity/loaders";
 import { Reveal } from "@/components/motion/Reveal";
 import { GlobalCTA } from "@/components/sections/GlobalCTA";
+import { PullQuote } from "@/components/sections/PullQuote";
 import { SolarSystemSlot } from "@/components/sections/services/SolarSystemSlot";
 import { SERVICE_ICONS } from "@/components/sections/services/ServiceIcons";
 import { HighlightedTitle } from "@/components/motion/HighlightedTitle";
@@ -148,6 +149,17 @@ export default async function ServicesPage({
           })}
         </div>
       </section>
+
+      {/* Closing pull-quote — same design as the homepage quote. Content is
+          editable via the servicesPage Sanity singleton, with the dict's
+          homepage quote as the fallback. */}
+      <PullQuote
+        quote={servicesPage?.quote ?? dict.pullQuote.quote}
+        author={servicesPage?.quoteAuthor ?? dict.pullQuote.author}
+        role={servicesPage?.quoteRole ?? dict.pullQuote.role}
+        imageSrc={servicesPage?.quoteImageUrl ?? "/quote-image.jpg"}
+        imageAlt={servicesPage?.quoteImageAlt ?? dict.pullQuote.imageAlt}
+      />
 
       <GlobalCTA dict={dict} variant="centered" content={contactCta} />
     </main>
