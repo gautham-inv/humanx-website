@@ -12,6 +12,7 @@ import {
   loadHomepage,
   loadEventsPage,
   loadContactCta,
+  loadPublications,
 } from "@/lib/sanity/loaders";
 import { Hero } from "@/components/sections/Hero";
 import { WhoWeAre } from "@/components/sections/WhoWeAre";
@@ -26,6 +27,7 @@ import {
   type TestimonialItem,
 } from "@/components/sections/Testimonials";
 import { GlobalCTA } from "@/components/sections/GlobalCTA";
+import { ConferencePush } from "@/components/sections/ConferencePush";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -75,6 +77,7 @@ export default async function Home({
     homepage,
     eventsPage,
     contactCta,
+    publications,
   ] = await Promise.all([
     getDictionary(locale),
     loadTestimonials(locale),
@@ -84,9 +87,13 @@ export default async function Home({
     loadHomepage(locale),
     loadEventsPage(locale),
     loadContactCta(locale),
+    loadPublications(locale),
   ]);
   return (
     <main id="main">
+      {/* Conference paper push — renders nothing unless the homepage is opened
+          via a tagged link (?paper=<campaignKey>). */}
+      <ConferencePush dict={dict} publications={publications} />
       <Hero dict={dict} locale={locale} content={homepage?.hero} />
       <OnStageTeaser dict={dict} locale={locale} />
       {/* Clients lead the homepage social proof — the more credible wall of
