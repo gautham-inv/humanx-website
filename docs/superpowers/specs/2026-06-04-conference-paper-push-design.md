@@ -40,7 +40,7 @@ frictionless reach.
 1. **Click 1 — link/QR.** Lands on the homepage; the modal slides up
    automatically (param detected). No click needed to open it.
 2. **Click 2 — "Get the paper."** Modal shows the matched paper (title + short
-   line; cover thumbnail if available), an email field (`type="email"` for the
+   line, **no cover thumbnail**), an email field (`type="email"` for the
    mobile keyboard), a consent checkbox, and one primary button. Enter email →
    tap once → email POSTs to HubSpot, the PDF downloads, modal closes, brief
    confirmation. Email is now a captured lead.
@@ -55,9 +55,7 @@ frictionless reach.
 
 ### 2. Website data layer (`lib/sanity`)
 - `publicationsQuery`: add `campaignKey` to the projection (already returns
-  `id, title, kind, date, file`). Add cover image URL **only if** the
-  `publication` schema already has an image field; otherwise omit (see Open/
-  Deferred). 
+  `id, title, kind, date, file`). **No cover image** — the modal is title-only.
 - `PublicationDoc` + `PublicationItem`: add `campaignKey: string` (empty when
   unset).
 - `loadPublications()` already filters to items with a `file`; keep that. The
@@ -135,6 +133,5 @@ props → client reads `?paper=` at runtime → matches `campaignKey` → opens
 - Per-conference greeting line ("Thanks for joining Ramon at AECOC") — optional
   future field.
 - Analytics events (modal shown / submitted) — optional future.
-- Cover thumbnail in the modal — include only if a publication image field
-  already exists; otherwise defer (title-only modal is fine).
+- Cover thumbnail in the modal — excluded by decision (title-only modal).
 - Real file access protection (signed URLs).
