@@ -101,7 +101,7 @@ export function EventsList({
                   </>
                 );
                 const cardClass =
-                  "flex items-start gap-6 p-6 rounded-2xl border border-line bg-bg-elev/30 backdrop-blur-sm transition hover:border-accent/60";
+                  "flex items-start gap-6 p-6 rounded-2xl border border-line bg-bg-elev/30 backdrop-blur-sm transition hover:border-cta/60";
                 if (internalHref) {
                   return (
                     <Link

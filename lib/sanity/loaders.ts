@@ -422,6 +422,16 @@ export type HomepageContent = {
     title?: string;
     body?: string;
     cta?: string;
+    /** Visible diagnostic cards, in document order. */
+    cards?: {
+      id?: string;
+      title?: string;
+      description?: string;
+      durationLabel?: string;
+      questionsLabel?: string;
+      url?: string;
+    }[];
+    /** @deprecated legacy single card — kept as a fallback for old content. */
     featured?: {
       id?: string;
       title?: string;
@@ -526,6 +536,36 @@ export async function loadHomepage(
         title: pickOpt(doc.assessmentTitle, locale),
         body: pickOpt(doc.assessmentBody, locale),
         cta: pickOpt(doc.assessmentCta, locale),
+        // Visible cards from the `assessments` array (drop any flagged hidden).
+        // Falls back to the legacy single `assessmentFeatured` object so old
+        // content keeps rendering until it's re-authored as array items.
+        cards: (() => {
+          const list = Array.isArray(doc.assessments) ? doc.assessments : [];
+          const visible = list
+            .filter((c) => c && c.visible !== false)
+            .map((c) => ({
+              id: c.id,
+              title: pickOpt(c.title, locale),
+              description: pickOpt(c.description, locale),
+              durationLabel: pickOpt(c.durationLabel, locale),
+              questionsLabel: pickOpt(c.questionsLabel, locale),
+              url: c.url,
+            }));
+          if (visible.length > 0) return visible;
+          if (doc.assessmentFeatured) {
+            return [
+              {
+                id: doc.assessmentFeatured.id,
+                title: pickOpt(doc.assessmentFeatured.title, locale),
+                description: pickOpt(doc.assessmentFeatured.description, locale),
+                durationLabel: pickOpt(doc.assessmentFeatured.durationLabel, locale),
+                questionsLabel: pickOpt(doc.assessmentFeatured.questionsLabel, locale),
+                url: doc.assessmentFeatured.url,
+              },
+            ];
+          }
+          return undefined;
+        })(),
         featured: doc.assessmentFeatured
           ? {
               id: doc.assessmentFeatured.id,
@@ -754,7 +794,7 @@ export type EventsPageContent = {
   /** Used by the homepage events block's "view all" link. */
   viewAllLabel?: string;
   /** Section header for the homepage Events block. */
-  homepage: { eyebrow?: string; title?: string; body?: string };
+  homepage: { eyebrow?: string; title?: string };
   /** Book-Ramon CTA shown beneath /events. */
   book: {
     eyebrow?: string;
@@ -784,7 +824,6 @@ export async function loadEventsPage(
       homepage: {
         eyebrow: pickOpt(doc.homepageEyebrow, locale),
         title: pickOpt(doc.homepageTitle, locale),
-        body: pickOpt(doc.homepageBody, locale),
       },
       book: {
         eyebrow: pickOpt(doc.bookEyebrow, locale),

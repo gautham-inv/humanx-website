@@ -22,9 +22,9 @@ export async function generateMetadata({
   return pageMetadata({
     locale,
     path: `/${SLUG}`,
-    title: "Publications · HumanX",
+    title: "Publications · HumanX Insights",
     description:
-      "Published writing, research and features from HumanX on customer and employee experience, AI, and human-centered strategy for leaders.",
+      "Published writing, research and features from HumanX Insights on customer and employee experience, AI, and human-centered strategy for leaders.",
   });
 }
 

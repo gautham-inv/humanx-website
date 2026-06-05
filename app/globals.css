@@ -14,6 +14,11 @@
   --color-ink-dim: #a39ea8;
   --color-accent: #e89348;        /* warm orange from the logo */
   --color-accent-bright: #f5a623; /* brighter for hover states */
+  /* CTA family — filled buttons + card hover frames. Matches the accent's
+     warm orange in dark theme; in light theme the accent flips to navy blue
+     but the CTA stays orange (overridden in the light-theme block). */
+  --color-cta: #e89348;
+  --color-cta-bright: #f5a623;
   --color-violet: #5b2db5;        /* X gradient start */
   --color-magenta: #c2186a;       /* X gradient end */
   --color-line: rgba(245,241,236,0.09);
@@ -34,16 +39,20 @@
 /* ---------------------------------------------------------------
  * Light theme — same token names, flipped values. Toggling the
  * [data-theme="light"] attribute on <html> swaps the entire palette
- * without touching any component class names. Accent stays orange
- * but deepens to a burnt tone so it has AA contrast on cream.
+ * without touching any component class names. In light theme the accent
+ * flips to navy blue (#000080); the warm orange survives only on filled CTA
+ * buttons and card hover frames, via the separate `cta` token. The dark
+ * theme keeps orange for both accent and cta.
  * ------------------------------------------------------------- */
 :root[data-theme="light"] {
   --color-bg: #faf6ed;            /* warm cream */
   --color-bg-elev: #ffffff;       /* clean white for elevated surfaces */
   --color-ink: #1a1620;           /* deep warm ink */
   --color-ink-dim: #5a5562;       /* muted body */
-  --color-accent: #a45620;        /* burnt orange for AA on cream */
-  --color-accent-bright: #c46428;
+  --color-accent: #000080;        /* navy blue accent (light theme) */
+  --color-accent-bright: #2222b0; /* brighter blue for hover/active accents */
+  --color-cta: #a45620;           /* buttons + card hover frames keep the warm orange */
+  --color-cta-bright: #c46428;
   --color-violet: #4a1f9c;        /* deeper violet for cream bg */
   --color-magenta: #a51258;       /* deeper magenta for cream bg */
   --color-line: rgba(26, 22, 32, 0.10);
@@ -57,6 +66,14 @@
 
 :root[data-theme="light"] [data-orbs] {
   display: none;
+}
+
+/* Buttons (and any .shadow-glow element) drop their glow in light theme — a
+ * blurred accent shadow reads as a smudge on the cream surface, not a halo.
+ * The --shadow-glow token is `none` here too, but Tailwind inlines the
+ * utility's value, so this explicit rule is what actually removes it. */
+:root[data-theme="light"] .shadow-glow {
+  box-shadow: none !important;
 }
 
 /* WebGL hero models: mobile gate handled by `hidden lg:block` utility on the
@@ -108,6 +125,15 @@
 .partner-logo-dark  { display: inline-block; }
 :root[data-theme="light"] .partner-logo-light { display: inline-block; }
 :root[data-theme="light"] .partner-logo-dark  { display: none; }
+
+/* ---------------------------------------------------------------
+ * Light-theme gradient opt-out. The recorded-keynote thumbnail fade
+ * reads as cinematic on the dark theme but turns into a washed-out
+ * cream overlay on the cream background, so it's hidden when the light
+ * theme is active. (The hero video uses a theme-independent dark overlay
+ * — see HeroVideoBackdrop — so it doesn't need a per-theme opt-out.)
+ * ------------------------------------------------------------- */
+:root[data-theme="light"] .keynote-thumb-scrim { display: none; }
 
 
 @layer base {

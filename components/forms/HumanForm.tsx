@@ -316,7 +316,7 @@ export function HumanForm({
         type="submit"
         disabled={submitting}
         aria-busy={submitting || undefined}
-        className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-accent px-6 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-bright focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-bright disabled:cursor-not-allowed disabled:opacity-70"
+        className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-cta px-6 text-sm font-semibold text-on-accent transition-colors hover:bg-cta-bright focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-bright disabled:cursor-not-allowed disabled:opacity-70"
       >
         {submitting ? dict.forms.sending : submitLabel}
       </button>

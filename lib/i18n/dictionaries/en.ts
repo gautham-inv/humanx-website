@@ -128,7 +128,6 @@ export const en = {
   events: {
     eyebrow: "Calendar",
     title: "Upcoming events",
-    body: "Where Ramon is on stage next.",
     viewAll: "View all events",
     noUpcoming: "No upcoming events announced yet. Check back soon.",
     pageTitle: "Events",
@@ -155,9 +154,9 @@ export const en = {
     note: "Recorded talks, full takes",
     // Homepage teaser → links to /on-stage
     credentials: "Founder · CX & EX Advisor · Keynote Speaker · Author",
-    teaserTitle: "Keynotes that <<move the room>>",
+    name: "Ramon Portilla",
     teaserBody:
-      "From boardrooms to main stages across three continents, Ramon turns human-experience strategy into talks audiences act on the next morning.",
+      "Over three decades at Meta, Walmart, Nielsen and Sam's Club, he's turned the way customers and employees feel into lasting loyalty and growth.",
     cta: "Watch me on stage",
   },
   // Full /on-stage page. The speaking map + region list reuse `about.speaking`.
@@ -166,9 +165,8 @@ export const en = {
     title: "Every stage, <<every talk>>",
     body: "Hundreds of leaders in the room, across three continents. Watch the keynotes in full, and see where Ramon has taken the stage.",
     videosTitle: "Recorded keynotes",
-    videosBody: "Full talks, unedited.",
     conferencesTitle: "Major conferences",
-    conferencesBody: "The summits and congresses where Ramon has shared the HumanX perspective.",
+    conferencesBody: "The summits and congresses where Ramon has shared the HumanX Insights perspective.",
     areasTitle: "Areas of expertise",
     areasItems: [
       { iconKey: "cx", label: "Customer Experience" },
@@ -183,7 +181,7 @@ export const en = {
     speakingExpBody:
       "Ramon has delivered keynotes and led forums for retailers, banks, business schools, and trade institutions across North America, Europe, and Latin America — turning human-experience strategy into ideas audiences apply the next day.",
     cta: {
-      eyebrow: "Work with HumanX",
+      eyebrow: "Work with HumanX Insights",
       title: "Bring Ramon to your stage",
       body: "Keynotes, consulting, workshops, and partnerships. One inbox for all of it — tell us what you're planning and we'll reply within two working days.",
       label: "Start a conversation",
@@ -245,7 +243,7 @@ export const en = {
     experienceBody: "Over 30 years of insights and analytics expertise across retail, social media and various industries. Leader in utilizing and synthesizing enormous databases for decision-making, pioneering CX/EX strategies, with proven business results. Storyteller, public speaker, community leader, and mentor.",
 
     pageEyebrow: "About",
-    pageTitle: "<<Why>> HumanX exists",
+    pageTitle: "<<Why>> HumanX Insights exists",
     pageBody: "We accelerate customer and employee loyalty for purpose-driven companies, through a human experience strategy designed around their own mission and purpose.",
     primaryCta: "Start a conversation",
 
@@ -347,7 +345,7 @@ export const en = {
   },
   cta: {
     eyebrow: "Let's talk",
-    title: "Want to work with HumanX?",
+    title: "Want to work with HumanX Insights?",
     body: "One inbox for speaking, consulting, partnerships and workshops. Tell us the moment and we reply within two working days.",
     openModalLabel: "Get in touch",
     modalTitle: "Open a conversation",

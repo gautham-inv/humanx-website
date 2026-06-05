@@ -32,7 +32,7 @@ export async function generateMetadata({
   return pageMetadata({
     locale,
     path: `/${SLUG}`,
-    title: "Services · HumanX",
+    title: "Services · HumanX Insights",
     description:
       "Three disciplines, one through-line: human experience as the operating principle. CX & EX strategy, insight-driven narratives, and operational playbooks for leadership teams.",
   });

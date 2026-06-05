@@ -175,7 +175,7 @@ export function PdfGateModal({
               type="submit"
               disabled={submitting || !consent || !email.includes("@")}
               aria-busy={submitting || undefined}
-              className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-medium text-on-accent shadow-glow transition hover:bg-accent-bright disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-full bg-cta px-6 py-3 text-sm font-medium text-on-accent shadow-glow transition hover:bg-cta-bright disabled:cursor-not-allowed disabled:opacity-50"
             >
               {submitting ? t.sending : t.submit}
               {!submitting ? <DownloadIcon /> : null}

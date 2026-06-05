@@ -38,8 +38,8 @@ function LiteYouTube({ id, title }: { id: string; title: string }) {
         className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
         loading="lazy"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-bg/80 via-transparent to-transparent" />
-      <div className="absolute left-1/2 top-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-accent text-on-accent shadow-glow transition group-hover:scale-110">
+      <div className="keynote-thumb-scrim absolute inset-0 bg-gradient-to-t from-bg/80 via-transparent to-transparent" />
+      <div className="absolute left-1/2 top-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-cta text-on-accent shadow-glow transition group-hover:scale-110">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
           <path d="M8 5v14l11-7z" />
         </svg>

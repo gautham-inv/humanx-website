@@ -55,7 +55,7 @@ export function ThemeToggle({
       // suppressHydrationWarning avoids React complaining when the inline
       // script flips the theme before React hydrates this button.
       suppressHydrationWarning
-      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink-dim transition-colors hover:border-accent hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink-dim transition-colors hover:border-cta hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
     >
       {/* Render a neutral icon until mounted so SSR markup matches client.
           After hydration, swap to the correct sun/moon. */}

@@ -39,7 +39,7 @@ export function Footer({ dict, locale, content }: FooterProps) {
           <div className="space-y-4">
             <Link
               href={`/${locale}`}
-              aria-label="HumanX home"
+              aria-label="HumanX Insights home"
               className="inline-block rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
             >
               {/* Theme-swapped wordmark — same dual-image pattern as the
@@ -48,15 +48,15 @@ export function Footer({ dict, locale, content }: FooterProps) {
                   the active theme. Dark variant bumped one size step to
                   offset its extra internal padding (see Nav for detail). */}
               <Image
-                src="/human-logo-dark.webp"
-                alt="HumanX"
+                src="/logo-dark.webp"
+                alt="HumanX Insights"
                 width={140}
                 height={40}
                 className="brand-logo-dark h-9 w-auto"
               />
               <Image
                 src="/logo.webp"
-                alt="HumanX"
+                alt="HumanX Insights"
                 width={140}
                 height={40}
                 className="brand-logo-light h-8 w-auto"
@@ -133,6 +133,9 @@ export function Footer({ dict, locale, content }: FooterProps) {
         {/* Bottom row: copyright */}
         <div className="mt-14 flex flex-col items-start justify-between gap-3 border-t border-line pt-6 text-xs sm:flex-row sm:items-center">
           <span>{rights}</span>
+          <span className="max-w-md leading-relaxed sm:text-right">
+            Music: &quot;Way To Dream&quot; by Keys Of Moon (CC BY 3.0)
+          </span>
         </div>
       </div>
     </footer>
@@ -155,7 +158,7 @@ function SocialLink({
       rel="noopener noreferrer"
       aria-label={label}
       title={label}
-      className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-line text-ink-dim transition-colors hover:border-accent hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-line text-ink-dim transition-colors hover:border-cta hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
     >
       {children}
     </a>

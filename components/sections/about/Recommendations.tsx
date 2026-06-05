@@ -79,7 +79,7 @@ function RecCard({
   );
 
   return (
-    <figure className="mb-6 break-inside-avoid rounded-2xl border border-line bg-bg-elev/30 p-6 backdrop-blur-sm transition hover:border-accent/40">
+    <figure className="mb-6 break-inside-avoid rounded-2xl border border-line bg-bg-elev/30 p-6 backdrop-blur-sm transition hover:border-cta/40">
       <div className="flex items-start gap-4">
         {rec.imageUrl ? (
           <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border border-line">
@@ -219,7 +219,7 @@ export function Recommendations({
             <button
               type="button"
               onClick={() => setShowAll((v) => !v)}
-              className="group inline-flex items-center gap-2 rounded-full border border-line px-6 py-3 text-sm font-medium text-ink transition hover:border-accent/60 hover:text-accent"
+              className="group inline-flex items-center gap-2 rounded-full border border-line px-6 py-3 text-sm font-medium text-ink transition hover:border-cta/60 hover:text-cta"
             >
               {showAll
                 ? showLessLabel

@@ -130,7 +130,6 @@ export const es: Dictionary = {
   events: {
     eyebrow: "io",
     title: "Próximos eventos",
-    body: "Dónde estará Ramon en el escenario próximamente.",
     viewAll: "Ver todos los eventos",
     noUpcoming: "Aún no se han anunciado próximos eventos. Vuelve pronto.",
     pageTitle: "Eventos",
@@ -157,9 +156,9 @@ export const es: Dictionary = {
     note: "Charlas grabadas, en su totalidad",
     // Teaser de la home → enlaza a /on-stage
     credentials: "Fundador · Asesor CX & EX · Conferencista · Autor",
-    teaserTitle: "Keynotes que <<mueven la sala>>",
+    name: "Ramon Portilla",
     teaserBody:
-      "De salas de juntas a los grandes escenarios en tres continentes, Ramon convierte la estrategia de experiencia humana en charlas que la audiencia aplica al día siguiente.",
+      "A lo largo de tres décadas en Meta, Walmart, Nielsen y Sam's Club, ha convertido la forma en que sienten clientes y empleados en lealtad y crecimiento duraderos.",
     cta: "Verme en escenario",
   },
   // Página completa /on-stage. El mapa + lista de regiones reutilizan `about.speaking`.
@@ -168,9 +167,8 @@ export const es: Dictionary = {
     title: "Cada escenario, <<cada charla>>",
     body: "Cientos de líderes en la sala, en tres continentes. Mira las keynotes completas y descubre dónde Ramon ha subido al escenario.",
     videosTitle: "Keynotes grabadas",
-    videosBody: "Charlas completas, sin editar.",
     conferencesTitle: "Conferencias principales",
-    conferencesBody: "Las cumbres y congresos donde Ramon ha compartido la perspectiva HumanX.",
+    conferencesBody: "Las cumbres y congresos donde Ramon ha compartido la perspectiva HumanX Insights.",
     areasTitle: "Áreas de especialización",
     areasItems: [
       { iconKey: "cx", label: "Experiencia del Cliente" },
@@ -185,7 +183,7 @@ export const es: Dictionary = {
     speakingExpBody:
       "Ramon ha ofrecido keynotes y liderado foros para retailers, bancos, escuelas de negocio e instituciones de comercio en Norteamérica, Europa y Latinoamérica — convirtiendo la estrategia de experiencia humana en ideas que las audiencias aplican al día siguiente.",
     cta: {
-      eyebrow: "Trabaja con HumanX",
+      eyebrow: "Trabaja con HumanX Insights",
       title: "Lleva a Ramon a tu escenario — o a tu equipo",
       body: "Keynotes, consultoría, talleres y alianzas. Una sola bandeja de entrada para todo — cuéntanos qué estás planeando y respondemos en dos días hábiles.",
       label: "Inicia una conversación",
@@ -240,7 +238,7 @@ export const es: Dictionary = {
     experienceBody: "Más de 30 años de experiencia en insights y analítica en retail, redes sociales e industrias diversas. Líder en sintetizar grandes bases de datos para la toma de decisiones, pionero en estrategias de CX/EX, con resultados de negocio comprobados. Narrador, conferencista, líder comunitario y mentor.",
 
     pageEyebrow: "Sobre nosotros",
-    pageTitle: "<<Por qué>> existe HumanX",
+    pageTitle: "<<Por qué>> existe HumanX Insights",
     pageBody: "Aceleramos la lealtad de clientes y empleados en empresas con propósito, a través de una estrategia de experiencia humana diseñada en torno a su propia misión y propósito.",
     primaryCta: "Iniciar una conversación",
 
@@ -333,7 +331,7 @@ export const es: Dictionary = {
   },
   cta: {
     eyebrow: "Hablemos",
-    title: "¿Quieres trabajar con HumanX?",
+    title: "¿Quieres trabajar con HumanX Insights?",
     body: "Una sola bandeja para conferencias, consultoría, partnerships y talleres. Cuéntanos el momento y respondemos en dos días hábiles.",
     openModalLabel: "Hablemos",
     modalTitle: "Abrir una conversación",

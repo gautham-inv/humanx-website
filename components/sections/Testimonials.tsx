@@ -112,7 +112,7 @@ export function Testimonials({ dict, items: itemsProp, content }: TestimonialsPr
             return (
               <div key={item.id} className="h-full">
                 <Reveal direction="up" delay={Math.min(i * 0.04, 0.25)} className="h-full">
-                  <figure className="flex h-full flex-col rounded-2xl border border-line bg-bg-elev/30 p-6 backdrop-blur-sm transition hover:border-accent/50">
+                  <figure className="flex h-full flex-col rounded-2xl border border-line bg-bg-elev/30 p-6 backdrop-blur-sm transition hover:border-cta/50">
                     <span
                       aria-hidden
                       className="block font-serif text-4xl leading-[0.6] text-accent/40 select-none"

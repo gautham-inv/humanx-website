@@ -63,7 +63,7 @@ export function MajorConferences({
             const meta = [c.organization, c.region].filter(Boolean).join(" · ");
 
             const card: ReactNode = (
-              <div className="flex h-full flex-col items-start gap-5 rounded-2xl border border-line bg-bg-elev/30 p-6 backdrop-blur-sm transition group-hover:border-accent/50 hover:border-accent/50">
+              <div className="flex h-full flex-col items-start gap-5 rounded-2xl border border-line bg-bg-elev/30 p-6 backdrop-blur-sm transition group-hover:border-cta/50 hover:border-cta/50">
                 <div className="flex min-h-12 items-center">
                   {hasLogo ? (
                     <>

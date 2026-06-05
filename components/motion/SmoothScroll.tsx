@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -13,6 +14,7 @@ if (typeof window !== "undefined") {
 
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
   const lenisRef = useRef<Lenis | null>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     if (prefersReducedMotion()) return;
@@ -35,6 +37,16 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       setLenis(null);
     };
   }, []);
+
+  // Reset scroll to the top on client navigation. Lenis owns the scroll
+  // position, so Next's default scroll-to-top never takes effect — do it
+  // explicitly. Skip when the URL carries a hash so in-page anchors still land.
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hash) return;
+    const lenis = lenisRef.current;
+    if (lenis) lenis.scrollTo(0, { immediate: true });
+    else window.scrollTo(0, 0);
+  }, [pathname]);
 
   return <>{children}</>;
 }

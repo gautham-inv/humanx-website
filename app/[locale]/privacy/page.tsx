@@ -20,7 +20,7 @@ export async function generateMetadata({
   return pageMetadata({
     locale,
     path: `/${SLUG}`,
-    title: "Privacy · HumanX",
+    title: "Privacy · HumanX Insights",
     description:
       "How HumanX Insights collects, uses, and protects your personal data.",
   });

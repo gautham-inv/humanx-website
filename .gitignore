@@ -50,3 +50,6 @@ next-env.d.ts
 
 # cloudflare
 .wrangler/
+
+# local/generated media
+/output.mp4

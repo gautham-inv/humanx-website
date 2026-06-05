@@ -65,7 +65,7 @@ export function ConferencePush({ dict, publications }: ConferencePushProps) {
     <button
       type="button"
       onClick={() => setOpen(true)}
-      className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-medium text-on-accent shadow-glow transition hover:bg-accent-bright focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-bright"
+      className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-2 rounded-full bg-cta px-5 py-3 text-sm font-medium text-on-accent shadow-glow transition hover:bg-cta-bright focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-bright"
     >
       {dict.pdfGate.reopen}
     </button>

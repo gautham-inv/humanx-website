@@ -23,9 +23,9 @@ export async function generateMetadata({
   return pageMetadata({
     locale,
     path: `/${SLUG}`,
-    title: "Events · HumanX",
+    title: "Events · HumanX Insights",
     description:
-      "Where HumanX is on stage next — keynotes, forums and roundtables on human experience, CX/EX and AI for leadership audiences worldwide.",
+      "Where HumanX Insights is on stage next — keynotes, forums and roundtables on human experience, CX/EX and AI for leadership audiences worldwide.",
   });
 }
 

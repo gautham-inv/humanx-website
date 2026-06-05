@@ -61,7 +61,6 @@ export function Events({
   const items: readonly EventRow[] =
     itemsProp && itemsProp.length > 0 ? itemsProp : dict.events.items;
   const title = content?.homepage.title ?? dict.events.title;
-  const body = content?.homepage.body ?? dict.events.body;
   const noUpcoming = content?.noUpcoming ?? dict.events.noUpcoming;
   const viewAllLabel = content?.viewAllLabel ?? dict.events.viewAll;
 
@@ -83,16 +82,8 @@ export function Events({
     >
       <div className="mx-auto max-w-6xl">
         <Reveal direction="up">
-          <div className="mb-16 grid gap-8 md:grid-cols-[auto_1fr_auto] md:items-end">
+          <div className="mb-16">
             <h2 className="font-display text-4xl md:text-5xl leading-[1.0] tracking-tight">{title}</h2>
-            <p className="max-w-sm text-ink-dim md:pl-2">{body}</p>
-            <span
-              aria-hidden
-              className="self-start font-display text-sm tabular-nums text-accent md:self-end"
-              style={{ fontVariationSettings: '"slnt" -8' }}
-            >
-              2026 / 2027
-            </span>
           </div>
         </Reveal>
 
@@ -144,7 +135,7 @@ export function Events({
                 </>
               );
               const cardClass =
-                "group flex flex-col overflow-hidden rounded-2xl border border-line bg-bg-elev/30 backdrop-blur-sm transition hover:border-accent/60";
+                "group flex flex-col overflow-hidden rounded-2xl border border-line bg-bg-elev/30 backdrop-blur-sm transition hover:border-cta/60";
               if (internalHref) {
                 return (
                   <Link

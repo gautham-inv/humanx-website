@@ -12,7 +12,7 @@ export const SITE_NAME = "HumanX Insights";
 /** Site-wide social share card (public/og.png, 1200×630). */
 const DEFAULT_OG_IMAGE = {
   url: `${SITE_URL}/og.png`,
-  alt: "HumanX — Human experience as the operating principle",
+  alt: "HumanX Insights — Human experience as the operating principle",
   width: 1200,
   height: 630,
 };

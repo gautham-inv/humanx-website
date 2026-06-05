@@ -32,10 +32,25 @@ type TickerRow = {
   logoLightHeight: number;
 };
 
+// Below this many logos we keep a single row — splitting a short list into two
+// rows leaves each one too sparse to fill the width and loop seamlessly. The
+// 25-brand clients wall comfortably clears this; a short partners strip won't.
+const TWO_ROW_THRESHOLD = 12;
+
+// ~3.5s per logo reads as a calm drift; floor at 40s so a short strip isn't
+// sluggish. Scaling by count keeps both rows drifting at the same speed even
+// when they hold a different number of logos.
+const trackDuration = (count: number) => Math.max(40, Math.round(count * 3.5));
+
 /**
  * Looping logo marquee shared by the homepage Clients and Partners strips.
  * Logos sit directly on the page background; theme-appropriate variants come
  * from Sanity (`logo` / `logoLight`), falling back to the brand name as text.
+ *
+ * With enough logos (see `TWO_ROW_THRESHOLD`) it renders as two rows scrolling
+ * in opposite directions — more brands are on screen at once and the
+ * counter-motion adds life. Shorter strips stay a single row.
+ *
  * Renders nothing when there's neither Sanity data nor a fallback list.
  */
 export function LogoTicker({
@@ -73,15 +88,7 @@ export function LogoTicker({
   // Nothing to show — don't render an empty strip.
   if (rows.length === 0) return null;
 
-  // Scale the scroll duration by the number of logos so a longer strip (e.g.
-  // the 25-brand clients wall) doesn't whip past faster than a short one — the
-  // animation always translates a fixed -50%, so more logos = more pixels in
-  // the same time. ~3.5s per logo reads as a calm drift; floor at 40s so a
-  // short strip isn't sluggish.
-  const durationSeconds = Math.max(40, Math.round(rows.length * 3.5));
-
-  // Duplicate the set so the translate animation loops seamlessly.
-  const loop = [...rows, ...rows];
+  const twoRows = rows.length >= TWO_ROW_THRESHOLD;
 
   return (
     <section
@@ -96,64 +103,21 @@ export function LogoTicker({
       </div>
 
       <div className="group relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
-        <div
-          className="ticker-track flex w-max items-center gap-12 md:gap-16 px-8 motion-reduce:animation-none"
-          style={{ animationDuration: `${durationSeconds}s` }}
-        >
-          {loop.map((row, i) => {
-            const itemClass =
-              "shrink-0 inline-flex items-center justify-center transition";
-            const inner =
-              row.logoUrl || row.logoLightUrl ? (
-                <>
-                  <img
-                    src={row.logoUrl}
-                    alt={row.name}
-                    width={row.logoWidth || undefined}
-                    height={row.logoHeight || undefined}
-                    loading="lazy"
-                    decoding="async"
-                    className="partner-logo-dark h-10 md:h-12 w-auto"
-                  />
-                  <img
-                    src={row.logoLightUrl}
-                    alt={row.name}
-                    width={row.logoLightWidth || undefined}
-                    height={row.logoLightHeight || undefined}
-                    loading="lazy"
-                    decoding="async"
-                    className="partner-logo-light h-10 md:h-12 w-auto"
-                  />
-                </>
-              ) : (
-                <span className="font-display text-2xl md:text-3xl tracking-tight text-ink-dim/90 hover:text-ink transition-colors">
-                  {row.name}
-                </span>
-              );
-            return row.website ? (
-              <a
-                key={`${row.key}-${i}`}
-                href={row.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={row.name}
-                aria-label={row.name}
-                className={`${itemClass} hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-bright rounded-sm`}
-              >
-                {inner}
-              </a>
-            ) : (
-              <div
-                key={`${row.key}-${i}`}
-                className={itemClass}
-                title={row.name}
-                aria-label={row.name}
-              >
-                {inner}
+        {twoRows ? (
+          (() => {
+            // Split roughly in half; the first (longer-or-equal) row drifts
+            // left, the second drifts right.
+            const mid = Math.ceil(rows.length / 2);
+            return (
+              <div className="flex flex-col gap-8 md:gap-12">
+                <TickerTrack rows={rows.slice(0, mid)} reverse={false} />
+                <TickerTrack rows={rows.slice(mid)} reverse />
               </div>
             );
-          })}
-        </div>
+          })()
+        ) : (
+          <TickerTrack rows={rows} reverse={false} />
+        )}
       </div>
 
       <style>{`
@@ -162,8 +126,13 @@ export function LogoTicker({
           to   { transform: translate3d(-50%, 0, 0); }
         }
         .ticker-track {
-          animation: humanx-ticker 38s linear infinite;
+          animation: humanx-ticker linear infinite;
           will-change: transform;
+        }
+        /* Reverse plays the same -50% keyframe backwards, so the row scrolls
+           the other way — seamless because the set is duplicated. */
+        .ticker-track--reverse {
+          animation-direction: reverse;
         }
         .group:hover .ticker-track,
         .group:focus-within .ticker-track {
@@ -177,5 +146,82 @@ export function LogoTicker({
         }
       `}</style>
     </section>
+  );
+}
+
+/**
+ * A single marquee row. The row set is duplicated so the -50% translate loops
+ * seamlessly; `reverse` flips the scroll direction. Duration scales with the
+ * logo count so every row drifts at the same pace.
+ */
+function TickerTrack({
+  rows,
+  reverse,
+}: {
+  rows: TickerRow[];
+  reverse: boolean;
+}) {
+  const loop = [...rows, ...rows];
+  return (
+    <div
+      className={`ticker-track flex w-max items-center gap-12 md:gap-16 px-8 motion-reduce:animation-none${
+        reverse ? " ticker-track--reverse" : ""
+      }`}
+      style={{ animationDuration: `${trackDuration(rows.length)}s` }}
+    >
+      {loop.map((row, i) => {
+        const itemClass =
+          "shrink-0 inline-flex items-center justify-center transition";
+        const inner =
+          row.logoUrl || row.logoLightUrl ? (
+            <>
+              <img
+                src={row.logoUrl}
+                alt={row.name}
+                width={row.logoWidth || undefined}
+                height={row.logoHeight || undefined}
+                loading="lazy"
+                decoding="async"
+                className="partner-logo-dark h-10 md:h-12 w-auto"
+              />
+              <img
+                src={row.logoLightUrl}
+                alt={row.name}
+                width={row.logoLightWidth || undefined}
+                height={row.logoLightHeight || undefined}
+                loading="lazy"
+                decoding="async"
+                className="partner-logo-light h-10 md:h-12 w-auto"
+              />
+            </>
+          ) : (
+            <span className="font-display text-2xl md:text-3xl tracking-tight text-ink-dim/90 hover:text-ink transition-colors">
+              {row.name}
+            </span>
+          );
+        return row.website ? (
+          <a
+            key={`${row.key}-${i}`}
+            href={row.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={row.name}
+            aria-label={row.name}
+            className={`${itemClass} hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-bright rounded-sm`}
+          >
+            {inner}
+          </a>
+        ) : (
+          <div
+            key={`${row.key}-${i}`}
+            className={itemClass}
+            title={row.name}
+            aria-label={row.name}
+          >
+            {inner}
+          </div>
+        );
+      })}
+    </div>
   );
 }

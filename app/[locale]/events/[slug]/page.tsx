@@ -17,9 +17,10 @@ import { eventSchema } from "@/lib/seo/schema";
  * list once during params resolution; the page render then re-fetches and
  * filters by slug — Sanity dedupes via its CDN so the cost is minimal.
  *
- * Layout: full-width hero image on top, then a two-column body — main
- * content on the left, a "Recent events" sidebar on the right. The
- * sidebar collapses below the body on mobile.
+ * Layout: a two-column body — the poster image on the left, and the
+ * title, summary, body and "Recent events" list stacked in the right
+ * column. Collapses to a single column on mobile, and falls back to a
+ * full-width content column when the event has no image.
  */
 
 type Params = { locale: string; slug: string };
@@ -58,7 +59,7 @@ export async function generateMetadata({
   const event = events.find((e) => e.slug === slug);
   if (!event) return {};
   return {
-    title: `${event.title} · HumanX`,
+    title: `${event.title} · HumanX Insights`,
     description: event.summary || `${event.venue} · ${event.date}`,
     alternates: {
       canonical: `/${locale}/events/${slug}`,
@@ -136,37 +137,13 @@ export default async function EventDetailPage({
   return (
     <main id="main" className="relative">
       <JsonLd data={eventSchema(event, locale as Locale)} />
-      {/* HERO IMAGE — centered, contained "poster" presentation. Event
-          posters often carry QR codes, dates, venue text — anything we'd
-          crop with `object-cover` is information the visitor came for. So
-          we use `object-contain` inside a max-width / max-height frame: the
-          image always shows in full, the container letterboxes top/bottom
-          (or left/right) as needed. Skipped entirely when no image has been
-          uploaded yet. */}
-      {event.imageUrl ? (
-        <section className="px-6 pt-10 pb-2 md:pt-14">
-          <div className="mx-auto flex max-w-3xl justify-center">
-            {/* Native <img> rather than `next/image` — we have
-                `images.unoptimized: true` (static export), so next/image is
-                just a passthrough, and using <img> lets the rendered height
-                track the natural aspect ratio of the uploaded asset instead
-                of being locked to a fixed container ratio. `max-h-[70vh]`
-                caps the height so portrait posters don't run the page off
-                screen; `max-w-md` keeps landscape shots from going wider
-                than ~28rem so QR codes / printed copy stay scan-sized
-                rather than billboard-sized. */}
-            <img
-              src={event.imageUrl}
-              alt={event.imageAlt || event.title}
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-              className="block h-auto w-auto max-h-[70vh] max-w-md rounded-2xl border border-line bg-bg-elev/40 object-contain"
-            />
-          </div>
-        </section>
-      ) : null}
-
+      {/* IMAGE-LEFT / CONTENT-RIGHT layout. The poster sits in a sticky
+          left column on desktop; the eyebrow, title, summary, body and the
+          "Recent events" list all stack in the right column. Event posters
+          carry QR codes, dates and printed copy, so the image uses
+          `object-contain` to always show in full rather than crop. When no
+          image has been uploaded the content spans the full width. Collapses
+          to a single column on mobile. */}
       <section className="relative px-6 pt-10 pb-16 md:pt-14 md:pb-24 lg:pt-20 lg:pb-32">
         <div className="mx-auto max-w-6xl">
           <Reveal direction="up">
@@ -178,152 +155,181 @@ export default async function EventDetailPage({
             </Link>
           </Reveal>
 
-          <div className="mt-8 grid gap-12 lg:grid-cols-[1fr_18rem] lg:gap-16">
-            {/* ── Main content column ───────────────────────────────── */}
-            <article>
+          <div
+            className={`mt-8 grid gap-12 lg:gap-16 ${
+              event.imageUrl ? "lg:grid-cols-[minmax(0,22rem)_1fr]" : ""
+            }`}
+          >
+            {/* ── Poster image — left column ─────────────────────────── */}
+            {event.imageUrl ? (
               <Reveal direction="up" delay={0.05}>
-                <div className="text-xs uppercase tracking-[0.3em] text-accent">
-                  {isPast
-                    ? locale === "es"
-                      ? "Evento pasado"
-                      : "Past event"
-                    : locale === "es"
-                      ? "Próximo evento"
-                      : "Upcoming event"}
-                  {event.date ? ` · ${event.date}` : null}
+                <div className="lg:sticky lg:top-24 lg:self-start">
+                  {/* Native <img> rather than `next/image` — we have
+                      `images.unoptimized: true` (static export), so next/image
+                      is just a passthrough, and using <img> lets the rendered
+                      height track the natural aspect ratio of the uploaded
+                      asset. `object-contain` keeps the whole poster — QR codes
+                      and printed copy included — visible; `max-h-[80vh]` stops
+                      tall portrait posters from running off screen. */}
+                  <img
+                    src={event.imageUrl}
+                    alt={event.imageAlt || event.title}
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
+                    className="mx-auto block h-auto w-full max-h-[80vh] rounded-2xl border border-line bg-bg-elev/40 object-contain"
+                  />
                 </div>
               </Reveal>
-              <Reveal direction="up" delay={0.1}>
-                <h1 className="mt-4 font-display text-[clamp(2rem,5vw,4rem)] leading-[1.05] tracking-tight">
-                  {event.title}
-                </h1>
-              </Reveal>
-              <Reveal direction="up" delay={0.15}>
-                <p className="mt-4 text-base text-ink-dim">
-                  {event.venue ? `${event.venue} · ` : null}
-                  <time dateTime={event.startsAt}>{dayLabel}</time>
-                </p>
-              </Reveal>
+            ) : null}
 
-              {event.summary ? (
-                <Reveal direction="up" delay={0.2}>
-                  <p className="mt-8 max-w-2xl font-serif text-xl leading-snug text-ink">
-                    {event.summary}
+            {/* ── Content + recent events — right column ─────────────── */}
+            <div>
+              <article>
+                <Reveal direction="up" delay={0.05}>
+                  <div className="text-xs uppercase tracking-[0.3em] text-accent">
+                    {isPast
+                      ? locale === "es"
+                        ? "Evento pasado"
+                        : "Past event"
+                      : locale === "es"
+                        ? "Próximo evento"
+                        : "Upcoming event"}
+                    {event.date ? ` · ${event.date}` : null}
+                  </div>
+                </Reveal>
+                <Reveal direction="up" delay={0.1}>
+                  <h1 className="mt-4 font-display text-[clamp(2rem,5vw,4rem)] leading-[1.05] tracking-tight">
+                    {event.title}
+                  </h1>
+                </Reveal>
+                <Reveal direction="up" delay={0.15}>
+                  <p className="mt-4 text-base text-ink-dim">
+                    {event.venue ? `${event.venue} · ` : null}
+                    <time dateTime={event.startsAt}>{dayLabel}</time>
                   </p>
                 </Reveal>
-              ) : null}
 
-              {bodyParagraphs.length > 0 ? (
-                <Reveal direction="up" delay={0.25}>
-                  <div className="mt-8 max-w-2xl space-y-5 font-serif text-base leading-relaxed text-ink-dim md:text-lg">
-                    {bodyParagraphs.map((p, i) => (
-                      <p key={i}>{p}</p>
-                    ))}
-                  </div>
+                {event.summary ? (
+                  <Reveal direction="up" delay={0.2}>
+                    <p className="mt-8 max-w-2xl font-serif text-xl leading-snug text-ink">
+                      {event.summary}
+                    </p>
+                  </Reveal>
+                ) : null}
+
+                {bodyParagraphs.length > 0 ? (
+                  <Reveal direction="up" delay={0.25}>
+                    <div className="mt-8 max-w-2xl space-y-5 font-serif text-base leading-relaxed text-ink-dim md:text-lg">
+                      {bodyParagraphs.map((p, i) => (
+                        <p key={i}>{p}</p>
+                      ))}
+                    </div>
+                  </Reveal>
+                ) : null}
+
+                {/* Optional embedded recording — separate from the homepage
+                    On Stage grid, which reads from `video` docs. */}
+                {event.youtubeId ? (
+                  <Reveal direction="up" delay={0.3}>
+                    <div className="mt-10 max-w-2xl">
+                      <iframe
+                        src={`https://www.youtube-nocookie.com/embed/${event.youtubeId}?rel=0`}
+                        title={event.title}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="aspect-video w-full rounded-[var(--radius-card)] border border-line"
+                      />
+                    </div>
+                  </Reveal>
+                ) : null}
+
+                {event.registrationUrl ? (
+                  <Reveal direction="up" delay={0.35}>
+                    <div className="mt-10">
+                      <a
+                        href={event.registrationUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 rounded-full bg-cta px-6 py-3 text-sm font-semibold text-on-accent transition hover:bg-cta-bright focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-bright"
+                      >
+                        {registerLabel}
+                        <span aria-hidden>↗</span>
+                      </a>
+                    </div>
+                  </Reveal>
+                ) : null}
+              </article>
+
+              {/* ── Recent events — stacked beneath the content ──────── */}
+              <aside className="mt-16 border-t border-line pt-10">
+                <Reveal direction="up" delay={0.1}>
+                  <h2 className="text-xs uppercase tracking-[0.3em] text-ink-dim">
+                    {recentLabel}
+                  </h2>
+                  {/* The accent rule + spacing here mirror the eyebrow style
+                      used elsewhere so the block reads like related content,
+                      not a navigation menu. */}
+                  <span aria-hidden className="mt-3 inline-block h-px w-8 bg-accent" />
                 </Reveal>
-              ) : null}
 
-              {/* Optional embedded recording — separate from the homepage
-                  On Stage grid, which reads from `video` docs. */}
-              {event.youtubeId ? (
-                <Reveal direction="up" delay={0.3}>
-                  <div className="mt-10 max-w-2xl">
-                    <iframe
-                      src={`https://www.youtube-nocookie.com/embed/${event.youtubeId}?rel=0`}
-                      title={event.title}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      className="aspect-video w-full rounded-[var(--radius-card)] border border-line"
-                    />
-                  </div>
-                </Reveal>
-              ) : null}
-
-              {event.registrationUrl ? (
-                <Reveal direction="up" delay={0.35}>
-                  <div className="mt-10">
-                    <a
-                      href={event.registrationUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-semibold text-on-accent transition hover:bg-accent-bright focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-bright"
-                    >
-                      {registerLabel}
-                      <span aria-hidden>↗</span>
-                    </a>
-                  </div>
-                </Reveal>
-              ) : null}
-            </article>
-
-            {/* ── Sidebar: recent events ────────────────────────────── */}
-            <aside className="lg:sticky lg:top-24 lg:self-start">
-              <Reveal direction="up" delay={0.1}>
-                <h2 className="text-xs uppercase tracking-[0.3em] text-ink-dim">
-                  {recentLabel}
-                </h2>
-                {/* The accent rule + spacing here mirror the eyebrow style
-                    used elsewhere so the sidebar reads like a related-content
-                    block, not a navigation menu. */}
-                <span aria-hidden className="mt-3 inline-block h-px w-8 bg-accent" />
-              </Reveal>
-
-              {sidebarEvents.length === 0 ? (
-                <p className="mt-6 text-sm text-ink-dim">
-                  {locale === "es"
-                    ? "Sin otros eventos por ahora."
-                    : "No other events listed yet."}
-                </p>
-              ) : (
-                <ul className="mt-6 space-y-5">
-                  {sidebarEvents.map((rev) => (
-                    <li key={rev.id}>
-                      <Reveal direction="up" delay={0.05}>
-                        <Link
-                          href={
-                            rev.slug
-                              ? `/${locale}/events/${rev.slug}`
-                              : `/${locale}/events`
-                          }
-                          className="group flex gap-3 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-bright"
-                        >
-                          {rev.imageUrl ? (
-                            <div className="relative h-16 w-20 flex-shrink-0 overflow-hidden rounded">
-                              <Image
-                                src={rev.imageUrl}
-                                alt={rev.imageAlt || rev.title}
-                                fill
-                                sizes="80px"
-                                className="object-cover transition duration-500 group-hover:scale-105"
-                              />
+                {sidebarEvents.length === 0 ? (
+                  <p className="mt-6 text-sm text-ink-dim">
+                    {locale === "es"
+                      ? "Sin otros eventos por ahora."
+                      : "No other events listed yet."}
+                  </p>
+                ) : (
+                  <ul className="mt-6 grid gap-x-8 gap-y-5 sm:grid-cols-2">
+                    {sidebarEvents.map((rev) => (
+                      <li key={rev.id}>
+                        <Reveal direction="up" delay={0.05}>
+                          <Link
+                            href={
+                              rev.slug
+                                ? `/${locale}/events/${rev.slug}`
+                                : `/${locale}/events`
+                            }
+                            className="group flex gap-3 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-bright"
+                          >
+                            {rev.imageUrl ? (
+                              <div className="relative h-16 w-20 flex-shrink-0 overflow-hidden rounded">
+                                <Image
+                                  src={rev.imageUrl}
+                                  alt={rev.imageAlt || rev.title}
+                                  fill
+                                  sizes="80px"
+                                  className="object-cover transition duration-500 group-hover:scale-105"
+                                />
+                              </div>
+                            ) : (
+                              <div className="h-16 w-20 flex-shrink-0 rounded bg-bg-elev/40 border border-line" />
+                            )}
+                            <div className="min-w-0">
+                              <p className="text-xs uppercase tracking-[0.2em] text-accent line-clamp-1">
+                                {rev.date}
+                              </p>
+                              <p className="mt-1 font-display text-sm leading-snug text-ink line-clamp-2 transition group-hover:text-accent">
+                                {rev.title}
+                              </p>
                             </div>
-                          ) : (
-                            <div className="h-16 w-20 flex-shrink-0 rounded bg-bg-elev/40 border border-line" />
-                          )}
-                          <div className="min-w-0">
-                            <p className="text-xs uppercase tracking-[0.2em] text-accent line-clamp-1">
-                              {rev.date}
-                            </p>
-                            <p className="mt-1 font-display text-sm leading-snug text-ink line-clamp-2 transition group-hover:text-accent">
-                              {rev.title}
-                            </p>
-                          </div>
-                        </Link>
-                      </Reveal>
-                    </li>
-                  ))}
-                </ul>
-              )}
+                          </Link>
+                        </Reveal>
+                      </li>
+                    ))}
+                  </ul>
+                )}
 
-              <Reveal direction="up" delay={0.2}>
-                <Link
-                  href={`/${locale}/events`}
-                  className="mt-8 inline-flex items-center gap-1 text-xs uppercase tracking-[0.3em] text-accent hover:text-accent-bright"
-                >
-                  {locale === "es" ? "Ver todos" : "View all"} →
-                </Link>
-              </Reveal>
-            </aside>
+                <Reveal direction="up" delay={0.2}>
+                  <Link
+                    href={`/${locale}/events`}
+                    className="mt-8 inline-flex items-center gap-1 text-xs uppercase tracking-[0.3em] text-accent hover:text-accent-bright"
+                  >
+                    {locale === "es" ? "Ver todos" : "View all"} →
+                  </Link>
+                </Reveal>
+              </aside>
+            </div>
           </div>
         </div>
       </section>

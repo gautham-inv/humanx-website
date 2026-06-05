@@ -295,6 +295,9 @@ export const homepageQuery = /* groq */ `
     whoWeAreTitle, whoWeAreLead, whoWeAreStepsHeading,
     whoWeAreItems[]{ title, body },
     assessmentEyebrow, assessmentTitle, assessmentBody, assessmentCta,
+    assessments[]{
+      visible, id, title, description, durationLabel, questionsLabel, url
+    },
     assessmentFeatured{
       id, title, description, durationLabel, questionsLabel, url
     },
@@ -328,6 +331,15 @@ export type HomepageDoc = {
   assessmentTitle?: LocStr;
   assessmentBody?: LocText;
   assessmentCta?: LocStr;
+  assessments?: {
+    visible?: boolean;
+    id?: string;
+    title?: LocStr;
+    description?: LocText;
+    durationLabel?: LocStr;
+    questionsLabel?: LocStr;
+    url?: string;
+  }[];
   assessmentFeatured?: {
     id?: string;
     title?: LocStr;
@@ -439,7 +451,7 @@ export const eventsPageQuery = /* groq */ `
     upcomingHeading, pastHeading,
     noUpcoming, noPast,
     viewAllLabel,
-    homepageEyebrow, homepageTitle, homepageBody,
+    homepageEyebrow, homepageTitle,
     bookEyebrow, bookTitle, bookBody, bookCta
   }
 `;
@@ -455,7 +467,6 @@ export type EventsPageDoc = {
   viewAllLabel?: LocStr;
   homepageEyebrow?: LocStr;
   homepageTitle?: LocStr;
-  homepageBody?: LocText;
   bookEyebrow?: LocStr;
   bookTitle?: LocStr;
   bookBody?: LocText;

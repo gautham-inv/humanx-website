@@ -49,7 +49,7 @@ export async function generateMetadata({
   return pageMetadata({
     locale,
     path: `/${SLUG}`,
-    title: "On stage · HumanX",
+    title: "On stage · HumanX Insights",
     description:
       "Book Ramon Portilla to speak — keynotes and talks that turn human-experience strategy into ideas audiences apply the next day, on stages across three continents.",
   });
@@ -196,11 +196,10 @@ export default async function OnStagePage({
       <section className="relative border-t border-line px-6 py-12 md:py-20 lg:py-24">
         <div className="mx-auto max-w-6xl">
           <Reveal direction="up">
-            <div className="mb-12 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div className="mb-12">
               <h2 className="font-display text-3xl leading-[1.1] tracking-tight md:text-4xl">
                 {t.videosTitle}
               </h2>
-              <p className="max-w-sm text-ink-dim">{t.videosBody}</p>
             </div>
           </Reveal>
           <VideoGrid videos={resolved} />

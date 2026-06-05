@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Reveal } from "@/components/motion/Reveal";
-import { HighlightedTitle } from "@/components/motion/HighlightedTitle";
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
 import type { Locale } from "@/lib/i18n/config";
 import { HeroImage } from "./HeroImage";
@@ -11,9 +10,10 @@ type OnStageTeaserProps = {
 };
 
 /**
- * Homepage "on stage" teaser ("Keynotes that move the room"): a two-column
- * editorial block — credentials, headline, body, and the "Watch me on stage"
- * CTA on the left; Ramon's portrait on the right. The portrait moved here from
+ * Homepage "on stage" teaser: a two-column editorial block — credentials,
+ * Ramon's name as the headline, a positioning line, and the "Watch me on
+ * stage" CTA on the left; Ramon's portrait on the right. The portrait moved
+ * here from
  * the hero (which now runs the keynote reel as its background), so the same
  * "text left / portrait right" composition continues into this section. No top
  * border, so the hero crossfades straight into it. Stacks on mobile.
@@ -21,6 +21,11 @@ type OnStageTeaserProps = {
 export function OnStageTeaser({ dict, locale }: OnStageTeaserProps) {
   const t = dict.onStage;
   const href = `/${locale}/on-stage`;
+  // Split the name so the surname carries the brand accent ("Ramon Portilla"
+  // → white first name + accent surname). Falls back gracefully to a single
+  // (all-white) word if the name has no space.
+  const [firstName, ...rest] = t.name.split(" ");
+  const surname = rest.join(" ");
 
   return (
     <section
@@ -36,23 +41,21 @@ export function OnStageTeaser({ dict, locale }: OnStageTeaserProps) {
             </p>
           </Reveal>
           <Reveal direction="up" delay={0.05}>
-            <HighlightedTitle
-              as="h2"
-              className="mt-5 font-display text-[clamp(2rem,5vw,3.5rem)] leading-[1.05] tracking-tight"
-            >
-              {t.teaserTitle}
-            </HighlightedTitle>
+            <h2 className="mt-5 font-display text-[clamp(2.5rem,6vw,4.5rem)] leading-[1.0] tracking-tight">
+              {firstName}
+              {surname ? <span className="text-accent"> {surname}</span> : null}
+            </h2>
           </Reveal>
           <Reveal direction="up" delay={0.1}>
             <p className="mx-auto mt-5 max-w-xl font-serif text-lg leading-relaxed text-ink-dim lg:mx-0">
               {t.teaserBody}
             </p>
           </Reveal>
-          <Reveal direction="up" delay={0.15}>
+          <Reveal direction="up" delay={0.2}>
             <div className="mt-8 flex justify-center lg:justify-start">
               <Link
                 href={href}
-                className="group inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-medium text-on-accent shadow-glow transition hover:bg-accent-bright"
+                className="group inline-flex items-center gap-2 rounded-full bg-cta px-6 py-3 text-sm font-medium text-on-accent shadow-glow transition hover:bg-cta-bright"
               >
                 {t.cta}
                 <span aria-hidden className="transition group-hover:translate-x-1">

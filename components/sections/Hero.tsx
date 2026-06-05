@@ -31,7 +31,7 @@ export function Hero({ dict, locale, content }: HeroProps) {
   const secondary = content?.secondaryCta ?? dict.hero.secondary;
 
   return (
-    <HeroShell className="relative isolate flex min-h-svh flex-col justify-center overflow-hidden px-6 pt-6 pb-10 md:pt-10 md:pb-12 lg:pt-8 lg:pb-0">
+    <HeroShell className="relative isolate flex min-h-svh flex-col justify-center overflow-hidden px-6 pt-6 pb-10 md:pt-10 md:pb-12 lg:justify-end lg:pt-8 lg:pb-28">
       {/* Background drifting orbs (mobile, and behind the desktop video). */}
       <BackgroundOrbs />
 
@@ -40,53 +40,42 @@ export function Hero({ dict, locale, content }: HeroProps) {
           on mobile — phones get the plain dark hero. */}
       <HeroVideoBackdrop />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col lg:pb-12">
-        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-16">
-          {/* Mobile portrait removed — on small screens the hero is text-only;
-              the absolute desktop image kicks in at lg+ via the wrapper above. */}
-
-          {/* Text Content Column.
-             *
-             * Mobile (< lg): text-center because there's no image to balance
-             * the left-aligned text — keeps the eyebrow, headline, paragraphs
-             * and buttons visually anchored to the column's centre.
-             *
-             * Desktop (lg+): text-left because the absolute portrait fills
-             * the right side of the section, and the two-column read works
-             * better with the text starting at the leading edge.
-             */}
-          <div className="z-10 flex flex-col justify-center text-center lg:text-left lg:col-span-7">
-            <div className="mb-3 inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-ink-dim animate-fade-in">
-              <span className="h-px w-8 bg-accent" />
-              {eyebrow}
-            </div>
-            {/* Emphasis defaults to index 1 ("experience") for the dict copy;
-                Sanity authors can re-target the italic-accent treatment by
-                wrapping a different word in <<…>>. */}
-            <HeroHeadline words={headlineWords} emphasis={headlineEmphasis} />
-            {/* `mx-auto lg:mx-0` centres the max-w-xl block on mobile/tablet
-                (where parent is wider than xl) and pins it to the left on
-                desktop alongside the portrait. */}
-            <p className="mt-5 max-w-xl mx-auto lg:mx-0 text-base md:text-lg text-ink leading-snug animate-fade-in">
-              {clarifier}
-            </p>
-            <p className="mt-3 max-w-xl mx-auto lg:mx-0 text-sm md:text-base text-ink-dim leading-relaxed animate-fade-in">
-              {sub}
-            </p>
-            <div className="mt-6 flex flex-wrap gap-4 justify-center lg:justify-start animate-fade-in">
-              <Link
-                href={`/${locale}#contact`}
-                className="rounded-full bg-accent px-6 py-3 text-sm font-semibold text-on-accent transition hover:bg-accent-bright focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-bright"
-              >
-                {primary}
-              </Link>
-              <Link
-                href={`/${locale}/services`}
-                className="rounded-full border border-line px-6 py-3 text-sm text-ink hover:border-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-              >
-                {secondary}
-              </Link>
-            </div>
+      <div className="relative z-10 flex w-full flex-col">
+        {/* Hero copy. The keynote video now runs full-bleed behind a dark
+            overlay on every breakpoint, so the copy is rendered white in BOTH
+            themes. On desktop (lg+) it's anchored bottom-left (HeroShell's
+            lg:justify-end); on mobile it stays vertically centered over the
+            scrimmed mobile clip. */}
+        <div className="z-10 flex flex-col text-center text-white lg:max-w-2xl lg:text-left">
+          <div className="mb-3 text-xs uppercase tracking-[0.3em] text-white/80 animate-fade-in">
+            {eyebrow}
+          </div>
+          {/* Emphasis defaults to index 1 ("experience") for the dict copy;
+              Sanity authors can re-target the italic treatment by wrapping a
+              different word in <<…>>. The h1 inherits color, so lg:text-white
+              on the wrapper turns it white over the video on desktop. */}
+          <HeroHeadline words={headlineWords} emphasis={headlineEmphasis} />
+          {/* `mx-auto lg:mx-0` centres the max-w-xl block on mobile and pins it
+              to the left at the bottom on desktop. */}
+          <p className="mt-5 max-w-xl mx-auto lg:mx-0 text-base md:text-lg text-white leading-snug animate-fade-in">
+            {clarifier}
+          </p>
+          <p className="mt-3 max-w-xl mx-auto lg:mx-0 text-sm md:text-base text-white/75 leading-relaxed animate-fade-in">
+            {sub}
+          </p>
+          <div className="mt-6 flex flex-wrap gap-4 justify-center lg:justify-start animate-fade-in">
+            <Link
+              href={`/${locale}#contact`}
+              className="rounded-full bg-cta px-6 py-3 text-sm font-semibold text-on-accent transition hover:bg-cta-bright focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-bright"
+            >
+              {primary}
+            </Link>
+            <Link
+              href={`/${locale}/services`}
+              className="rounded-full border border-white/40 px-6 py-3 text-sm text-white hover:border-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              {secondary}
+            </Link>
           </div>
         </div>
       </div>

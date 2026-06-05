@@ -8,6 +8,7 @@ import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
 import { ContactModalProvider } from "@/components/layout/ContactModalProvider";
 import { ThemeSync } from "@/components/layout/ThemeSync";
+import { BackgroundAudio } from "@/components/layout/BackgroundAudio";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { LocaleFade } from "@/components/motion/LocaleFade";
 import {
@@ -78,7 +79,7 @@ export async function generateMetadata({
     ...pageMetadata({
       locale,
       path: "",
-      title: "HumanX · Human experience as the operating principle",
+      title: "HumanX Insights · Human experience as the operating principle",
       description:
         "CX & EX consultancy for boards and executives — turning three decades across Meta, Walmart and Nielsen into human-experience strategy your team can run on Monday.",
     }),
@@ -135,12 +136,7 @@ export default async function LocaleLayout({
             (browsing history merged into each contact's CRM timeline),
             add the <Script src="https://js-na2.hs-scripts.com/{portalId}.js"
             strategy="afterInteractive" /> back here. */}
-        <a
-          href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-on-accent focus:text-sm focus:font-semibold"
-        >
-          Skip to content
-        </a>
+        
         <ThemeSync />
         <JsonLd
           data={[
@@ -170,6 +166,7 @@ export default async function LocaleLayout({
               locale={locale as Locale}
               content={footerContent}
             />
+            <BackgroundAudio locale={locale as Locale} />
           </SmoothScroll>
         </ContactModalProvider>
       </body>

@@ -40,7 +40,7 @@ export async function generateMetadata({
   return pageMetadata({
     locale,
     path: `/${SLUG}`,
-    title: "About · HumanX",
+    title: "About · HumanX Insights",
     description:
       "Ramon Portilla — founder, speaker and advisor. 30+ years of CX/EX and analytics across Meta, Walmart, Nielsen and Sam's Club, turning strategy into systems teams can run.",
   });
