@@ -41,6 +41,11 @@ jobs:
         env:
           NEXT_PUBLIC_HUBSPOT_PORTAL_ID: ${{ vars.NEXT_PUBLIC_HUBSPOT_PORTAL_ID }}
           NEXT_PUBLIC_HUBSPOT_FORM_GUID: ${{ vars.NEXT_PUBLIC_HUBSPOT_FORM_GUID }}
+          # Gated-PDF download form (homepage ?paper= push + /publications gate).
+          # Without this, isDownloadConfigured() is false in the prod bundle and
+          # the gate is skipped — the paper downloads directly instead of asking
+          # for an email. Must also exist as an Actions Variable in the repo.
+          NEXT_PUBLIC_HUBSPOT_DOWNLOAD_FORM_GUID: ${{ vars.NEXT_PUBLIC_HUBSPOT_DOWNLOAD_FORM_GUID }}
         run: npm run build
 
       - name: Deploy to Cloudflare Pages
