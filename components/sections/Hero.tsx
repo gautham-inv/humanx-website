@@ -4,7 +4,8 @@ import type { Locale } from "@/lib/i18n/config";
 import type { HomepageContent } from "@/lib/sanity/loaders";
 import { HeroHeadline } from "./HeroHeadline";
 import { BackgroundOrbs } from "./BackgroundOrbs";
-import { HeroImage } from "./HeroImage";
+import { HeroShell } from "./HeroShell";
+import { HeroVideoBackdrop } from "./HeroVideoBackdrop";
 
 type HeroProps = {
   dict: Dictionary;
@@ -26,22 +27,18 @@ export function Hero({ dict, locale, content }: HeroProps) {
   const eyebrow = content?.eyebrow ?? dict.hero.eyebrow;
   const clarifier = content?.clarifier ?? dict.hero.clarifier;
   const sub = content?.sub ?? dict.hero.sub;
-  const portraitAlt = content?.portraitAlt ?? dict.hero.portraitAlt;
   const primary = content?.primaryCta ?? dict.hero.primary;
   const secondary = content?.secondaryCta ?? dict.hero.secondary;
 
   return (
-    <section className="relative isolate flex min-h-svh flex-col justify-center overflow-hidden px-6 pt-6 pb-10 md:pt-10 md:pb-12 lg:pt-8 lg:pb-0">
-      {/* Background drifting orbs */}
+    <HeroShell className="relative isolate flex min-h-svh flex-col justify-center overflow-hidden px-6 pt-6 pb-10 md:pt-10 md:pb-12 lg:pt-8 lg:pb-0">
+      {/* Background drifting orbs (mobile, and behind the desktop video). */}
       <BackgroundOrbs />
 
-      {/* Desktop portrait — fills hero top→bottom. Section sits below the
-          sticky nav in the DOM, so inset-y-0 places the image just under
-          the nav. HeroImage internally handles the scale + bottom-anchor +
-          parallax so the visible crop keeps Ramon's face + torso in frame. */}
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-0 hidden lg:block lg:w-[42%] xl:w-[46%]">
-        <HeroImage fill alt={portraitAlt} />
-      </div>
+      {/* Desktop background video + dark scrim. Replaces the old right-side
+          portrait, which now lives in the OnStageTeaser section below. Hidden
+          on mobile — phones get the plain dark hero. */}
+      <HeroVideoBackdrop />
 
       <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col lg:pb-12">
         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-16">
@@ -93,6 +90,6 @@ export function Hero({ dict, locale, content }: HeroProps) {
           </div>
         </div>
       </div>
-    </section>
+    </HeroShell>
   );
 }

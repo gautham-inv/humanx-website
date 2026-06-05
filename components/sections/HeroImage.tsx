@@ -22,11 +22,15 @@ export function HeroImage({ fill = false, alt = "Ramon Portilla, founder of Huma
     () => {
       if (!containerRef.current || !imageRef.current) return;
 
+      // Parallax stays within the image's overscale headroom so its edges
+      // never slide into the frame. With object-cover the safe travel is
+      // |yPercent| ≤ 50·(scale − 1); at scale-110 that's 5%, so ±4% keeps a
+      // margin at every breakpoint and the portrait is never cut off on scroll.
       gsap.fromTo(
         imageRef.current,
-        { yPercent: -12 },
+        { yPercent: -4 },
         {
-          yPercent: 12,
+          yPercent: 4,
           ease: "none",
           scrollTrigger: {
             trigger: containerRef.current,
@@ -53,8 +57,14 @@ export function HeroImage({ fill = false, alt = "Ramon Portilla, founder of Huma
     { scope: containerRef }
   );
 
+  // person.webp is a landscape (1086×724) source. object-cover fills the
+  // portrait frame and crops the sides (where there's no subject) rather than
+  // letterboxing or relying on a heavy zoom; scale-110 adds just enough
+  // overscale to give the parallax room without throwing away much of the
+  // image. Previously object-contain + scale-200 cropped ~50% and, paired with
+  // the larger parallax, let the frame clip the portrait as it scrolled.
   const imageClass =
-    "object-contain object-center scale-200 transition-opacity duration-300 ease-out";
+    "object-cover object-center scale-105 transition-opacity duration-300 ease-out";
   const sizes = fill ? "(max-width: 1024px) 100vw, 52vw" : "(max-width: 1024px) 100vw, 40vw";
 
   return (

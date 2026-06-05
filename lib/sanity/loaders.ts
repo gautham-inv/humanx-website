@@ -280,6 +280,8 @@ export type PublicationItem = {
   date: string;
   /** Resolved Sanity CDN URL of the PDF; empty when none uploaded. */
   file: string;
+  /** Conference share key (?paper=<key>); empty when unset. */
+  campaignKey: string;
 };
 
 export async function loadPublications(
@@ -294,6 +296,7 @@ export async function loadPublications(
         kind: pickLoc(row.kind, locale),
         date: pickLoc(row.date, locale),
         file: row.file ?? "",
+        campaignKey: row.campaignKey ?? "",
       }))
       .filter((row) => row.title && row.file);
   } catch (err) {

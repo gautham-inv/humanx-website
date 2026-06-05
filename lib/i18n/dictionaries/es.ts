@@ -217,6 +217,7 @@ export const es: Dictionary = {
     error: "Algo salió mal. Inténtalo de nuevo.",
     cancel: "Cancelar",
     close: "Cerrar",
+    reopen: "Descarga el paper de Ramon",
   },
   values: {
     title: "Nuestros Valores",

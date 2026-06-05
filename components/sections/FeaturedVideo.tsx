@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Reveal } from "@/components/motion/Reveal";
+import { getLenis } from "@/lib/lenis";
 
 type FeaturedVideoProps = {
   eyebrow: string;
@@ -31,6 +32,18 @@ export function FeaturedVideo({
   const [active, setActive] = useState(false);
   const thumb = `https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg`;
 
+  // The YouTube iframe is cross-origin, so Lenis (smooth scroll) can't read
+  // wheel events over it and animates the page back to its last target —
+  // the "pull back" when you scroll over the playing video. While the pointer
+  // is over the active iframe we pause Lenis so the wheel scrolls the page
+  // natively, then resume on leave. Always resume on unmount so smooth scroll
+  // is never left disabled.
+  useEffect(() => {
+    return () => {
+      getLenis()?.start();
+    };
+  }, []);
+
   return (
     <section
       id="featured-video"
@@ -58,13 +71,20 @@ export function FeaturedVideo({
         </div>
 
         <Reveal direction="up" delay={0.15} className="mt-10 block md:mt-14">
-          <div className="mx-auto w-full">
+          <div
+            className="mx-auto w-full"
+            onMouseEnter={() => {
+              if (active) getLenis()?.stop();
+            }}
+            onMouseLeave={() => getLenis()?.start()}
+          >
           {active ? (
             <iframe
               src={`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&rel=0`}
               title={title}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
+              data-lenis-prevent
               className="aspect-video w-full rounded-[var(--radius-card)] border border-line"
             />
           ) : (

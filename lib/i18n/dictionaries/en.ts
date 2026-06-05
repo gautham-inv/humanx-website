@@ -222,6 +222,7 @@ export const en = {
     error: "Something went wrong. Please try again.",
     cancel: "Cancel",
     close: "Close",
+    reopen: "Get Ramon's paper",
   },
   values: {
     title: "Our Values",

@@ -153,6 +153,7 @@ export const publicationsQuery = /* groq */ `
     title,
     kind,
     date,
+    campaignKey,
     "file": file.asset->url
   }
 `;
@@ -162,6 +163,8 @@ export type PublicationDoc = {
   title: { en?: string; es?: string };
   kind?: { en?: string; es?: string };
   date?: { en?: string; es?: string };
+  /** Conference share key matched against `?paper=<key>`. */
+  campaignKey?: string;
   /** Resolved Sanity CDN URL of the uploaded PDF, or undefined. */
   file?: string;
 };
