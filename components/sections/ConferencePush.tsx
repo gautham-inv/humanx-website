@@ -6,6 +6,7 @@ import type { PublicationItem } from "@/lib/sanity/loaders";
 import { isDownloadConfigured } from "@/lib/hubspot";
 import { triggerDownload } from "@/lib/download";
 import { matchPublicationByKey } from "@/lib/conference-push";
+import { getLenis } from "@/lib/lenis";
 import { PdfGateModal, type GatePublication } from "./PdfGateModal";
 
 type ConferencePushProps = {
@@ -41,6 +42,11 @@ export function ConferencePush({ dict, publications }: ConferencePushProps) {
       triggerDownload(match.file);
       setDone(true);
     } else {
+      // Pin the page to the top so the hero sits behind the gate (not whatever
+      // section a restored scroll position would land on). The modal's own
+      // scroll-lock then freezes it there.
+      window.scrollTo(0, 0);
+      getLenis()?.scrollTo(0, { immediate: true });
       setOpen(true);
     }
     /* eslint-enable react-hooks/set-state-in-effect */

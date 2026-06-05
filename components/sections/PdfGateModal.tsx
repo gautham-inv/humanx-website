@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
 import { submitGatedDownload } from "@/lib/hubspot";
 import { triggerDownload } from "@/lib/download";
+import { getLenis } from "@/lib/lenis";
 
 /** Minimal shape the gate needs to render + download a paper. */
 export type GatePublication = { id: string; title: string; file: string };
@@ -56,9 +58,32 @@ export function PdfGateModal({
   const emailRef = useRef<HTMLInputElement | null>(null);
   const headingId = useId();
 
-  // Focus the email field on open; Escape dismisses.
+  // Lock background scroll while the gate is open so the dialog stays put
+  // (sticky) over a frozen page rather than letting the content drift behind
+  // the blurred backdrop. Pause Lenis (the smooth-scroll engine) and hard-lock
+  // body overflow as a fallback. When the gate auto-opens from a ?paper= link,
+  // Lenis may finish initialising a tick later, so re-issue stop() on the next
+  // frame (and once more shortly after) to win that race.
   useEffect(() => {
-    emailRef.current?.focus();
+    const stopLenis = () => getLenis()?.stop();
+    stopLenis();
+    const raf = requestAnimationFrame(stopLenis);
+    const timer = setTimeout(stopLenis, 60);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(timer);
+      document.body.style.overflow = prevOverflow;
+      getLenis()?.start();
+    };
+  }, []);
+
+  // Focus the email field on open; Escape dismisses. `preventScroll` stops the
+  // browser from scrolling the page to chase the focused input (which would
+  // otherwise drag the page off the hero on auto-open).
+  useEffect(() => {
+    emailRef.current?.focus({ preventScroll: true });
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
@@ -83,7 +108,15 @@ export function PdfGateModal({
     }
   }
 
-  return (
+  // Portal to <body> so the dialog escapes the page's transformed ancestors
+  // (LocaleFade wraps children in a GSAP-animated div whose residual transform
+  // would otherwise make `position: fixed` resolve against that div instead of
+  // the viewport — leaving the panel centered far down the document). Rendered
+  // on <body>, `fixed inset-0` is truly viewport-anchored, so the gate stays
+  // centered and sticky over a frozen page.
+  if (typeof window === "undefined") return null;
+
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       role="dialog"
@@ -150,6 +183,7 @@ export function PdfGateModal({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

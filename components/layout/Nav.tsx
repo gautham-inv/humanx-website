@@ -97,7 +97,7 @@ export function Nav({ locale, dict }: { locale: Locale; dict: Dictionary }) {
           width={180}
           height={52}
           priority
-          className="brand-logo-dark h-9 w-auto md:h-10"
+          className="brand-logo-dark h-11 w-auto md:h-12"
         />
         <Image
           src="/logo.webp"
@@ -105,7 +105,7 @@ export function Nav({ locale, dict }: { locale: Locale; dict: Dictionary }) {
           width={180}
           height={52}
           priority
-          className="brand-logo-light h-8 w-auto md:h-9"
+          className="brand-logo-light h-10 w-auto md:h-11"
         />
       </Link>
 
