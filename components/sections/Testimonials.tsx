@@ -1,6 +1,7 @@
 import { Reveal } from "@/components/motion/Reveal";
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
 import type { HomepageContent } from "@/lib/sanity/loaders";
+import { sanityImageUrl } from "@/lib/sanity/image-loader";
 import { BackdropMesh } from "@/components/motion/Backdrops";
 
 /**
@@ -88,7 +89,7 @@ export function Testimonials({ dict, items: itemsProp, content }: TestimonialsPr
               <>
                 {item.imageUrl ? (
                   <img
-                    src={item.imageUrl}
+                    src={sanityImageUrl(item.imageUrl, 112)}
                     alt={item.imageAlt || item.author}
                     width={56}
                     height={56}

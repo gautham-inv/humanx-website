@@ -17,7 +17,8 @@ import { GlobalSpeaking } from "@/components/sections/about/GlobalSpeaking";
 import { MajorConferences } from "@/components/sections/on-stage/MajorConferences";
 import { AreasOfExpertise } from "@/components/sections/on-stage/AreasOfExpertise";
 import { VideoGrid } from "@/components/sections/on-stage/VideoGrid";
-import { WorldMap, type SpeakingPin } from "@/components/sections/on-stage/WorldMap";
+import { WorldMapSlot } from "@/components/sections/on-stage/WorldMapSlot";
+import { type SpeakingPin } from "@/components/sections/on-stage/WorldMap";
 import { resolveVideos } from "@/components/sections/on-stage/resolve-videos";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { videoObjectSchema } from "@/lib/seo/schema";
@@ -189,7 +190,7 @@ export default async function OnStagePage({
           so the global reach reads before the talks themselves. */}
       <GlobalSpeaking
         {...speaking}
-        map={<WorldMap pins={SPEAKING_PINS} className="mx-auto w-full max-w-4xl" />}
+        map={<WorldMapSlot pins={SPEAKING_PINS} className="mx-auto w-full max-w-4xl" />}
       />
 
       {/* VIDEOS — every recorded keynote */}

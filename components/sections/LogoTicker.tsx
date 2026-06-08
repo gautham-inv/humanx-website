@@ -1,4 +1,5 @@
 import type { PartnerItem } from "@/lib/sanity/loaders";
+import { LogoMark } from "@/components/sections/LogoMark";
 
 type LogoTickerProps = {
   /** Visible label above the strip — e.g. "Trusted by" or "Our partners". */
@@ -174,26 +175,15 @@ function TickerTrack({
           "shrink-0 inline-flex items-center justify-center transition";
         const inner =
           row.logoUrl || row.logoLightUrl ? (
-            <>
-              <img
-                src={row.logoUrl}
-                alt={row.name}
-                width={row.logoWidth || undefined}
-                height={row.logoHeight || undefined}
-                loading="lazy"
-                decoding="async"
-                className="partner-logo-dark h-10 md:h-12 w-auto"
-              />
-              <img
-                src={row.logoLightUrl}
-                alt={row.name}
-                width={row.logoLightWidth || undefined}
-                height={row.logoLightHeight || undefined}
-                loading="lazy"
-                decoding="async"
-                className="partner-logo-light h-10 md:h-12 w-auto"
-              />
-            </>
+            <LogoMark
+              name={row.name}
+              logoUrl={row.logoUrl}
+              logoWidth={row.logoWidth}
+              logoHeight={row.logoHeight}
+              logoLightUrl={row.logoLightUrl}
+              logoLightWidth={row.logoLightWidth}
+              logoLightHeight={row.logoLightHeight}
+            />
           ) : (
             <span className="font-display text-2xl md:text-3xl tracking-tight text-ink-dim/90 hover:text-ink transition-colors">
               {row.name}

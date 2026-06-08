@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Reveal } from "@/components/motion/Reveal";
+import { LogoMark } from "@/components/sections/LogoMark";
 import type { ConferenceItem } from "@/lib/sanity/loaders";
 
 type MajorConferencesProps = {
@@ -59,33 +60,21 @@ export function MajorConferences({
         <div className="mt-12 grid auto-rows-fr gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((c, i) => {
             const hasLogo = Boolean(c.logoUrl || c.logoLightUrl);
-            const lightUrl = c.logoLightUrl || c.logoUrl;
             const meta = [c.organization, c.region].filter(Boolean).join(" · ");
 
             const card: ReactNode = (
               <div className="flex h-full flex-col items-start gap-5 rounded-2xl border border-line bg-bg-elev/30 p-6 backdrop-blur-sm transition group-hover:border-cta/50 hover:border-cta/50">
                 <div className="flex min-h-12 items-center">
                   {hasLogo ? (
-                    <>
-                      <img
-                        src={c.logoUrl}
-                        alt={c.name}
-                        width={c.logoWidth || undefined}
-                        height={c.logoHeight || undefined}
-                        loading="lazy"
-                        decoding="async"
-                        className="partner-logo-dark h-10 w-auto md:h-12"
-                      />
-                      <img
-                        src={lightUrl}
-                        alt={c.name}
-                        width={c.logoLightWidth || c.logoWidth || undefined}
-                        height={c.logoLightHeight || c.logoHeight || undefined}
-                        loading="lazy"
-                        decoding="async"
-                        className="partner-logo-light h-10 w-auto md:h-12"
-                      />
-                    </>
+                    <LogoMark
+                      name={c.name}
+                      logoUrl={c.logoUrl}
+                      logoWidth={c.logoWidth}
+                      logoHeight={c.logoHeight}
+                      logoLightUrl={c.logoLightUrl}
+                      logoLightWidth={c.logoLightWidth}
+                      logoLightHeight={c.logoLightHeight}
+                    />
                   ) : (
                     <span className="font-display text-xl leading-tight tracking-tight text-ink md:text-2xl">
                       {c.name}

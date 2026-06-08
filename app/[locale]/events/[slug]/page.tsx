@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { locales, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { loadEvents, loadEventsPage } from "@/lib/sanity/loaders";
+import { sanityImageUrl } from "@/lib/sanity/image-loader";
 import { Reveal } from "@/components/motion/Reveal";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { eventSchema } from "@/lib/seo/schema";
@@ -172,7 +173,7 @@ export default async function EventDetailPage({
                       and printed copy included — visible; `max-h-[80vh]` stops
                       tall portrait posters from running off screen. */}
                   <img
-                    src={event.imageUrl}
+                    src={sanityImageUrl(event.imageUrl, 750)}
                     alt={event.imageAlt || event.title}
                     loading="eager"
                     fetchPriority="high"

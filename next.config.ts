@@ -3,15 +3,14 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: "export",
   images: {
-    unoptimized: true,
-    remotePatterns: [
-      { protocol: "https", hostname: "i.ytimg.com" },
-      // Sanity CDN host for image asset URLs returned by the insight
-      // schema's `image.asset->url` projection. `unoptimized: true` above
-      // means Next won't re-encode these — we just need the host allowed
-      // so next/image accepts the src.
-      { protocol: "https", hostname: "cdn.sanity.io" },
-    ],
+    // Static export can't run Next's built-in optimizer, so we delegate to a
+    // custom loader that rewrites Sanity CDN URLs to request AVIF/WebP +
+    // right-sized images on the fly (see lib/sanity/image-loader.ts). This
+    // gives every next/image a responsive srcset of optimized assets at build
+    // time; non-Sanity/local URLs pass through untouched. `remotePatterns` is
+    // not enforced under a custom loader, so it's no longer needed.
+    loader: "custom",
+    loaderFile: "./lib/sanity/image-loader.ts",
   },
 };
 
