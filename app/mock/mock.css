@@ -1,0 +1,359 @@
+/* ---------------------------------------------------------------
+ * Playbill mock — scoped design system for /mock only.
+ * Cream "programme paper" default; dark indigo reserved for stage
+ * interludes (hero, tour schedule, colophon). All six logo colours
+ * keep a job: amber = workhorse accent, violet/magenta/gold appear
+ * in numerals and in the 2px "brand thread" gradient hairline.
+ * Nothing here leaks into production — every rule sits under
+ * body.playbill.
+ * ------------------------------------------------------------- */
+
+body.playbill {
+  --paper: #faf6ed;
+  --paper-elev: #f3ecdc;
+  --ink: #1a1620;
+  --ink-soft: #5a5562;
+  --stage: #0c0a16;
+  --stage-elev: #15121f;
+  --cream-on-stage: #f5f1ec;
+  --dim-on-stage: #a89fb2;
+  --amber: #c46428;
+  --amber-bright: #e89348;
+  --gold: #f5a623;
+  --violet: #5b2db5;
+  --magenta: #c2186a;
+  --hairline: rgba(26, 22, 32, 0.16);
+  --hairline-stage: rgba(245, 241, 236, 0.14);
+
+  --pb-mono: var(--font-spline-mono), ui-monospace, "SF Mono", monospace;
+  --pb-display: var(--font-fraunces), Georgia, serif;
+  --pb-body: var(--font-literata), Georgia, serif;
+
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--pb-body);
+}
+
+/* Film-grain overlay: breaks digital flatness on paper AND adds
+ * texture to the video interludes. Fixed, click-through, subtle. */
+body.playbill::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  opacity: 0.045;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---- type roles ---- */
+
+.pb-display {
+  font-family: var(--pb-display);
+  font-weight: 560;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+.pb-italic {
+  font-family: var(--pb-display);
+  font-style: italic;
+  font-weight: 480;
+}
+
+.pb-label {
+  font-family: var(--pb-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.pb-mono {
+  font-family: var(--pb-mono);
+}
+
+.pb-body-lg {
+  font-size: 1.125rem;
+  line-height: 1.7;
+}
+
+/* ---- the brand thread: the logo's gradient as a hairline ---- */
+
+.pb-thread {
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--gold) 0%,
+    var(--amber-bright) 28%,
+    var(--magenta) 68%,
+    var(--violet) 100%
+  );
+}
+
+/* ---- buttons ---- */
+
+.pb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-family: var(--pb-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  background: var(--amber);
+  color: var(--paper);
+  padding: 1rem 1.625rem;
+  border-radius: 4px;
+  transition:
+    background-color 220ms ease,
+    transform 220ms ease,
+    box-shadow 220ms ease;
+}
+.pb-btn:hover {
+  background: #a85420;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 30px -14px rgba(196, 100, 40, 0.7);
+}
+.pb-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+.pb-btn:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+
+.pb-btn-stage {
+  background: var(--amber-bright);
+  color: var(--stage);
+}
+.pb-btn-stage:hover {
+  background: var(--gold);
+}
+
+.pb-link {
+  font-family: var(--pb-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 0.2rem;
+  transition: color 200ms ease;
+}
+a.pb-link:hover {
+  color: var(--amber);
+}
+.on-stage a.pb-link:hover {
+  color: var(--amber-bright);
+}
+
+/* ---- hero entrance: one orchestrated stagger, nothing else ---- */
+
+@keyframes pb-rise {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.pb-rise {
+  animation: pb-rise 0.9s cubic-bezier(0.2, 0.65, 0.2, 1) both;
+}
+
+/* ---- credit-roll marquees ---- */
+
+.pb-marquee {
+  overflow: hidden;
+  position: relative;
+}
+.pb-marquee-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  animation: pb-marquee 38s linear infinite;
+}
+.pb-marquee-track.pb-reverse {
+  animation-direction: reverse;
+}
+.pb-marquee:hover .pb-marquee-track {
+  animation-play-state: paused;
+}
+@keyframes pb-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ---- departure-board schedule rows ---- */
+
+.pb-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem 2rem;
+  padding: 1.75rem 1rem;
+  border-top: 1px solid var(--hairline-stage);
+  transition: background-color 240ms ease;
+  position: relative;
+}
+@media (min-width: 768px) {
+  .pb-row {
+    grid-template-columns: 9rem 1fr 16rem 7rem;
+    align-items: baseline;
+    padding: 2rem 1.25rem;
+  }
+}
+.pb-row:last-of-type {
+  border-bottom: 1px solid var(--hairline-stage);
+}
+.pb-row:hover {
+  background: rgba(232, 147, 72, 0.07);
+}
+.pb-row .pb-row-arrow {
+  display: inline-block;
+  transition: transform 240ms ease;
+}
+.pb-row:hover .pb-row-arrow {
+  transform: translateX(6px);
+}
+
+/* ---- field-note covers ---- */
+
+.pb-cover {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--hairline);
+  background: var(--paper);
+  padding: 1.75rem 1.75rem 0;
+  transition:
+    transform 260ms ease,
+    border-color 260ms ease,
+    box-shadow 260ms ease;
+}
+.pb-cover:hover {
+  transform: translateY(-5px);
+  border-color: var(--cover-hue, var(--amber));
+  box-shadow: 0 24px 50px -32px rgba(26, 22, 32, 0.35);
+}
+.pb-cover-rule {
+  height: 3px;
+  margin-top: 2rem;
+  background: var(--cover-hue, var(--amber));
+}
+
+/* ---- editorial form fields ---- */
+
+.pb-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+.pb-field input,
+.pb-field select,
+.pb-field textarea {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
+  padding: 0.625rem 0.125rem;
+  font-family: var(--pb-body);
+  font-size: 1rem;
+  color: var(--ink);
+  transition: border-color 200ms ease;
+}
+.pb-field input::placeholder,
+.pb-field textarea::placeholder {
+  color: rgba(90, 85, 98, 0.55);
+  font-style: italic;
+}
+.pb-field input:focus,
+.pb-field select:focus,
+.pb-field textarea:focus {
+  outline: none;
+  border-bottom-color: var(--amber);
+}
+
+/* ---- testimonial inline expand ----
+ * Two stacked panes share the card: the excerpt collapses (1fr → 0fr) as
+ * the full quote grows (0fr → 1fr). The heights sum monotonically, so the
+ * card grows in place and the content below shifts down smoothly — no
+ * modal, no grid reflow. grid-template-rows interpolation does the work. */
+.pb-quote-pane {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition:
+    grid-template-rows 400ms cubic-bezier(0.2, 0.65, 0.2, 1),
+    opacity 240ms ease;
+}
+.pb-quote-inner {
+  overflow: hidden;
+}
+.pb-quote-full {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+.pb-quote[data-open="true"] .pb-quote-pane:not(.pb-quote-full) {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+.pb-quote[data-open="true"] .pb-quote-full {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.pb-quote-toggle {
+  font-family: var(--pb-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 600;
+  transition: opacity 200ms ease;
+}
+.pb-quote-toggle:hover {
+  opacity: 0.6;
+}
+.pb-quote-toggle:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+
+/* ---- stage interludes ---- */
+
+.on-stage {
+  background: var(--stage);
+  color: var(--cream-on-stage);
+}
+/* literal spotlight: one soft amber radial, top-left, like a follow spot */
+.pb-spotlight {
+  background:
+    radial-gradient(
+      900px 520px at 18% 0%,
+      rgba(232, 147, 72, 0.1),
+      transparent 64%
+    ),
+    var(--stage);
+}
+
+/* hanging margin labels get a short amber rule, replacing the old
+ * centered "— KICKER" formula */
+.pb-margin-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.pb-margin-label::before {
+  content: "";
+  width: 2rem;
+  height: 2px;
+  background: var(--amber);
+  flex: none;
+}
+.on-stage .pb-margin-label::before {
+  background: var(--amber-bright);
+}

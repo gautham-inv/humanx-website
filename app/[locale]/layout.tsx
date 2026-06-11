@@ -16,8 +16,10 @@ import {
   loadFooter,
   loadSummitBar,
   loadEvents,
+  loadDownloadPromo,
 } from "@/lib/sanity/loaders";
 import { SummitBar } from "@/components/layout/SummitBar";
+import { DownloadPromo } from "@/components/sections/DownloadPromo";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { pageMetadata, SITE_URL } from "@/lib/seo/metadata";
 import {
@@ -99,7 +101,7 @@ export default async function LocaleLayout({
   // Locale-level chrome: dict + contactCta + footer fetched in parallel at
   // build time. ContactCta drives the modal opened from anywhere on the
   // site; footer drives copy + social links in every page footer.
-  const [dict, contactCta, footerContent, summitBar, events] =
+  const [dict, contactCta, footerContent, summitBar, events, downloadPromo] =
     await Promise.all([
       getDictionary(locale as Locale),
       loadContactCta(locale as Locale),
@@ -110,6 +112,10 @@ export default async function LocaleLayout({
       // already runs at build time, so this fetch piggybacks on the
       // existing chrome data load with no extra request waterfall.
       loadEvents(locale as Locale),
+      // The single promoted publication for the timed download modal, or null
+      // when the downloadPromo singleton is off. Site-wide, so it loads here
+      // with the rest of the chrome rather than per-page.
+      loadDownloadPromo(locale as Locale),
     ]);
 
   return (
@@ -167,6 +173,11 @@ export default async function LocaleLayout({
               content={footerContent}
             />
             <BackgroundAudio locale={locale as Locale} />
+            {/* Timed download promotion — renders nothing unless the
+                downloadPromo singleton is enabled with a publication. Surfaces
+                a dismissible centered modal ~30s after landing, once per
+                session, site-wide. */}
+            <DownloadPromo dict={dict} promo={downloadPromo} />
           </SmoothScroll>
         </ContactModalProvider>
       </body>

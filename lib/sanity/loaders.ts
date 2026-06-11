@@ -32,6 +32,7 @@ import {
   summitBarQuery,
   contactCtaQuery,
   footerContentQuery,
+  downloadPromoQuery,
   type ServiceDoc,
   type EventDoc,
   type InsightDoc,
@@ -51,6 +52,7 @@ import {
   type SummitBarDoc,
   type ContactCtaDoc,
   type FooterContentDoc,
+  type DownloadPromoDoc,
 } from "./queries";
 
 /** Flat row shape used by `<Services>`-style components. */
@@ -301,6 +303,58 @@ export async function loadPublications(
       .filter((row) => row.title && row.file);
   } catch (err) {
     return fail("publications", err);
+  }
+}
+
+/**
+ * Resolved promoted-publication payload for the 30s download promo. Mirrors the
+ * gate's `GatePublication` shape (id/title/file) plus optional kind/date for
+ * the card line and resolved promo copy (empty string → component falls back to
+ * its dict default). `loadDownloadPromo` returns `null` whenever the promo
+ * should not show, so the layout renders nothing in every off/misconfigured
+ * case.
+ */
+export type DownloadPromoItem = {
+  id: string;
+  title: string;
+  kind: string;
+  date: string;
+  file: string;
+  heading: string;
+  body: string;
+  ctaLabel: string;
+};
+
+/**
+ * Load the single promoted publication, or `null` when the promo is disabled,
+ * no publication is selected, or the selected publication has no downloadable
+ * file. The single-reference singleton guarantees at most one paper here.
+ */
+export async function loadDownloadPromo(
+  locale: Locale
+): Promise<DownloadPromoItem | null> {
+  try {
+    const doc = await sanityClient.fetch<DownloadPromoDoc | null>(
+      downloadPromoQuery
+    );
+    if (!doc?.enabled) return null;
+    const pub = doc.publication;
+    if (!pub?.file) return null;
+    const title = pickLoc(pub.title, locale);
+    if (!title) return null;
+    return {
+      id: pub.id,
+      title,
+      kind: pickLoc(pub.kind, locale),
+      date: pickLoc(pub.date, locale),
+      file: pub.file,
+      heading: pickOpt(doc.heading, locale) ?? "",
+      body: pickOpt(doc.body, locale) ?? "",
+      ctaLabel: pickOpt(doc.ctaLabel, locale) ?? "",
+    };
+  } catch (err) {
+    console.warn("Sanity downloadPromo fetch failed; promo hidden.", err);
+    return null;
   }
 }
 

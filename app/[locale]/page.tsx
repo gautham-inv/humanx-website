@@ -23,6 +23,7 @@ import { PullQuote } from "@/components/sections/PullQuote";
 import { Events } from "@/components/sections/Events";
 import { OnStageTeaser } from "@/components/sections/OnStageTeaser";
 import { LogoTicker } from "@/components/sections/LogoTicker";
+import { Partners } from "@/components/sections/Partners";
 import {
   Testimonials,
   type TestimonialItem,
@@ -127,9 +128,10 @@ export default async function Home({
         items={testimonials}
         content={homepage?.testimonials}
       />
-      {/* Partners — relocated here from the top, clearly labelled so it reads
-          as partners (distinct from the clients wall above the fold). */}
-      <LogoTicker
+      {/* Partners — a static distributed cluster (not a marquee), clearly
+          labelled so it reads as partners, distinct from the scrolling clients
+          wall above the fold. */}
+      <Partners
         heading={dict.partnersTicker.heading}
         ariaLabel="Partners"
         items={partners}

@@ -511,4 +511,10 @@ export const es: Dictionary = {
     ],
     download: "Descargar",
   },
+  downloadPromo: {
+    heading: "Documento destacado",
+    body: "Una nueva lectura de Ramon Portilla. Introduce tu correo y descárgalo.",
+    cta: "Descargar",
+    close: "Cerrar",
+  },
 };

@@ -536,6 +536,40 @@ export type PublicationsPageDoc = {
  * and resolved into a content slice every consuming component reads.
  * ────────────────────────────────────────────────────────────────────────── */
 
+/**
+ * Download promotion singleton. Dereferences the single promoted publication
+ * to the same flat shape the gate needs (id/title/kind/date/file). The query
+ * always runs (cheap); the loader decides whether to surface it based on
+ * `enabled` + a resolvable file.
+ */
+export const downloadPromoQuery = /* groq */ `
+  *[_type == "downloadPromo" && _id == "downloadPromo"][0] {
+    enabled,
+    heading, body, ctaLabel,
+    "publication": publication->{
+      "id": _id,
+      title, kind, date,
+      "file": file.asset->url
+    }
+  }
+`;
+
+export type DownloadPromoDoc = {
+  enabled?: boolean;
+  heading?: LocStr;
+  body?: LocText;
+  ctaLabel?: LocStr;
+  /** Resolved promoted publication, or null when unset / reference dangling. */
+  publication?: {
+    id: string;
+    title?: LocStr;
+    kind?: LocStr;
+    date?: LocStr;
+    /** Sanity CDN URL of the PDF; undefined when no file uploaded. */
+    file?: string;
+  } | null;
+};
+
 export const summitBarQuery = /* groq */ `
   *[_type == "summitBar" && _id == "summitBar"][0] {
     enabled, label, text, cta, ctaUrl

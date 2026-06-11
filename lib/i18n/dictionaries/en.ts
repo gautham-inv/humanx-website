@@ -526,6 +526,12 @@ export const en = {
     ],
     download: "Download",
   },
+  downloadPromo: {
+    heading: "Featured paper",
+    body: "A fresh read from Ramon Portilla. Enter your email and it's yours to download.",
+    cta: "Download",
+    close: "Close",
+  },
 } as const;
 
 type DeepStringify<T> = T extends string

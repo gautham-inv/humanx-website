@@ -134,9 +134,6 @@ export function Footer({ dict, locale, content }: FooterProps) {
         {/* Bottom row: copyright */}
         <div className="mt-14 flex flex-col items-start justify-between gap-3 border-t border-line pt-6 text-xs sm:flex-row sm:items-center">
           <span>{rights}</span>
-          <span className="max-w-md leading-relaxed sm:text-right">
-            Music: &quot;Way To Dream&quot; by Keys Of Moon (CC BY 3.0)
-          </span>
         </div>
       </div>
     </footer>

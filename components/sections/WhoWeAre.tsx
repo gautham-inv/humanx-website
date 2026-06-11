@@ -1,3 +1,4 @@
+import { Reveal } from "@/components/motion/Reveal";
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
 import type { HomepageContent } from "@/lib/sanity/loaders";
 
@@ -6,6 +7,18 @@ type WhoWeAreProps = {
   /** Sanity-resolved homepage.whoWeAre slice. Each leaf falls back to dict. */
   content?: HomepageContent["whoWeAre"];
 };
+
+// Each discipline carries the rotating brand hue — orange, violet, magenta —
+// so the three read as distinct moments rather than a uniform list.
+const HUES = [
+  { rule: "bg-accent", numeral: "text-accent" },
+  { rule: "bg-violet", numeral: "text-violet" },
+  { rule: "bg-magenta", numeral: "text-magenta" },
+];
+
+// Descending offsets break the rigid row into a staggered, editorial cascade
+// on desktop; they collapse to a clean single column below `md`.
+const OFFSETS = ["", "md:mt-14", "md:mt-28"];
 
 export function WhoWeAre({ dict, content }: WhoWeAreProps) {
   const t = dict.whoWeAre;
@@ -20,55 +33,55 @@ export function WhoWeAre({ dict, content }: WhoWeAreProps) {
   return (
     <section className="relative border-t border-line px-6 py-16 md:py-24 lg:py-32">
       <div className="mx-auto max-w-6xl">
-        <div className="grid grid-cols-1 gap-16 lg:grid-cols-[1fr_1.4fr] lg:gap-24">
-          {/* Left column — intro + CTA, sticky on desktop */}
-          <div className="lg:sticky lg:top-24 lg:self-start">
+        {/* Header — asymmetric: headline left, lead settling to the baseline
+            on the right. The old "how it works" line becomes the eyebrow. */}
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-end lg:gap-16">
+          <Reveal direction="up" className="lg:col-span-7">
+            <div className="mb-5 text-xs uppercase tracking-[0.3em] text-ink-dim">
+              <span className="mr-3 inline-block h-px w-8 bg-accent align-middle" />
+              {stepsHeading}
+            </div>
             <h2 className="font-display text-[clamp(2.25rem,4.5vw,4rem)] leading-[1.05] tracking-tight">
               {title}
             </h2>
-            <p className="mt-6 max-w-md text-base leading-relaxed text-ink-dim md:text-lg">
-              {lead}
-            </p>
-          </div>
+          </Reveal>
+          <Reveal
+            direction="up"
+            delay={0.05}
+            className="max-w-md text-base leading-relaxed text-ink-dim md:text-lg lg:col-span-5 lg:pb-2"
+          >
+            <p>{lead}</p>
+          </Reveal>
+        </div>
 
-          {/* Right column — numbered process steps */}
-          <div>
-            <h3 className="mb-10 font-display text-3xl tracking-tight md:mb-14 md:text-4xl">
-              {stepsHeading}
-            </h3>
-            <ol className="relative">
-              {/* Gradient connector running through the numbered chips */}
-              <div
-                aria-hidden
-                className="absolute left-5 top-6 bottom-6 w-px bg-gradient-to-b from-accent/50 via-accent/15 to-transparent"
-              />
-              {items.map((item, idx) => {
-                // Step chip rotates colour so the three steps read as
-                // distinct moments — orange, violet, magenta.
-                const chipColor =
-                  ["text-accent", "text-violet", "text-magenta"][idx % 3];
-                return (
-                <li
-                  key={idx}
-                  className="relative grid grid-cols-[2.5rem_1fr] items-start gap-6 border-t border-line py-8 first:border-t-0 first:pt-0 md:gap-10 md:py-10"
-                >
-                  <div className={`relative z-10 flex h-10 w-10 items-center justify-center rounded-full border border-line bg-bg-elev text-xs font-semibold ${chipColor}`}>
+        {/* Disciplines — staggered three-up. Large hue numerals, a short hue
+            rule, and a descending offset replace the old vertical chip list. */}
+        <ol className="mt-14 grid grid-cols-1 gap-10 md:mt-20 md:grid-cols-3 md:gap-10 lg:gap-12">
+          {items.map((item, idx) => {
+            const hue = HUES[idx % 3];
+            return (
+              <li key={idx} className={OFFSETS[idx % OFFSETS.length]}>
+                <Reveal direction="up" delay={Math.min(idx * 0.08, 0.2)}>
+                  <span
+                    aria-hidden
+                    className={`block h-[3px] w-12 ${hue.rule}`}
+                  />
+                  <div
+                    className={`mt-6 font-display text-5xl leading-none md:text-6xl ${hue.numeral}`}
+                  >
                     {String(idx + 1).padStart(2, "0")}
                   </div>
-                  <div>
-                    <h4 className="font-display text-xl leading-snug text-ink md:text-2xl">
-                      {item.title}
-                    </h4>
-                    <p className="mt-3 text-sm leading-relaxed text-ink-dim md:text-base">
-                      {item.body}
-                    </p>
-                  </div>
-                </li>
-                );
-              })}
-            </ol>
-          </div>
-        </div>
+                  <h3 className="mt-6 font-display text-xl leading-snug text-ink md:text-2xl">
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-relaxed text-ink-dim md:text-base">
+                    {item.body}
+                  </p>
+                </Reveal>
+              </li>
+            );
+          })}
+        </ol>
       </div>
     </section>
   );

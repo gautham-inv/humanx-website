@@ -1,8 +1,8 @@
 import { Reveal } from "@/components/motion/Reveal";
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
 import type { HomepageContent } from "@/lib/sanity/loaders";
-import { sanityImageUrl } from "@/lib/sanity/image-loader";
 import { BackdropMesh } from "@/components/motion/Backdrops";
+import { TestimonialCard } from "@/components/sections/TestimonialCard";
 
 /**
  * Row shape after the page component has picked a locale from the Sanity
@@ -45,14 +45,13 @@ export function Testimonials({ dict, items: itemsProp, content }: TestimonialsPr
   const eyebrow = content?.eyebrow ?? dict.testimonials.eyebrow;
   const heading = content?.heading ?? dict.testimonials.heading;
 
-  // Cap the column count at the number of items so a short list never leaves a
-  // trailing column empty (e.g. 2 quotes under `lg:grid-cols-3` left col 3 blank).
-  const columnsClass =
+  // A single quote stays one column; otherwise a staggered two-column wall.
+  // `items-start` keeps every card at its own content height, so expanding one
+  // card grows only that card — its row-mates never stretch to match.
+  const gridClass =
     items.length <= 1
-      ? "grid-cols-1"
-      : items.length === 2
-        ? "grid-cols-1 sm:grid-cols-2"
-        : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
+      ? "max-w-2xl grid-cols-1"
+      : "grid-cols-1 sm:grid-cols-2 sm:items-start";
 
   return (
     <section
@@ -79,70 +78,14 @@ export function Testimonials({ dict, items: itemsProp, content }: TestimonialsPr
           </h2>
         </Reveal>
 
-        {/* Grid of cards. Each card fills its grid cell, so cards in the same
-            row share a height (tallest in the row wins) while rows size to
-            their own content — full quotes stay visible, never truncated. The
-            attribution pins to the bottom of each card via `mt-auto`. */}
-        <div className={`mt-12 grid gap-6 ${columnsClass}`}>
-          {items.map((item, i) => {
-            const attribution = (
-              <>
-                {item.imageUrl ? (
-                  <img
-                    src={sanityImageUrl(item.imageUrl, 112)}
-                    alt={item.imageAlt || item.author}
-                    width={56}
-                    height={56}
-                    loading="lazy"
-                    decoding="async"
-                    className="h-14 w-14 flex-shrink-0 rounded-full object-cover border border-line"
-                  />
-                ) : null}
-                <div className="min-w-0">
-                  <div className="text-base font-medium text-ink group-hover:text-accent transition-colors md:text-lg">
-                    {item.author}
-                  </div>
-                  {item.org ? (
-                    <div className="text-sm text-ink-dim/80 leading-snug">
-                      {item.org}
-                    </div>
-                  ) : null}
-                </div>
-              </>
-            );
-            return (
-              <div key={item.id} className="h-full">
-                <Reveal direction="up" delay={Math.min(i * 0.04, 0.25)} className="h-full">
-                  <figure className="flex h-full flex-col rounded-2xl border border-line bg-bg-elev/30 p-6 backdrop-blur-sm transition hover:border-cta/50">
-                    <span
-                      aria-hidden
-                      className="block font-serif text-4xl leading-[0.6] text-accent/40 select-none"
-                    >
-                      &ldquo;
-                    </span>
-                    <blockquote className="mt-3 font-serif text-base leading-relaxed text-ink md:text-lg">
-                      {item.quote}
-                    </blockquote>
-                    <figcaption className="mt-auto border-t border-line/70 pt-4 text-sm text-ink-dim">
-                      {item.linkedinUrl ? (
-                        <a
-                          href={item.linkedinUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={`${item.author} on LinkedIn`}
-                          className="group flex items-center gap-3 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
-                        >
-                          {attribution}
-                        </a>
-                      ) : (
-                        <div className="flex items-center gap-3">{attribution}</div>
-                      )}
-                    </figcaption>
-                  </figure>
-                </Reveal>
-              </div>
-            );
-          })}
+        {/* Staggered two-column wall (see TestimonialCard). Odd cards drop
+            down so the columns read as a brick layout rather than a rigid
+            grid; long quotes collapse to an excerpt and swipe the full text in
+            on "Read full" — each card grows independently. */}
+        <div className={`mt-12 grid gap-x-10 gap-y-12 md:gap-x-16 md:gap-y-14 ${gridClass}`}>
+          {items.map((item, i) => (
+            <TestimonialCard key={item.id} item={item} index={i} />
+          ))}
         </div>
       </div>
     </section>
