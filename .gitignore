@@ -53,3 +53,6 @@ next-env.d.ts
 
 # local/generated media
 /output.mp4
+
+# Latentgraph Claude Code integration (auto-generated)
+.claude/hooks/lgraph/

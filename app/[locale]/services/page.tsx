@@ -63,8 +63,8 @@ export default async function ServicesPage({
     <main id="main">
       <JsonLd data={servicesSchema(items, locale)} />
       {/* HERO — text left / solar system right */}
-      <section className="relative overflow-hidden px-6 pt-14 pb-10 md:pt-24 md:pb-16 lg:pt-32 lg:pb-24">
-        <div className="mx-auto grid max-w-6xl items-start gap-12 lg:grid-cols-[1.2fr_auto]">
+      <section className="relative flex min-h-[calc(100svh-6rem)] items-center overflow-hidden px-6 py-16 md:py-24">
+        <div className="mx-auto grid w-full max-w-6xl items-center gap-12 lg:grid-cols-[1.2fr_auto]">
           <div className="order-2 lg:order-1">
             <Reveal direction="up">
               <div className="mb-6 text-xs uppercase tracking-[0.3em] text-ink-dim">
@@ -86,7 +86,7 @@ export default async function ServicesPage({
               </p>
             </Reveal>
           </div>
-          <div className="order-1 hidden lg:order-2 lg:block lg:-mt-16">
+          <div className="order-1 hidden lg:order-2 lg:block">
             <Reveal direction="up" delay={0.1}>
               <SolarSystemSlot className="mx-auto aspect-square w-[28rem] max-w-full" />
             </Reveal>
@@ -98,17 +98,17 @@ export default async function ServicesPage({
        * No numbers, no eyebrows, no audience/deliverable dl, no per-card CTA.
        * Just the icon, the title, the body. A hairline rule between rows. */}
       <section className="relative border-t border-line px-6 py-14 md:py-24 lg:py-32">
-        <div className="mx-auto max-w-5xl divide-y divide-line/70">
+        <div className="mx-auto max-w-6xl divide-y divide-line/70">
           {items.map((item, idx) => {
             const Icon = SERVICE_ICONS[item.id];
             const reverse = idx % 2 === 1;
             return (
               <article
                 key={item.id}
-                className={`grid items-center gap-10 py-16 md:gap-20 md:py-24 ${
+                className={`grid items-center gap-10 py-16 md:gap-16 md:py-24 ${
                   reverse
-                    ? "md:grid-cols-[1fr_auto]"
-                    : "md:grid-cols-[auto_1fr]"
+                    ? "md:grid-cols-[minmax(0,40rem)_auto] md:justify-end"
+                    : "md:grid-cols-[auto_minmax(0,40rem)] md:justify-start"
                 }`}
               >
                 {/* Icon column — visually anchored, alternates side per row.
@@ -116,9 +116,7 @@ export default async function ServicesPage({
                     as its own chapter, not a list item. */}
                 <Reveal
                   direction="up"
-                  className={`${
-                    reverse ? "md:order-2 md:justify-self-end" : "md:order-1"
-                  }`}
+                  className={`${reverse ? "md:order-2" : "md:order-1"}`}
                 >
                   <div className="flex h-28 w-28 items-center justify-center text-accent md:h-40 md:w-40">
                     {Icon ? (

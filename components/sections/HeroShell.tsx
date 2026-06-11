@@ -21,9 +21,13 @@ if (typeof window !== "undefined") {
 export function HeroShell({
   children,
   className,
+  id,
 }: {
   children: ReactNode;
   className?: string;
+  /** Optional DOM id — the homepage sets `id="hero"` so the sticky Nav can
+   *  observe the hero (IntersectionObserver) to know when it's over it. */
+  id?: string;
 }) {
   const ref = useRef<HTMLElement | null>(null);
 
@@ -46,7 +50,7 @@ export function HeroShell({
   );
 
   return (
-    <section ref={ref} className={className}>
+    <section ref={ref} id={id} className={className}>
       {children}
     </section>
   );

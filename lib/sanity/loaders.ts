@@ -441,7 +441,7 @@ export type HomepageContent = {
       url?: string;
     };
   };
-  onStage: { eyebrow?: string; title?: string; body?: string };
+  onStage: { eyebrow?: string; title?: string; body?: string; linkedinUrl?: string };
   partners: { eyebrow?: string; heading?: string };
   testimonials: { eyebrow?: string; heading?: string };
   pullQuote: {
@@ -587,6 +587,7 @@ export async function loadHomepage(
         eyebrow: pickOpt(doc.onStageEyebrow, locale),
         title: pickOpt(doc.onStageTitle, locale),
         body: pickOpt(doc.onStageBody, locale),
+        linkedinUrl: doc.onStageLinkedinUrl,
       },
       partners: {
         eyebrow: pickOpt(doc.partnersEyebrow, locale),
@@ -641,6 +642,7 @@ export type AboutPageContent = {
     name?: string;
     bio?: string;
     imageAlt?: string;
+    linkedinUrl?: string;
     stats?: { value: string; label: string }[];
   };
   featuredVideo: {
@@ -705,6 +707,7 @@ export async function loadAboutPage(
         name: pickOpt(doc.founderName, locale),
         bio: pickOpt(doc.founderBio, locale),
         imageAlt: pickOpt(doc.founderImageAlt, locale),
+        linkedinUrl: doc.founderLinkedinUrl,
         stats: doc.founderStats
           ?.map((s) => ({
             value: s.value ?? "",

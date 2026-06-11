@@ -96,8 +96,8 @@ export default async function AboutPage({
   return (
     <main id="main">
         {/* 1. HERO */}
-        <section className="relative overflow-hidden px-6 pt-14 pb-10 md:pt-24 md:pb-16 lg:pt-32 lg:pb-24">
-          <div className="mx-auto grid max-w-6xl items-start gap-12 lg:grid-cols-[1.2fr_auto]">
+        <section className="relative flex min-h-[calc(100svh-6rem)] items-center overflow-hidden px-6 py-16 md:py-24">
+          <div className="mx-auto grid w-full max-w-6xl items-center gap-12 lg:grid-cols-[1.2fr_auto]">
             <div className="order-2 lg:order-1">
               <Reveal direction="up">
                 <div className="mb-6 text-xs uppercase tracking-[0.3em] text-ink-dim">

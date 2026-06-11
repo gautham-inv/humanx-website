@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -40,11 +40,41 @@ export function Nav({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const menuId = useId();
   const panelRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const navRef = useRef<HTMLElement | null>(null);
+
+  // The homepage is the only page with a full-bleed hero behind the sticky
+  // nav, so it's the only place that gets the transparent-over-hero treatment.
+  const isHome = pathname === `/${locale}` || pathname === `/${locale}/`;
+  // Start transparent on the homepage (matches first paint over the hero); the
+  // observer below flips it solid once the hero scrolls up past the nav.
+  const [overHero, setOverHero] = useState(isHome);
 
   // Close on route change.
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
+
+  // Transparent over the homepage hero; solid once scrolled past it. Only the
+  // homepage renders `#hero`, so every other page keeps `overHero` false via
+  // the early return. Native IntersectionObserver matches the pattern already
+  // used in HeroVideoBackdrop / CountUp.
+  useEffect(() => {
+    // Only the homepage hero drives transparency; bail on every other page.
+    // The early returns leave `overHero` untouched — `transparent` below also
+    // gates on `isHome`, so a stale value can never leak onto an inner page.
+    if (!isHome) return;
+    const hero = document.getElementById("hero");
+    if (!hero) return;
+    const navHeight = navRef.current?.offsetHeight ?? 80;
+    const io = new IntersectionObserver(
+      ([entry]) => setOverHero(entry.isIntersecting),
+      // Shrink the root's top by the nav height so the flip lands exactly as
+      // the hero's bottom edge slides under the sticky nav.
+      { rootMargin: `-${Math.round(navHeight)}px 0px 0px 0px`, threshold: 0 }
+    );
+    io.observe(hero);
+    return () => io.disconnect();
+  }, [isHome, pathname]);
 
   // Esc to close + body scroll lock + focus first link on open.
   useEffect(() => {
@@ -66,14 +96,35 @@ export function Nav({ locale, dict }: { locale: Locale; dict: Dictionary }) {
     };
   }, [open]);
 
+  // Transparent only on the homepage, while over the hero, and not while the
+  // mobile menu (a solid panel) is open. Gating on `isHome` here means the
+  // observer never has to reset `overHero` on navigation.
+  const transparent = isHome && overHero && !open;
+  // Over the always-dark hero the nav must read light in BOTH themes. Rather
+  // than theme-branch every child, re-point the palette tokens to their
+  // on-dark values on the nav scope — links, theme toggle and lang switcher
+  // all inherit through these CSS vars. (The logo is a display-swap, not
+  // token-driven, so it's forced to the dark-bg variant on its <Image>s below.)
+  const heroVars = {
+    "--color-ink": "#f5f1ec",
+    "--color-ink-dim": "rgba(245, 241, 236, 0.78)",
+    "--color-line": "rgba(245, 241, 236, 0.28)",
+    "--color-bg": "#0c0a16",
+  } as CSSProperties;
+
   return (
     <nav
+      ref={navRef}
       aria-label="Primary"
-      // `py-2` (was `py-4`) compensates for the new SummitBar strip
-      // sitting above the nav. Combined SummitBar (~26px) + Nav (~52px)
-      // ≈ old standalone Nav height (~76px), so the page below doesn't
-      // get pushed down compared to the pre-summit layout.
-      className="sticky top-0 z-40 flex items-center justify-between px-6 py-2 backdrop-blur-md bg-bg/95 border-b border-line"
+      style={transparent ? heroVars : undefined}
+      // `py-2` (was `py-4`) compensates for the SummitBar strip above the nav.
+      // Over the homepage hero the nav is transparent and fades to the solid
+      // frosted style on scroll (see `transparent` / `overHero` above).
+      className={`sticky top-0 z-40 flex items-center justify-between px-6 py-2 transition-colors duration-300 ${
+        transparent
+          ? "border-b border-transparent bg-transparent"
+          : "border-b border-line bg-bg/95 backdrop-blur-md"
+      }`}
     >
       <Link
         href={`/${locale}`}
@@ -86,26 +137,29 @@ export function Nav({ locale, dict }: { locale: Locale; dict: Dictionary }) {
         // instant with no network round-trip.
         className="inline-flex items-center rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-bright"
       >
-        {/* The dark logo file (681×286) carries ~14% more vertical padding
-            than the light file (676×250), so at an identical CSS height its
-            glyph looks smaller. Bumping the dark variant one size step
-            (h-9/h-10 vs h-8/h-9) makes the two read at the same visual size.
+        {/* The dark logo file (548×211, ratio 2.60) carries more vertical
+            padding than the light file (676×250, ratio 2.70), so at an
+            identical CSS height its glyph looks smaller. The dark variant runs one size step larger
+            (h-12/md:h-16 vs light h-11/md:h-14 — 64px vs 56px on desktop, a
+            ~14% bump that matches the padding gap) so the two read alike.
             Robust long-term fix: re-export both with matched padding. */}
+        {/* Over the (always-dark) hero we force the dark-bg logo regardless of
+            theme; otherwise the usual data-theme display-swap applies. */}
         <Image
           src="/logo-dark.webp"
           alt="HumanX"
-          width={180}
-          height={52}
+          width={548}
+          height={211}
           priority
-          className="brand-logo-dark h-11 w-auto md:h-12"
+          className={`${transparent ? "inline-block" : "brand-logo-dark"} h-12 w-auto md:h-16`}
         />
         <Image
           src="/logo.webp"
           alt="HumanX"
-          width={180}
-          height={52}
+          width={676}
+          height={250}
           priority
-          className="brand-logo-light h-10 w-auto md:h-11"
+          className={`${transparent ? "hidden" : "brand-logo-light"} h-11 w-auto md:h-14`}
         />
       </Link>
 

@@ -160,6 +160,9 @@ export const es: Dictionary = {
     teaserBody:
       "A lo largo de tres décadas en Meta, Walmart, Nielsen y Sam's Club, ha convertido la forma en que sienten clientes y empleados en lealtad y crecimiento duraderos.",
     cta: "Verme en escenario",
+    connect: "Conéctate en LinkedIn",
+    // Predeterminado para el botón "Conéctate"; editable desde Sanity.
+    linkedinUrl: "https://www.linkedin.com/in/ramon-portilla-627b064/",
   },
   // Página completa /on-stage. El mapa + lista de regiones reutilizan `about.speaking`.
   onStagePage: {

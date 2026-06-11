@@ -10,6 +10,7 @@ import {
   loadPartners,
   loadClients,
   loadHomepage,
+  loadAboutPage,
   loadEventsPage,
   loadContactCta,
   loadPublications,
@@ -78,6 +79,7 @@ export default async function Home({
     eventsPage,
     contactCta,
     publications,
+    about,
   ] = await Promise.all([
     getDictionary(locale),
     loadTestimonials(locale),
@@ -88,6 +90,7 @@ export default async function Home({
     loadEventsPage(locale),
     loadContactCta(locale),
     loadPublications(locale),
+    loadAboutPage(locale),
   ]);
   return (
     <main id="main">
@@ -95,7 +98,11 @@ export default async function Home({
           via a tagged link (?paper=<campaignKey>). */}
       <ConferencePush dict={dict} publications={publications} />
       <Hero dict={dict} locale={locale} content={homepage?.hero} />
-      <OnStageTeaser dict={dict} locale={locale} />
+      <OnStageTeaser
+        dict={dict}
+        locale={locale}
+        linkedinUrl={homepage?.onStage?.linkedinUrl || about?.founder?.linkedinUrl}
+      />
       {/* Clients lead the homepage social proof — the more credible wall of
           brands HumanX has served. Renders only once clients are seeded. */}
       <LogoTicker

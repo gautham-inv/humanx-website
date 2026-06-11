@@ -4,9 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Reveal } from "@/components/motion/Reveal";
+import { aspectCropLoader } from "@/lib/sanity/image-loader";
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
 import type { Locale } from "@/lib/i18n/config";
 import type { EventsPageContent } from "@/lib/sanity/loaders";
+
+// Homepage event cards render in a fixed 16:9 frame; crop author uploads to
+// that ratio at the CDN so every card is framed identically (see image-loader).
+const EVENT_CARD_LOADER = aspectCropLoader(16, 9);
 
 /**
  * Row shape this component (and OnStage / EventsList) renders. Matches the
@@ -108,12 +113,13 @@ export function Events({
                   {/* Image-led header: the event image (or a branded
                       placeholder) fills the top of the card on every
                       breakpoint, with the date badge overlaid. */}
-                  <div className="relative aspect-[3/2] w-full overflow-hidden bg-bg-elev">
+                  <div className="relative aspect-video w-full overflow-hidden bg-bg-elev">
                     {ev.imageUrl ? (
                       <Image
                         src={ev.imageUrl}
                         alt={ev.imageAlt || ev.title}
                         fill
+                        loader={EVENT_CARD_LOADER}
                         sizes="(min-width: 768px) 32rem, 100vw"
                         className="object-cover transition duration-700 group-hover:scale-105"
                       />

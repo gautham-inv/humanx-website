@@ -158,6 +158,10 @@ export const en = {
     teaserBody:
       "Over three decades at Meta, Walmart, Nielsen and Sam's Club, he's turned the way customers and employees feel into lasting loyalty and growth.",
     cta: "Watch me on stage",
+    connect: "Connect on LinkedIn",
+    // Default for the "Connect" button; overridable from Sanity (homepage On
+    // Stage section, then About founder). Same profile used across the site.
+    linkedinUrl: "https://www.linkedin.com/in/ramon-portilla-627b064/",
   },
   // Full /on-stage page. The speaking map + region list reuse `about.speaking`.
   onStagePage: {

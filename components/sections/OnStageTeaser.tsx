@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Reveal } from "@/components/motion/Reveal";
+import { LinkedInIcon } from "@/components/icons/LinkedInIcon";
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
 import type { Locale } from "@/lib/i18n/config";
 import { HeroImage } from "./HeroImage";
@@ -7,6 +8,12 @@ import { HeroImage } from "./HeroImage";
 type OnStageTeaserProps = {
   dict: Dictionary;
   locale: Locale;
+  /**
+   * Ramon's LinkedIn URL, resolved on the homepage (Sanity homepage On Stage
+   * → About founder). Falls back to the dict default so the button always
+   * renders.
+   */
+  linkedinUrl?: string;
 };
 
 /**
@@ -18,9 +25,11 @@ type OnStageTeaserProps = {
  * "text left / portrait right" composition continues into this section. No top
  * border, so the hero crossfades straight into it. Stacks on mobile.
  */
-export function OnStageTeaser({ dict, locale }: OnStageTeaserProps) {
+export function OnStageTeaser({ dict, locale, linkedinUrl }: OnStageTeaserProps) {
   const t = dict.onStage;
   const href = `/${locale}/on-stage`;
+  // Sanity-resolved URL wins; dict default keeps the button working pre-CMS.
+  const linkedin = linkedinUrl || t.linkedinUrl;
   // Split the name so the surname carries the brand accent ("Ramon Portilla"
   // → white first name + accent surname). Falls back gracefully to a single
   // (all-white) word if the name has no space.
@@ -52,7 +61,7 @@ export function OnStageTeaser({ dict, locale }: OnStageTeaserProps) {
             </p>
           </Reveal>
           <Reveal direction="up" delay={0.2}>
-            <div className="mt-8 flex justify-center lg:justify-start">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
               <Link
                 href={href}
                 className="group inline-flex items-center gap-2 rounded-full bg-cta px-6 py-3 text-sm font-medium text-on-accent shadow-glow transition hover:bg-cta-bright"
@@ -62,6 +71,20 @@ export function OnStageTeaser({ dict, locale }: OnStageTeaserProps) {
                   →
                 </span>
               </Link>
+              {/* Ghost "Connect" button. Uses the `accent` token (amber in
+                  dark, navy blue in light) for border + text so it reads as a
+                  brand-tinted secondary action beside the filled primary CTA. */}
+              {linkedin ? (
+                <a
+                  href={linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full border border-accent px-6 py-3 text-sm font-medium text-accent transition hover:border-accent-bright hover:text-accent-bright focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-bright"
+                >
+                  <LinkedInIcon size={18} />
+                  {t.connect}
+                </a>
+              ) : null}
             </div>
           </Reveal>
         </div>

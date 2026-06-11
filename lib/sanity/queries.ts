@@ -301,7 +301,7 @@ export const homepageQuery = /* groq */ `
     assessmentFeatured{
       id, title, description, durationLabel, questionsLabel, url
     },
-    onStageEyebrow, onStageTitle, onStageBody,
+    onStageEyebrow, onStageTitle, onStageBody, onStageLinkedinUrl,
     partnersEyebrow, partnersHeading,
     testimonialsEyebrow, testimonialsHeading,
     pullQuoteText, pullQuoteAuthor, pullQuoteRole,
@@ -352,6 +352,7 @@ export type HomepageDoc = {
   onStageEyebrow?: LocStr;
   onStageTitle?: LocStr;
   onStageBody?: LocText;
+  onStageLinkedinUrl?: string;
 
   partnersEyebrow?: LocStr;
   partnersHeading?: LocStr;
@@ -380,7 +381,7 @@ export const aboutPageQuery = /* groq */ `
     valuesItems[]{ title, body },
     experienceTitle, experienceBody,
     experienceStatValue, experienceStatLabel, experienceStatNote,
-    founderEyebrow, founderName, founderBio, founderImageAlt,
+    founderEyebrow, founderName, founderBio, founderImageAlt, founderLinkedinUrl,
     founderStats[]{ value, label },
     featuredVideoEyebrow, featuredVideoTitle, featuredVideoBody,
     featuredVideoYoutubeId, featuredVideoBlogUrl, featuredVideoBlogLabel,
@@ -409,6 +410,7 @@ export type AboutPageDoc = {
   founderName?: LocStr;
   founderBio?: LocText;
   founderImageAlt?: LocStr;
+  founderLinkedinUrl?: string;
   founderStats?: { value: string; label: LocStr }[];
   featuredVideoEyebrow?: LocStr;
   featuredVideoTitle?: LocStr;

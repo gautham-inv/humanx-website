@@ -4,10 +4,16 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Reveal } from "@/components/motion/Reveal";
+import { aspectCropLoader } from "@/lib/sanity/image-loader";
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
 import type { Locale } from "@/lib/i18n/config";
 import type { EventRow } from "@/components/sections/Events";
 import type { EventsPageContent } from "@/lib/sanity/loaders";
+
+// Past-event cards use a 16:9 frame; the small upcoming-row thumb is square.
+// Crop author uploads to each ratio at the CDN for uniform framing.
+const PAST_CARD_LOADER = aspectCropLoader(16, 9);
+const THUMB_LOADER = aspectCropLoader(1, 1);
 
 type EventsListProps = {
   dict: Dictionary;
@@ -93,6 +99,7 @@ export function EventsList({
                           src={ev.imageUrl}
                           alt={ev.imageAlt || ev.title}
                           fill
+                          loader={THUMB_LOADER}
                           sizes="80px"
                           className="object-cover"
                         />
@@ -162,6 +169,7 @@ export function EventsList({
                       src={ev.imageUrl}
                       alt={ev.imageAlt || ev.title}
                       fill
+                      loader={PAST_CARD_LOADER}
                       sizes="(min-width: 768px) 45vw, 95vw"
                       className="object-cover transition duration-700 group-hover:scale-[1.02]"
                     />
