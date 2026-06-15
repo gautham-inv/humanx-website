@@ -37,8 +37,10 @@ export function Reveal({
       const sign = direction === "down" || direction === "right" ? -1 : 1;
 
       const targets = stagger
-        ? ref.current.querySelectorAll<HTMLElement>("[data-reveal-child]")
+        ? Array.from(ref.current.querySelectorAll<HTMLElement>("[data-reveal-child]"))
         : [ref.current];
+
+      if (targets.length === 0) return;
 
       gsap.from(targets, {
         opacity: 0,
