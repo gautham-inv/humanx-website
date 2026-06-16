@@ -134,6 +134,7 @@ export function HumanForm({
         topic: values.topic ?? "",
         message: values.message ?? "",
       });
+      window.gtag?.("event", "generate_lead", { form_id: "contact" });
       setSent(true);
     } catch (err) {
       // Keep the form populated so users don't lose what they typed. Log

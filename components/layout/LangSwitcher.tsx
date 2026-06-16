@@ -47,6 +47,11 @@ export function LangSwitcher({ current }: { current: Locale }) {
           key={loc}
           data-locale={loc}
           href={`/${loc}${stripLocale === "/" ? "" : stripLocale}`}
+          onClick={() => {
+            if (loc !== current) {
+              window.gtag?.("event", "select_language", { language: loc, previous_language: current });
+            }
+          }}
           className={`relative z-10 rounded-full px-3 py-1 transition-colors ${
             loc === current ? "text-bg" : "text-ink-dim hover:text-ink"
           }`}

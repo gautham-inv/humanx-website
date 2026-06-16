@@ -100,6 +100,7 @@ export function PdfGateModal({
     try {
       await submitGatedDownload({ email });
       triggerDownload(publication.file);
+      window.gtag?.("event", "generate_lead", { form_id: "pdf_gate", publication_id: publication.id });
       onSubmitted?.();
       onClose();
     } catch {

@@ -104,6 +104,9 @@ export function DownloadPromo({ dict, promo }: DownloadPromoProps) {
         dict={dict}
         publication={{ id: promo.id, title: promo.title, file: promo.file }}
         onClose={() => setPhase("hidden")}
+        onSubmitted={() => {
+          window.gtag?.("event", "generate_lead", { form_id: "download_promo" });
+        }}
       />
     );
   }

@@ -162,6 +162,9 @@ export function Events({
                     href={ev.registrationUrl}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => {
+                      window.gtag?.("event", "select_content", { content_type: "event_registration", item_id: ev.id });
+                    }}
                     className={`${cardClass} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-bright`}
                   >
                     {inner}

@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const isDev = process.env.NODE_ENV !== "production";
+
 const nextConfig: NextConfig = {
   output: "export",
   images: {
@@ -12,6 +14,18 @@ const nextConfig: NextConfig = {
     loader: "custom",
     loaderFile: "./lib/sanity/image-loader.ts",
   },
+  ...(isDev && {
+    turbopack: {
+      rules: {
+        "**/*.{tsx,jsx}": {
+          loaders: [
+            { loader: "@locator/webpack-loader", options: { env: "development" } },
+          ],
+        },
+      },
+    },
+  }),
 };
+
 
 export default nextConfig;

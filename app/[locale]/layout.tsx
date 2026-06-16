@@ -135,6 +135,16 @@ export default async function LocaleLayout({
           src="/theme-init.js"
           strategy="beforeInteractive"
         />
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-N7G8EFJHDE"
+          strategy="afterInteractive"
+        />
+        <Script id="ga4-init" strategy="afterInteractive">{`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-N7G8EFJHDE');
+        `}</Script>
         {/* HubSpot tracking script intentionally NOT loaded — GA4 covers
             site analytics, and the Forms Submissions API in lib/hubspot.ts
             populates the CRM directly without needing HubSpot's tracker
