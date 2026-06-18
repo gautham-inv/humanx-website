@@ -26,11 +26,15 @@ export function HeroImage({ fill = false, alt = "Ramon Portilla, founder of Huma
       // never slide into the frame. With object-cover the safe travel is
       // |yPercent| ≤ 50·(scale − 1); at scale-110 that's 5%, so ±4% keeps a
       // margin at every breakpoint and the portrait is never cut off on scroll.
+      // yPercent starts at 0 (portrait enters with no upward offset → head
+      // fully visible) and scrubs to −8 as the section scrolls away. With
+      // origin-top the scale grows only downward, so the top edge never rises
+      // above the container regardless of scroll position.
       gsap.fromTo(
         imageRef.current,
-        { yPercent: -4 },
+        { yPercent: 0 },
         {
-          yPercent: 4,
+          yPercent: -8,
           ease: "none",
           scrollTrigger: {
             trigger: containerRef.current,
@@ -64,7 +68,7 @@ export function HeroImage({ fill = false, alt = "Ramon Portilla, founder of Huma
   // image. Previously object-contain + scale-200 cropped ~50% and, paired with
   // the larger parallax, let the frame clip the portrait as it scrolled.
   const imageClass =
-    "object-cover object-center scale-105 transition-opacity duration-300 ease-out";
+    "object-cover object-top scale-110 origin-top transition-opacity duration-300 ease-out";
   const sizes = fill ? "(max-width: 1024px) 100vw, 52vw" : "(max-width: 1024px) 100vw, 40vw";
 
   return (

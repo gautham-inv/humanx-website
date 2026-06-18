@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PresentationCTA } from "./PresentationCTA";
 
 export const metadata: Metadata = {
   title: "El punto ciego del Retail · HumanX Insights",
@@ -31,6 +32,7 @@ export default function ExpoRetailMadridPage() {
         .er-d4 { animation-delay: 0.54s; }
         .er-d5 { animation-delay: 0.66s; }
         .er-d6 { animation-delay: 0.78s; }
+        .er-d7 { animation-delay: 0.90s; }
 
         .er-cobrand {
           font-family: var(--font-sans);
@@ -105,7 +107,7 @@ export default function ExpoRetailMadridPage() {
               marginBottom: "clamp(1.75rem, 4vh, 3rem)",
             }}
           >
-            Próximo evento · 18 de junio, 2026 · 10:00
+            Gracias por asistir · 18 de Junio 2026
           </p>
 
           <h1
@@ -220,12 +222,13 @@ export default function ExpoRetailMadridPage() {
             fontSize: "clamp(1.125rem, 2.4vw, 1.35rem)",
             lineHeight: 1.85,
             color: "var(--color-ink)",
+            fontWeight: 600,
             marginBottom: "1.5rem",
           }}
         >
-          Únete a nosotros en Madrid el 18 de junio de 2026 a las 10:00 para
-          nuestra ponencia magistral sobre la importancia y el valor de la
-          tecnología en nuestros espacios físicos.
+          Hoy compartimos con la gran audiencia de la 1a gran Expo Retail
+          Iberoamérica nuestra vision de la Experiencia Humana enfocada en la
+          mejora de la experiencia de clients y empleados en la tienda física.
         </p>
 
         <p
@@ -234,12 +237,37 @@ export default function ExpoRetailMadridPage() {
             fontSize: "clamp(1.125rem, 2.4vw, 1.35rem)",
             lineHeight: 1.85,
             color: "var(--color-ink-dim)",
+            marginBottom: "2.5rem",
           }}
         >
-          Hablaremos del objetivo de mejorar tanto la experiencia del cliente
-          como la de los empleados, con la tecnología como herramienta central
-          de ese cambio.
+          Concretamente, expusimos como el uso de la tecnología inteligente
+          aplicada a la infraestructura de las cámaras de video puede usarse
+          productivamente para ayudar a nuestros empleados a dar una major
+          experiencia al cliente y con ello incrementar ventas, reducer costos,
+          y multiplicar lealtad.
         </p>
+
+        {/* Presentation request */}
+        <div
+          style={{
+            borderTop: "1px solid var(--color-line)",
+            paddingTop: "2.25rem",
+          }}
+        >
+          <p
+            style={{
+              fontFamily: "var(--font-serif)",
+              fontSize: "clamp(1rem, 2.2vw, 1.2rem)",
+              lineHeight: 1.75,
+              color: "var(--color-ink-dim)",
+              marginBottom: "1.5rem",
+            }}
+          >
+            Si quieres copia de nuestra presentación, porfavor comparte tus
+            datos y la recibirás inmediatamente.
+          </p>
+          <PresentationCTA />
+        </div>
       </section>
     </main>
   );

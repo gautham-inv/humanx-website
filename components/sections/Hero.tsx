@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
 import type { Locale } from "@/lib/i18n/config";
 import type { HomepageContent } from "@/lib/sanity/loaders";
@@ -64,14 +63,6 @@ export function Hero({ dict, locale, content }: HeroProps) {
               `w-auto` image and distort the wordmark, so we pin it to its
               natural width. The drop-shadow keeps the thin outlined "humanx"
               strokes legible over a moving video. */}
-          <Image
-            src="/logo-dark.webp"
-            alt="HumanX Insights"
-            width={548}
-            height={211}
-            priority
-            className="mb-6 h-16 w-auto self-center animate-fade-in [filter:drop-shadow(0_2px_12px_rgba(0,0,0,0.55))] md:h-20 lg:h-24 lg:self-start"
-          />
           {/* Emphasis defaults to index 1 ("experience") for the dict copy;
               Sanity authors can re-target the italic treatment by wrapping a
               different word in <<…>>. The h1 inherits color, so lg:text-white

@@ -41,7 +41,7 @@ export function OnStageTeaser({ dict, locale, linkedinUrl }: OnStageTeaserProps)
       id="on-stage"
       className="relative flex flex-col justify-center px-6 py-16 md:py-24 lg:min-h-svh lg:py-24"
     >
-      <div className="mx-auto grid w-full max-w-6xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
+      <div className="mx-auto grid w-full max-w-6xl items-center gap-12 lg:grid-cols-2 lg:gap-16 mt-8 lg:mt-16">
         {/* Text + CTA — left on desktop, centered on mobile. */}
         <div className="text-center lg:text-left">
           <Reveal direction="up">
@@ -90,8 +90,8 @@ export function OnStageTeaser({ dict, locale, linkedinUrl }: OnStageTeaserProps)
         </div>
 
         {/* Portrait — right on desktop, below the text on mobile. */}
-        <Reveal direction="up" delay={0.1}>
-          <div className="relative mx-auto h-[24rem] w-full max-w-sm sm:h-[28rem] lg:h-[calc(100svh-12rem)] lg:max-w-none">
+        <Reveal direction="up" delay={0.1} className="relative z-20">
+          <div className="relative mx-auto h-[32rem] w-full max-w-sm sm:h-[40rem] md:max-w-none lg:h-[min(calc(100svh-6rem),72vw)] lg:max-w-none">
             <HeroImage fill alt={dict.hero.portraitAlt} />
           </div>
         </Reveal>
