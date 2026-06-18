@@ -53,16 +53,6 @@ export function Hero({ dict, locale, content }: HeroProps) {
             lg:justify-end); on mobile it stays vertically centered over the
             scrimmed mobile clip. */}
         <div className="z-10 flex flex-col text-center text-white lg:max-w-2xl lg:text-left">
-          {/* Brand wordmark lead-in, replacing the old text eyebrow (which just
-              repeated the brand name). The hero scrim is always dark in BOTH
-              themes (see HeroVideoBackdrop), so we hardcode the dark-background
-              logo rather than theme-swapping like the nav/footer do. Not a link
-              — the nav logo already routes home, so a second one here would be a
-              redundant target. `self-center lg:self-start` is load-bearing: in a
-              flex column the default align-items:stretch would widen the
-              `w-auto` image and distort the wordmark, so we pin it to its
-              natural width. The drop-shadow keeps the thin outlined "humanx"
-              strokes legible over a moving video. */}
           {/* Emphasis defaults to index 1 ("experience") for the dict copy;
               Sanity authors can re-target the italic treatment by wrapping a
               different word in <<…>>. The h1 inherits color, so lg:text-white
