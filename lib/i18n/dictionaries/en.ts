@@ -1,4 +1,13 @@
 export const en = {
+  seo: {
+    // Homepage <title>/description. Localized per dictionary so /es no longer
+    // inherits the English title from the locale layout's generateMetadata.
+    home: {
+      title: "HumanX Insights · Human experience as the operating principle",
+      description:
+        "CX & EX consultancy for boards and executives — turning three decades across Meta, Walmart and Nielsen into human-experience strategy your team can run on Monday.",
+    },
+  },
   nav: {
     about: "About",
     services: "Services",

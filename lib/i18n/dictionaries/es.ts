@@ -1,6 +1,13 @@
 import type { Dictionary } from "./en";
 
 export const es: Dictionary = {
+  seo: {
+    home: {
+      title: "HumanX Insights · La experiencia humana como principio operativo",
+      description:
+        "Consultoría de CX y EX para consejos y directivos: tres décadas en Meta, Walmart y Nielsen convertidas en una estrategia de experiencia humana que tu equipo puede aplicar desde el lunes.",
+    },
+  },
   nav: {
     about: "Sobre nosotros",
     services: "Servicios",

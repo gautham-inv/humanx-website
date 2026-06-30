@@ -1,5 +1,7 @@
+import type { Metadata } from "next";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { locales, type Locale } from "@/lib/i18n/config";
+import { pageMetadata } from "@/lib/seo/metadata";
 import { sanityClient } from "@/lib/sanity/client";
 import {
   testimonialsQuery,
@@ -33,6 +35,27 @@ import { ConferencePush } from "@/components/sections/ConferencePush";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
+}
+
+/**
+ * Per-locale homepage metadata. The homepage is the only route without its own
+ * generateMetadata, so without this it inherited the locale layout's
+ * hardcoded English title — making /es serve the English <title>. Pull the
+ * localized title/description from the dictionary so each locale gets its own.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const dict = await getDictionary(locale);
+  return pageMetadata({
+    locale,
+    path: "",
+    title: dict.seo.home.title,
+    description: dict.seo.home.description,
+  });
 }
 
 /**

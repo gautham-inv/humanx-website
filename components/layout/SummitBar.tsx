@@ -28,6 +28,29 @@ type SummitBarProps = {
   events?: readonly EventItem[];
 };
 
+/**
+ * Collapse an absolute URL that points at our own site — the staging
+ * *.pages.dev preview build or the production host — down to a path. Content
+ * authors paste full preview URLs into the summitBar `ctaUrl` field (e.g.
+ * https://humanx-website.pages.dev/en/events/…), which would otherwise ship to
+ * production as a hard link back to staging. Reducing it to a path makes the
+ * link follow whatever host serves the page and lets it render as an internal
+ * <Link>. Genuinely external URLs (Eventbrite, etc.) are left untouched.
+ */
+function normalizeOwnHostUrl(url: string): string {
+  try {
+    const { hostname, pathname, search, hash } = new URL(url);
+    const ownHost =
+      hostname.endsWith(".pages.dev") ||
+      hostname === "humanxinsights.com" ||
+      hostname.endsWith(".humanxinsights.com");
+    if (ownHost) return `${pathname}${search}${hash}`;
+  } catch {
+    // Relative URL (no origin) — already host-agnostic, nothing to collapse.
+  }
+  return url;
+}
+
 export function SummitBar({ dict, locale, content, events }: SummitBarProps) {
   // Hide entirely if the author flipped the kill-switch.
   if (content && content.enabled === false) return null;
@@ -86,9 +109,11 @@ export function SummitBar({ dict, locale, content, events }: SummitBarProps) {
   const cta = content?.cta ?? dict.summit.cta;
   // Internal link to the event detail page when auto-picked; otherwise the
   // author-supplied URL or a sensible default to the events listing.
-  const ctaUrl = nextEvent?.slug
-    ? `/${locale}/events/${nextEvent.slug}`
-    : content?.ctaUrl ?? `/${locale}/events`;
+  const ctaUrl = normalizeOwnHostUrl(
+    nextEvent?.slug
+      ? `/${locale}/events/${nextEvent.slug}`
+      : content?.ctaUrl ?? `/${locale}/events`
+  );
   const isInternal = ctaUrl.startsWith("/");
 
   useGSAP(
