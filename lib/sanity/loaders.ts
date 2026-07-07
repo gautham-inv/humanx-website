@@ -11,6 +11,8 @@
  */
 import type { Locale } from "@/lib/i18n/config";
 import type { Recommendation } from "@/lib/data/recommendations";
+import type { PortableTextBlock } from "./queries";
+import { portableTextToPlainText } from "@/lib/sanity/portableText";
 import { sanityClient } from "./client";
 import {
   servicesQuery,
@@ -94,16 +96,18 @@ export type InsightItem = {
   /**
    * URL path segment, or empty string when the author hasn't set one yet.
    * A dedicated /insights/[slug] page is only generated when both `slug`
-   * and `body` are non-empty — see `loadInsights`'s build-safety fallback.
+   * is set and `body` has at least one block — see `loadInsights`'s
+   * build-safety fallback.
    */
   slug: string;
   title: string;
   kind: string;
   date: string;
-  /** Full article text, paragraphs separated by blank lines. Empty string
-   * when the author hasn't written one yet (teaser-only insight). */
-  body: string;
-  /** ~200 words/minute estimate from `body`, minimum 1. 0 when body is empty. */
+  /** Portable Text blocks for the resolved locale. Empty array when the
+   * author hasn't written one yet (teaser-only insight). */
+  body: PortableTextBlock[];
+  /** ~200 words/minute estimate from `body`'s flattened text, minimum 1.
+   * 0 when body is empty. */
   readingTimeMinutes: number;
   /** ISO datetime from the schema's `publishedAt`, or empty string. */
   publishedAt: string;
@@ -117,6 +121,12 @@ export type InsightItem = {
   image: string;
   /** Optional alt text from Sanity; falls back to the insight title. */
   imageAlt: string;
+  /** Defaults to "Ramon Portilla" when the insight has no `author` reference. */
+  authorName: string;
+  /** Resolved CDN URL of the author's photo, or empty string when none. */
+  authorPhotoUrl: string;
+  /** Optional alt text from Sanity; falls back to `authorName`. */
+  authorPhotoAlt: string;
 };
 
 /** Picks `field[locale]`, then `field.en`, then `fallback`. */
@@ -181,10 +191,19 @@ export async function loadEvents(locale: Locale): Promise<EventItem[]> {
   }
 }
 
-/** ~200 words/minute estimate, rounded up, minimum 1 (0 for empty body). */
-function readingTime(body: string): number {
-  if (!body.trim()) return 0;
-  const words = body.trim().split(/\s+/).filter(Boolean).length;
+/** Picks `field[locale]`, then `field.en`, then `[]` — the array analogue of `pickLoc`. */
+function pickLocArray<T>(
+  field: { en?: T[]; es?: T[] } | undefined,
+  locale: Locale
+): T[] {
+  if (!field) return [];
+  return field[locale] ?? field.en ?? [];
+}
+
+/** ~200 words/minute estimate, rounded up, minimum 1 (0 for empty text). */
+function readingTime(plainText: string): number {
+  if (!plainText.trim()) return 0;
+  const words = plainText.trim().split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.ceil(words / 200));
 }
 
@@ -193,7 +212,7 @@ export async function loadInsights(locale: Locale): Promise<InsightItem[]> {
     const rows = await sanityClient.fetch<InsightDoc[]>(insightsQuery);
     return rows
       .map((row) => {
-        const body = pickLoc(row.body, locale);
+        const body = pickLocArray(row.body, locale);
         return {
           id: row.id,
           slug: row.slug ?? "",
@@ -201,7 +220,7 @@ export async function loadInsights(locale: Locale): Promise<InsightItem[]> {
           kind: pickLoc(row.kind, locale),
           date: pickLoc(row.date, locale),
           body,
-          readingTimeMinutes: readingTime(body),
+          readingTimeMinutes: readingTime(portableTextToPlainText(body)),
           publishedAt: row.publishedAt ?? "",
           href: row.href ?? "",
           // Sanity CDN URL (resolved in the GROQ projection via
@@ -209,6 +228,9 @@ export async function loadInsights(locale: Locale): Promise<InsightItem[]> {
           // decorative tile in `app/[locale]/insights/page.tsx`.
           image: row.imageUrl ?? "",
           imageAlt: row.imageAlt ?? "",
+          authorName: row.author?.name ?? "Ramon Portilla",
+          authorPhotoUrl: row.author?.photoUrl ?? "",
+          authorPhotoAlt: row.author?.photoAlt ?? "",
         };
       })
       .filter((row) => row.title);

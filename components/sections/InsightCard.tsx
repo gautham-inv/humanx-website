@@ -14,7 +14,9 @@ export type InsightCardData = {
   date: string;
   href?: string;
   slug?: string;
-  body?: string;
+  /** Portable Text blocks (real insights) — absent/empty for teaser-only
+   * insights and dict-fallback items. Only array length is checked here. */
+  body?: unknown[];
   image?: string;
   imageAlt?: string;
 };
@@ -50,7 +52,7 @@ export function InsightCard({
   const role = TILE_ROLES[index % TILE_ROLES.length];
   const hasImage = Boolean(item.image);
   const imageAlt = item.imageAlt || item.title;
-  const hasDetailPage = Boolean(item.slug && item.body);
+  const hasDetailPage = Boolean(item.slug && item.body && item.body.length > 0);
   const externalHref =
     !hasDetailPage && item.href && /^https?:\/\//.test(item.href)
       ? item.href
