@@ -10,6 +10,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { articleSchema } from "@/lib/seo/schema";
 import { InsightCard } from "@/components/sections/InsightCard";
 import { InsightShare } from "@/components/sections/InsightShare";
+import { InsightBody, portableTextToPlainText } from "@/lib/sanity/portableText";
 import { pageMetadata, SITE_URL } from "@/lib/seo/metadata";
 
 /**
@@ -23,8 +24,8 @@ import { pageMetadata, SITE_URL } from "@/lib/seo/metadata";
 
 type Params = { locale: string; slug: string };
 
-function hasDetailPage(insight: { slug: string; body: string }) {
-  return Boolean(insight.slug && insight.body);
+function hasDetailPage(insight: { slug: string; body: unknown[] }) {
+  return Boolean(insight.slug && insight.body.length > 0);
 }
 
 export async function generateStaticParams() {
@@ -59,7 +60,7 @@ export async function generateMetadata({
   const insights = await loadInsights(locale as Locale);
   const insight = insights.find((i) => i.slug === slug && hasDetailPage(i));
   if (!insight) return {};
-  const description = insight.body.slice(0, 160);
+  const description = portableTextToPlainText(insight.body).slice(0, 160);
   return pageMetadata({
     locale,
     path: `/insights/${slug}`,
@@ -99,11 +100,6 @@ export default async function InsightDetailPage({
   const rest = candidates.filter((i) => i.kind !== insight.kind);
   const related = [...sameKind, ...rest].slice(0, 3);
 
-  const bodyParagraphs = insight.body
-    .split(/\n{2,}/)
-    .map((p) => p.trim())
-    .filter(Boolean);
-
   const readingLabel = t.readingTime.replace(
     "{n}",
     String(insight.readingTimeMinutes)
@@ -132,6 +128,18 @@ export default async function InsightDetailPage({
                   .join(" · ")}
               </div>
             </Reveal>
+            <Reveal direction="up" delay={0.08}>
+              <div className="mt-3 flex items-center gap-2 text-sm text-ink-dim">
+                {insight.authorPhotoUrl ? (
+                  <img
+                    src={sanityImageUrl(insight.authorPhotoUrl, 64)}
+                    alt={insight.authorPhotoAlt || insight.authorName}
+                    className="h-6 w-6 rounded-full object-cover"
+                  />
+                ) : null}
+                <span>{insight.authorName}</span>
+              </div>
+            </Reveal>
             <Reveal direction="up" delay={0.1}>
               <h1 className="mt-4 font-display text-[clamp(2rem,5vw,4rem)] leading-[1.05] tracking-tight">
                 {insight.title}
@@ -151,12 +159,10 @@ export default async function InsightDetailPage({
               </Reveal>
             ) : null}
 
-            {bodyParagraphs.length > 0 ? (
+            {insight.body.length > 0 ? (
               <Reveal direction="up" delay={0.2}>
-                <div className="mt-8 space-y-5 font-serif text-base leading-relaxed text-ink-dim md:text-lg">
-                  {bodyParagraphs.map((p, i) => (
-                    <p key={i}>{p}</p>
-                  ))}
+                <div className="mt-8">
+                  <InsightBody value={insight.body} />
                 </div>
               </Reveal>
             ) : null}
