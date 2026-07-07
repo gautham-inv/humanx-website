@@ -96,6 +96,29 @@ export function articleSchema(insight: InsightItem, locale: string) {
 }
 
 /**
+ * One `DigitalDocument` node per publication on /publications. Accepts the
+ * same loose `{ title, file, publishedAt }` shape the page already
+ * renders, so it works whether the list came from Sanity or the dict
+ * fallback (whose items have no `publishedAt`).
+ */
+export function publicationSchema(
+  items: ReadonlyArray<{ title: string; file?: string; publishedAt?: string }>,
+  locale: string
+) {
+  return items.map((item) => ({
+    "@context": "https://schema.org",
+    "@type": "DigitalDocument",
+    name: item.title,
+    ...(item.publishedAt ? { datePublished: item.publishedAt } : {}),
+    ...(item.file ? { url: item.file } : {}),
+    encodingFormat: "application/pdf",
+    author: { "@type": "Person", name: "Ramon Portilla" },
+    publisher: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+    inLanguage: locale === "es" ? "es" : "en",
+  }));
+}
+
+/**
  * One `Service` node per practice on /services. Accepts the same flat
  * `{ title, body }` rows the page already renders, so it works whether the
  * list came from Sanity or the dict fallback.

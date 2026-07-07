@@ -5,6 +5,8 @@ import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { loadPublicationsPage, loadPublications } from "@/lib/sanity/loaders";
 import { Reveal } from "@/components/motion/Reveal";
 import { GatedPublications } from "@/components/sections/GatedPublications";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { publicationSchema } from "@/lib/seo/schema";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 const SLUG = "publications";
@@ -52,6 +54,7 @@ export default async function PublicationsPage({
 
   return (
     <main id="main">
+      <JsonLd data={publicationSchema(items, locale)} />
       <section className="relative px-6 pt-14 pb-8 md:pt-24 md:pb-14 lg:pt-32 lg:pb-20">
         <div className="mx-auto max-w-6xl">
           <Reveal direction="up">
