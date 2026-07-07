@@ -10,6 +10,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { articleSchema } from "@/lib/seo/schema";
 import { InsightCard } from "@/components/sections/InsightCard";
 import { InsightShare } from "@/components/sections/InsightShare";
+import { InsightCtaRow } from "@/components/sections/InsightCtaRow";
 import { InsightBody, portableTextToPlainText } from "@/lib/sanity/portableText";
 import { pageMetadata, SITE_URL } from "@/lib/seo/metadata";
 
@@ -188,6 +189,16 @@ export default async function InsightDetailPage({
                   share: t.share,
                   copyLink: t.copyLink,
                   linkCopied: t.linkCopied,
+                }}
+              />
+            </Reveal>
+
+            <Reveal direction="up" delay={0.35}>
+              <InsightCtaRow
+                locale={locale}
+                labels={{
+                  explorePublications: t.explorePublications,
+                  seeEvents: t.seeEvents,
                 }}
               />
             </Reveal>
