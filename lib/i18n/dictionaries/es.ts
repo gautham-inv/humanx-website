@@ -399,6 +399,13 @@ export const es: Dictionary = {
     listTitle: "Recientes",
     linkedinLabel: "Sigue a Ramon en LinkedIn",
     linkedinUrl: "https://www.linkedin.com/in/ramon-portilla-627b064/",
+    backToInsights: "← Volver a insights",
+    readingTime: "{n} min de lectura",
+    viewOnLinkedIn: "Ver publicación original en LinkedIn",
+    share: "Compartir",
+    copyLink: "Copiar enlace",
+    linkCopied: "Enlace copiado",
+    moreInsights: "Más insights",
     items: [
       {
         id: "i1",

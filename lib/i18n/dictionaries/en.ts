@@ -416,6 +416,13 @@ export const en = {
     listTitle: "Latest",
     linkedinLabel: "Follow Ramon on LinkedIn",
     linkedinUrl: "https://www.linkedin.com/in/ramon-portilla-627b064/",
+    backToInsights: "← Back to insights",
+    readingTime: "{n} min read",
+    viewOnLinkedIn: "View original on LinkedIn",
+    share: "Share",
+    copyLink: "Copy link",
+    linkCopied: "Link copied",
+    moreInsights: "More insights",
     items: [
       {
         id: "i1",
