@@ -1,5 +1,5 @@
 import { SITE_URL, SITE_NAME } from "@/lib/seo/metadata";
-import type { EventItem, VideoItem } from "@/lib/sanity/loaders";
+import type { EventItem, InsightItem, VideoItem } from "@/lib/sanity/loaders";
 
 /**
  * Schema.org JSON-LD builders. Rendered via <JsonLd> as
@@ -71,6 +71,26 @@ export function eventSchema(event: EventItem, locale: string) {
     url: `${SITE_URL}/${locale}/events/${event.slug}`,
     organizer: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
     performer: { "@type": "Person", name: "Ramon Portilla" },
+  };
+}
+
+/**
+ * `Article` JSON-LD for an /insights/[slug] page. `description` truncates
+ * the body to ~200 chars — search engines re-truncate anyway, this just
+ * keeps the emitted JSON small.
+ */
+export function articleSchema(insight: InsightItem, locale: string) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: insight.title,
+    description: insight.body.slice(0, 200),
+    ...(insight.image ? { image: insight.image } : {}),
+    ...(insight.publishedAt ? { datePublished: insight.publishedAt } : {}),
+    url: `${SITE_URL}/${locale}/insights/${insight.slug}`,
+    inLanguage: locale === "es" ? "es" : "en",
+    author: { "@type": "Person", name: "Ramon Portilla" },
+    publisher: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
   };
 }
 
