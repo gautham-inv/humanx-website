@@ -333,6 +333,8 @@ export type PublicationItem = {
   file: string;
   /** Conference share key (?paper=<key>); empty when unset. */
   campaignKey: string;
+  /** ISO datetime from the schema's `publishedAt`, or empty string. */
+  publishedAt: string;
 };
 
 export async function loadPublications(
@@ -348,6 +350,7 @@ export async function loadPublications(
         date: pickLoc(row.date, locale),
         file: row.file ?? "",
         campaignKey: row.campaignKey ?? "",
+        publishedAt: row.publishedAt ?? "",
       }))
       .filter((row) => row.title && row.file);
   } catch (err) {
