@@ -122,6 +122,19 @@ export type EventDoc = {
   imageAlt?: string;
 };
 
+/**
+ * Loosely-typed Portable Text block/image — enough shape to satisfy
+ * `@portabletext/react`'s `TypedObject` requirement (`_type: string` plus
+ * arbitrary fields) without pulling in `@portabletext/types` as a direct
+ * dependency. `imageUrl` is added by the GROQ projection below for image
+ * blocks; it isn't part of Sanity's own image block shape.
+ */
+export type PortableTextBlock = {
+  _type: string;
+  imageUrl?: string;
+  [key: string]: unknown;
+};
+
 /** Insights ordered newest-first by the `publishedAt` timestamp. */
 export const insightsQuery = /* groq */ `
   *[_type == "insight"] | order(publishedAt desc, _createdAt desc) {
@@ -130,11 +143,21 @@ export const insightsQuery = /* groq */ `
     title,
     kind,
     date,
-    body,
+    "body": {
+      "en": body.en[]{
+        ...,
+        _type == "image" => { "imageUrl": asset->url }
+      },
+      "es": body.es[]{
+        ...,
+        _type == "image" => { "imageUrl": asset->url }
+      }
+    },
     href,
     publishedAt,
     "imageUrl": image.asset->url,
-    "imageAlt": image.alt
+    "imageAlt": image.alt,
+    "author": author->{ name, "photoUrl": photo.asset->url, "photoAlt": photo.alt }
   }
 `;
 
@@ -145,12 +168,14 @@ export type InsightDoc = {
   title: { en?: string; es?: string };
   kind?: { en?: string; es?: string };
   date?: { en?: string; es?: string };
-  body?: { en?: string; es?: string };
+  body?: { en?: PortableTextBlock[]; es?: PortableTextBlock[] };
   href?: string;
   publishedAt?: string;
   /** Resolved Sanity CDN URL of the uploaded card image, or undefined. */
   imageUrl?: string;
   imageAlt?: string;
+  /** Null when the insight has no `author` reference set. */
+  author?: { name?: string; photoUrl?: string; photoAlt?: string } | null;
 };
 
 /** Downloadable publications (gated PDFs) for the Publications page. */
