@@ -126,10 +126,13 @@ export type EventDoc = {
 export const insightsQuery = /* groq */ `
   *[_type == "insight"] | order(publishedAt desc, _createdAt desc) {
     "id": _id,
+    "slug": slug.current,
     title,
     kind,
     date,
+    body,
     href,
+    publishedAt,
     "imageUrl": image.asset->url,
     "imageAlt": image.alt
   }
@@ -137,10 +140,14 @@ export const insightsQuery = /* groq */ `
 
 export type InsightDoc = {
   id: string;
+  /** URL path segment from the slug field. Undefined if author hasn't set one. */
+  slug?: string;
   title: { en?: string; es?: string };
   kind?: { en?: string; es?: string };
   date?: { en?: string; es?: string };
+  body?: { en?: string; es?: string };
   href?: string;
+  publishedAt?: string;
   /** Resolved Sanity CDN URL of the uploaded card image, or undefined. */
   imageUrl?: string;
   imageAlt?: string;

@@ -88,12 +88,25 @@ export type EventItem = {
   imageAlt: string;
 };
 
-/** Flat row shape used by the insights grid. */
+/** Flat row shape used by the insights grid and the /insights/[slug] page. */
 export type InsightItem = {
   id: string;
+  /**
+   * URL path segment, or empty string when the author hasn't set one yet.
+   * A dedicated /insights/[slug] page is only generated when both `slug`
+   * and `body` are non-empty — see `loadInsights`'s build-safety fallback.
+   */
+  slug: string;
   title: string;
   kind: string;
   date: string;
+  /** Full article text, paragraphs separated by blank lines. Empty string
+   * when the author hasn't written one yet (teaser-only insight). */
+  body: string;
+  /** ~200 words/minute estimate from `body`, minimum 1. 0 when body is empty. */
+  readingTimeMinutes: number;
+  /** ISO datetime from the schema's `publishedAt`, or empty string. */
+  publishedAt: string;
   href: string;
   /**
    * Resolved CDN URL of the Sanity-hosted card image, or empty string when
@@ -168,22 +181,36 @@ export async function loadEvents(locale: Locale): Promise<EventItem[]> {
   }
 }
 
+/** ~200 words/minute estimate, rounded up, minimum 1 (0 for empty body). */
+function readingTime(body: string): number {
+  if (!body.trim()) return 0;
+  const words = body.trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.ceil(words / 200));
+}
+
 export async function loadInsights(locale: Locale): Promise<InsightItem[]> {
   try {
     const rows = await sanityClient.fetch<InsightDoc[]>(insightsQuery);
     return rows
-      .map((row) => ({
-        id: row.id,
-        title: pickLoc(row.title, locale),
-        kind: pickLoc(row.kind, locale),
-        date: pickLoc(row.date, locale),
-        href: row.href ?? "",
-        // Sanity CDN URL (resolved in the GROQ projection via
-        // `image.asset->url`). Empty string falls back to the brand-token
-        // decorative tile in `app/[locale]/insights/page.tsx`.
-        image: row.imageUrl ?? "",
-        imageAlt: row.imageAlt ?? "",
-      }))
+      .map((row) => {
+        const body = pickLoc(row.body, locale);
+        return {
+          id: row.id,
+          slug: row.slug ?? "",
+          title: pickLoc(row.title, locale),
+          kind: pickLoc(row.kind, locale),
+          date: pickLoc(row.date, locale),
+          body,
+          readingTimeMinutes: readingTime(body),
+          publishedAt: row.publishedAt ?? "",
+          href: row.href ?? "",
+          // Sanity CDN URL (resolved in the GROQ projection via
+          // `image.asset->url`). Empty string falls back to the brand-token
+          // decorative tile in `app/[locale]/insights/page.tsx`.
+          image: row.imageUrl ?? "",
+          imageAlt: row.imageAlt ?? "",
+        };
+      })
       .filter((row) => row.title);
   } catch (err) {
     return fail("insights", err);
