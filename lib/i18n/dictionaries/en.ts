@@ -423,6 +423,8 @@ export const en = {
     copyLink: "Copy link",
     linkCopied: "Link copied",
     moreInsights: "More insights",
+    explorePublications: "Explore our publications",
+    seeEvents: "See upcoming events",
     items: [
       {
         id: "i1",

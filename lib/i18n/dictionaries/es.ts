@@ -406,6 +406,8 @@ export const es: Dictionary = {
     copyLink: "Copiar enlace",
     linkCopied: "Enlace copiado",
     moreInsights: "Más insights",
+    explorePublications: "Explora nuestras publicaciones",
+    seeEvents: "Ver próximos eventos",
     items: [
       {
         id: "i1",
