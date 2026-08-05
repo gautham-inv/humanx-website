@@ -12,6 +12,25 @@ const NEWS_CARD_LOADER = aspectCropLoader(16, 9);
 const MAX_ITEMS = 3;
 
 /**
+ * Grid layout adapts to how many items are actually showing, rather than
+ * always reserving 3 columns: a single item centers instead of hugging the
+ * left edge, two items sit as an evenly-spaced centered pair, three fill a
+ * full row, and four (if `MAX_ITEMS` is ever raised) become a 4-up grid.
+ */
+function gridClassesFor(count: number): string {
+  switch (count) {
+    case 1:
+      return "mx-auto max-w-md grid-cols-1";
+    case 2:
+      return "mx-auto max-w-3xl grid-cols-1 sm:grid-cols-2";
+    case 3:
+      return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
+    default:
+      return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4";
+  }
+}
+
+/**
  * Homepage "Latest news" section — press mentions linking out to the
  * publisher. Anchored at `#news` so it can be linked directly from social
  * posts (e.g. humanxinsights.com/en#news).
@@ -48,7 +67,7 @@ export function LatestNews({
           </h2>
         </Reveal>
 
-        <ul className="mt-10 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <ul className={`mt-10 grid gap-8 ${gridClassesFor(visible.length)}`}>
           {visible.map((item, idx) => {
             const meta = [item.source, item.date].filter(Boolean).join(" · ");
             const paragraphs = item.body
