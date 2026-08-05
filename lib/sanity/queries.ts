@@ -178,6 +178,38 @@ export type InsightDoc = {
   author?: { name?: string; photoUrl?: string; photoAlt?: string } | null;
 };
 
+/**
+ * Press mentions for the homepage "Latest news" section. The
+ * `enabled == true` filter lives here so disabled items never reach the
+ * frontend at all.
+ */
+export const newsQuery = /* groq */ `
+  *[_type == "news" && enabled == true] | order(publishedAt desc, _createdAt desc) {
+    "id": _id,
+    title,
+    body,
+    source,
+    articleUrl,
+    date,
+    publishedAt,
+    "imageUrl": image.asset->url,
+    "imageAlt": image.alt
+  }
+`;
+
+export type NewsDoc = {
+  id: string;
+  title: { en?: string; es?: string };
+  body?: { en?: string; es?: string };
+  source?: string;
+  articleUrl?: string;
+  date?: { en?: string; es?: string };
+  publishedAt?: string;
+  /** Resolved Sanity CDN URL of the uploaded image, or undefined. */
+  imageUrl?: string;
+  imageAlt?: string;
+};
+
 /** Downloadable publications (gated PDFs) for the Publications page. */
 export const publicationsQuery = /* groq */ `
   *[_type == "publication"] | order(publishedAt desc, _createdAt desc) {

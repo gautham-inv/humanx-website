@@ -18,6 +18,7 @@ import {
   servicesQuery,
   eventsQuery,
   insightsQuery,
+  newsQuery,
   partnersQuery,
   clientsQuery,
   conferencesQuery,
@@ -38,6 +39,7 @@ import {
   type ServiceDoc,
   type EventDoc,
   type InsightDoc,
+  type NewsDoc,
   type PartnerDoc,
   type ClientDoc,
   type ConferenceDoc,
@@ -236,6 +238,51 @@ export async function loadInsights(locale: Locale): Promise<InsightItem[]> {
       .filter((row) => row.title);
   } catch (err) {
     return fail("insights", err);
+  }
+}
+
+/** Flat row shape used by the homepage `<LatestNews>` section. */
+export type NewsItem = {
+  id: string;
+  title: string;
+  /** Blurb; paragraphs separated by blank lines. Empty when unset. */
+  body: string;
+  /** Publication name, e.g. "BULB! Marketing Magazine". Empty when unset. */
+  source: string;
+  /** External article URL. Guaranteed non-empty (rows without it are dropped). */
+  articleUrl: string;
+  /** Human-readable display date, e.g. "August 2026". Empty when unset. */
+  date: string;
+  /** ISO datetime used for ordering, or empty string. */
+  publishedAt: string;
+  /** Sanity CDN URL of the card image; empty when none uploaded. */
+  imageUrl: string;
+  /** Optional alt text from Sanity; falls back to the title. */
+  imageAlt: string;
+};
+
+/**
+ * Press mentions for the homepage news section, newest first. Only
+ * `enabled` items are returned — that filter lives in the GROQ query.
+ */
+export async function loadNews(locale: Locale): Promise<NewsItem[]> {
+  try {
+    const rows = await sanityClient.fetch<NewsDoc[]>(newsQuery);
+    return rows
+      .map((row) => ({
+        id: row.id,
+        title: pickLoc(row.title, locale),
+        body: pickLoc(row.body, locale),
+        source: row.source ?? "",
+        articleUrl: row.articleUrl ?? "",
+        date: pickLoc(row.date, locale),
+        publishedAt: row.publishedAt ?? "",
+        imageUrl: row.imageUrl ?? "",
+        imageAlt: row.imageAlt ?? "",
+      }))
+      .filter((row) => row.title && row.articleUrl);
+  } catch (err) {
+    return fail("news", err);
   }
 }
 
