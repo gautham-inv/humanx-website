@@ -16,6 +16,7 @@ import {
   loadEventsPage,
   loadContactCta,
   loadPublications,
+  loadNews,
 } from "@/lib/sanity/loaders";
 import { Hero } from "@/components/sections/Hero";
 import { WhoWeAre } from "@/components/sections/WhoWeAre";
@@ -32,6 +33,7 @@ import {
 } from "@/components/sections/Testimonials";
 import { GlobalCTA } from "@/components/sections/GlobalCTA";
 import { ConferencePush } from "@/components/sections/ConferencePush";
+import { LatestNews } from "@/components/sections/LatestNews";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -104,6 +106,7 @@ export default async function Home({
     contactCta,
     publications,
     about,
+    news,
   ] = await Promise.all([
     getDictionary(locale),
     loadTestimonials(locale),
@@ -115,6 +118,7 @@ export default async function Home({
     loadContactCta(locale),
     loadPublications(locale),
     loadAboutPage(locale),
+    loadNews(locale),
   ]);
   return (
     <main id="main">
@@ -122,6 +126,9 @@ export default async function Home({
           via a tagged link (?paper=<campaignKey>). */}
       <ConferencePush dict={dict} publications={publications} />
       <Hero dict={dict} locale={locale} content={homepage?.hero} />
+      {/* Press mentions — renders nothing until a news item is enabled in
+          Sanity. Anchored at #news for direct linking from social posts. */}
+      <LatestNews dict={dict} items={news} />
       <OnStageTeaser
         dict={dict}
         locale={locale}
