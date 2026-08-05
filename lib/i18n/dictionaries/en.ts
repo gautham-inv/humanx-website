@@ -550,6 +550,11 @@ export const en = {
     cta: "Download",
     close: "Close",
   },
+  news: {
+    eyebrow: "Latest news",
+    title: "In the press",
+    readArticle: "Read the article",
+  },
 } as const;
 
 type DeepStringify<T> = T extends string

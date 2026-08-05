@@ -533,4 +533,9 @@ export const es: Dictionary = {
     cta: "Descargar",
     close: "Cerrar",
   },
+  news: {
+    eyebrow: "Últimas noticias",
+    title: "En la prensa",
+    readArticle: "Leer el artículo",
+  },
 };
