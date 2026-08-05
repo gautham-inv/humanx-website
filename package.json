@@ -13,6 +13,7 @@
     "seed:events": "tsx --env-file=.env.local scripts/seed-events-only.ts",
     "seed:clients": "tsx --env-file=.env.local scripts/seed-clients.ts",
     "seed:conferences": "tsx --env-file=.env.local scripts/seed-conferences.ts",
+    "seed:news": "tsx --env-file=.env.local scripts/seed-news.ts",
     "seed:retail-media-summit": "tsx --env-file=.env.local scripts/seed-retail-media-summit.ts"
   },
   "dependencies": {
