@@ -522,38 +522,66 @@ export function buildEvents(): Doc[] {
           "e icónicas, para redondear un viaje perfecto a España.",
       },
     },
-    // 10 — 3rd Retail Media Summit · Chile 2026 (UPCOMING)
+    // 10 — Retail Media Summit Chile 2026 · Connected Commerce (UPCOMING)
     {
       slug: "retail-media-summit-2026",
       title: {
-        en: "HumanX Insights on Retail Media and Customer Engagement",
-        es: "HumanX Insights sobre Retail Media y Compromiso del Cliente",
+        en: "Retail Media Summit Chile 2026 · Connected Commerce",
+        es: "Retail Media Summit Chile 2026 · Connected Commerce",
       },
       venue: {
-        en: "Chile · 3rd Retail Media Summit",
-        es: "Chile · 3er Retail Media Summit",
+        en: "Santiago, Chile · Retail Media Summit",
+        es: "Santiago, Chile · Retail Media Summit",
       },
       dateDisplay: { en: "July 28, 2026", es: "28 de julio de 2026" },
       startsAt: "2026-07-28T14:00:00.000Z",
       summary: {
-        en: "Retail leaders gathered to explore the growing impact of retail media networks and customer-centric engagement strategies.",
-        es: "Líderes del retail se reunieron para analizar el impacto creciente de las redes de retail media y las estrategias centradas en el cliente.",
+        en: "Chile's leading Retail Media event returns with a new vision, where data, media, and retail come together to create real, lasting impact.",
+        es: "El evento que está redefiniendo el futuro del Retail Media en Chile regresa con una nueva visión, donde data, medios y retail se integran para generar impacto real y duradero.",
       },
       body: {
         en:
-          "At the 3rd Retail Media Summit in Santiago, HumanX Insights shared " +
-          "perspectives on the evolution of retail media and its role in shaping " +
-          "customer relationships.\n\nThe session highlighted how organizations can " +
-          "combine customer understanding, employee engagement, and data-driven " +
-          "decision-making to create sustainable competitive advantages in an " +
-          "increasingly connected retail ecosystem.",
+          "Retail Media Summit Chile is the leading event bringing together marketing " +
+          "and retail media experts to debate and explore the latest global trends, " +
+          "share innovative strategies, and present cutting-edge solutions in a " +
+          "category that is growing at a rapid pace.\n\n" +
+          "Discover how this event can power your omnichannel marketing strategy at " +
+          "the point of conversion, with interviews with experts, thought-leader " +
+          "perspectives, a look at the newest solutions in retail media, and " +
+          "testimonials from brands already seeing results.\n\n" +
+          "Why attend:\n" +
+          "· Grow your brand — access effective strategies to maximize business " +
+          "impact, with experts sharing how to implement first-party data campaigns " +
+          "that increase conversions and optimize ROI.\n" +
+          "· Business opportunities — connect with local players and retail media " +
+          "leaders, and build relationships that elevate your media plan through " +
+          "dedicated networking spaces.\n" +
+          "· Valuable insight — access the latest global trends transforming retail " +
+          "media across its three pillars: in-store, on-site, and off-site, from " +
+          "first-party data to the newest tools in this now-consolidated category.",
         es:
-          "En el 3er Retail Media Summit de Santiago, HumanX Insights compartió " +
-          "perspectivas sobre la evolución del retail media y su papel en la " +
-          "construcción de relaciones con los clientes.\n\nLa sesión destacó cómo " +
-          "las organizaciones pueden combinar conocimiento del cliente, compromiso " +
-          "de los empleados y decisiones basadas en datos para crear ventajas " +
-          "competitivas sostenibles en un ecosistema retail cada vez más conectado.",
+          "Tras el éxito de sus ediciones anteriores, el Retail Media Summit Chile " +
+          "es el principal evento que congrega a expertos en marketing y retail " +
+          "media para debatir y explorar las últimas tendencias globales, compartir " +
+          "estrategias innovadoras y presentar soluciones vanguardistas en una " +
+          "categoría que crece a pasos agigantados.\n\n" +
+          "Descubre cómo este evento puede potenciar tu estrategia de marketing " +
+          "omnicanal en el punto de conversión: entrevistas con expertos, " +
+          "perspectivas de líderes de pensamiento, una visión de las soluciones más " +
+          "recientes en retail media y testimonios de marcas que ya están " +
+          "obteniendo resultados positivos.\n\n" +
+          "Por qué participar:\n" +
+          "· Impulsa tu marca — accede a estrategias efectivas para maximizar el " +
+          "impacto de tu negocio; expertos comparten cómo implementar campañas " +
+          "basadas en datos de primera mano que aumentan las conversiones y " +
+          "optimizan el retorno de inversión.\n" +
+          "· Oportunidades de negocio — conéctate con los players locales y " +
+          "líderes del retail media, y establece relaciones que eleven tu plan de " +
+          "medios en zonas de networking dedicadas.\n" +
+          "· Información de valor — accede a las últimas tendencias globales que " +
+          "transforman el retail media en sus tres ejes: in-store, on-site y " +
+          "off-site, desde el uso de datos de primera mano hasta las nuevas " +
+          "herramientas de esta categoría ya consolidada.",
       },
     },
     // 11 — 4th Congreso AECOC Empleo y Talento · Spain 2026 (UPCOMING)
