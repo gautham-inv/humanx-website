@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { Reveal } from "@/components/motion/Reveal";
 import { aspectCropLoader } from "@/lib/sanity/image-loader";
