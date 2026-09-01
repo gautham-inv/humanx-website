@@ -30,6 +30,8 @@ const components: PortableTextComponents = {
         <img
           src={sanityImageUrl(url, 900)}
           alt={(value?.alt as string) || ""}
+          width={(value?.imageWidth as number) || undefined}
+          height={(value?.imageHeight as number) || undefined}
           loading="lazy"
           decoding="async"
           className="w-full rounded-2xl border border-line object-cover"

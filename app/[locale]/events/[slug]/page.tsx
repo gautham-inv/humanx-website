@@ -175,6 +175,8 @@ export default async function EventDetailPage({
                   <img
                     src={sanityImageUrl(event.imageUrl, 750)}
                     alt={event.imageAlt || event.title}
+                    width={event.imageWidth || undefined}
+                    height={event.imageHeight || undefined}
                     loading="eager"
                     fetchPriority="high"
                     decoding="async"

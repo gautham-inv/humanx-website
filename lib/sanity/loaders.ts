@@ -90,6 +90,9 @@ export type EventItem = {
   /** Sanity CDN URL of the hero image; empty when none uploaded. */
   imageUrl: string;
   imageAlt: string;
+  /** Native pixel dimensions of the uploaded asset; 0 when none uploaded. */
+  imageWidth: number;
+  imageHeight: number;
 };
 
 /** Flat row shape used by the insights grid and the /insights/[slug] page. */
@@ -123,12 +126,18 @@ export type InsightItem = {
   image: string;
   /** Optional alt text from Sanity; falls back to the insight title. */
   imageAlt: string;
+  /** Native pixel dimensions of the uploaded asset; 0 when none uploaded. */
+  imageWidth: number;
+  imageHeight: number;
   /** Defaults to "Ramon Portilla" when the insight has no `author` reference. */
   authorName: string;
   /** Resolved CDN URL of the author's photo, or empty string when none. */
   authorPhotoUrl: string;
   /** Optional alt text from Sanity; falls back to `authorName`. */
   authorPhotoAlt: string;
+  /** Native pixel dimensions of the author's photo; 0 when none uploaded. */
+  authorPhotoWidth: number;
+  authorPhotoHeight: number;
 };
 
 /** Picks `field[locale]`, then `field.en`, then `fallback`. */
@@ -186,6 +195,8 @@ export async function loadEvents(locale: Locale): Promise<EventItem[]> {
         registrationUrl: row.registrationUrl ?? "",
         imageUrl: row.imageUrl ?? "",
         imageAlt: row.imageAlt ?? "",
+        imageWidth: row.imageWidth ?? 0,
+        imageHeight: row.imageHeight ?? 0,
       }))
       .filter((row) => row.title && row.startsAt);
   } catch (err) {
@@ -230,9 +241,13 @@ export async function loadInsights(locale: Locale): Promise<InsightItem[]> {
           // decorative tile in `app/[locale]/insights/page.tsx`.
           image: row.imageUrl ?? "",
           imageAlt: row.imageAlt ?? "",
+          imageWidth: row.imageWidth ?? 0,
+          imageHeight: row.imageHeight ?? 0,
           authorName: row.author?.name ?? "Ramon Portilla",
           authorPhotoUrl: row.author?.photoUrl ?? "",
           authorPhotoAlt: row.author?.photoAlt ?? "",
+          authorPhotoWidth: row.author?.photoWidth ?? 0,
+          authorPhotoHeight: row.author?.photoHeight ?? 0,
         };
       })
       .filter((row) => row.title);

@@ -102,7 +102,9 @@ export const eventsQuery = /* groq */ `
     youtubeId,
     registrationUrl,
     "imageUrl": image.asset->url,
-    "imageAlt": image.alt
+    "imageAlt": image.alt,
+    "imageWidth": image.asset->metadata.dimensions.width,
+    "imageHeight": image.asset->metadata.dimensions.height
   }
 `;
 
@@ -120,6 +122,9 @@ export type EventDoc = {
   registrationUrl?: string;
   imageUrl?: string;
   imageAlt?: string;
+  /** Native pixel dimensions of the uploaded asset, undefined if none uploaded. */
+  imageWidth?: number;
+  imageHeight?: number;
 };
 
 /**
@@ -132,6 +137,8 @@ export type EventDoc = {
 export type PortableTextBlock = {
   _type: string;
   imageUrl?: string;
+  imageWidth?: number;
+  imageHeight?: number;
   [key: string]: unknown;
 };
 
@@ -146,18 +153,34 @@ export const insightsQuery = /* groq */ `
     "body": {
       "en": body.en[]{
         ...,
-        _type == "image" => { "imageUrl": asset->url }
+        _type == "image" => {
+          "imageUrl": asset->url,
+          "imageWidth": asset->metadata.dimensions.width,
+          "imageHeight": asset->metadata.dimensions.height
+        }
       },
       "es": body.es[]{
         ...,
-        _type == "image" => { "imageUrl": asset->url }
+        _type == "image" => {
+          "imageUrl": asset->url,
+          "imageWidth": asset->metadata.dimensions.width,
+          "imageHeight": asset->metadata.dimensions.height
+        }
       }
     },
     href,
     publishedAt,
     "imageUrl": image.asset->url,
     "imageAlt": image.alt,
-    "author": author->{ name, "photoUrl": photo.asset->url, "photoAlt": photo.alt }
+    "imageWidth": image.asset->metadata.dimensions.width,
+    "imageHeight": image.asset->metadata.dimensions.height,
+    "author": author->{
+      name,
+      "photoUrl": photo.asset->url,
+      "photoAlt": photo.alt,
+      "photoWidth": photo.asset->metadata.dimensions.width,
+      "photoHeight": photo.asset->metadata.dimensions.height
+    }
   }
 `;
 
@@ -174,8 +197,17 @@ export type InsightDoc = {
   /** Resolved Sanity CDN URL of the uploaded card image, or undefined. */
   imageUrl?: string;
   imageAlt?: string;
+  /** Native pixel dimensions of the uploaded asset, undefined if none uploaded. */
+  imageWidth?: number;
+  imageHeight?: number;
   /** Null when the insight has no `author` reference set. */
-  author?: { name?: string; photoUrl?: string; photoAlt?: string } | null;
+  author?: {
+    name?: string;
+    photoUrl?: string;
+    photoAlt?: string;
+    photoWidth?: number;
+    photoHeight?: number;
+  } | null;
 };
 
 /**

@@ -135,6 +135,8 @@ export default async function InsightDetailPage({
                   <img
                     src={sanityImageUrl(insight.authorPhotoUrl, 64)}
                     alt={insight.authorPhotoAlt || insight.authorName}
+                    width={insight.authorPhotoWidth || undefined}
+                    height={insight.authorPhotoHeight || undefined}
                     className="h-6 w-6 rounded-full object-cover"
                   />
                 ) : null}
@@ -152,6 +154,8 @@ export default async function InsightDetailPage({
                 <img
                   src={sanityImageUrl(insight.image, 900)}
                   alt={insight.imageAlt || insight.title}
+                  width={insight.imageWidth || undefined}
+                  height={insight.imageHeight || undefined}
                   loading="eager"
                   fetchPriority="high"
                   decoding="async"
